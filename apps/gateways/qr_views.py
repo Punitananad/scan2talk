@@ -353,40 +353,25 @@ def activate_qr_code(request, qr_code):
                 messages.error(request, 'Phone number is required')
                 return redirect(f'/gateways/activate/{qr_code}/?step=1')
             
-            # Send OTP
-            from apps.accounts.phone_auth import send_otp
-            send_otp(phone)
-            
+            # Skip OTP verification - go directly to step 3
             # Store phone in session
             request.session['activation_phone'] = phone
             request.session['activation_qr_code'] = qr_code
             
-            messages.success(request, f'OTP sent to {phone}')
-            return redirect(f'/gateways/activate/{qr_code}/?step=2')
+            # Mark phone as verified without OTP
+            from apps.accounts.phone_auth import mark_phone_verified
+            mark_phone_verified(phone)
+            
+            messages.success(request, 'Phone number saved. Please enter vehicle details.')
+            return redirect(f'/gateways/activate/{qr_code}/?step=3')
         
         context = {'qr': qr, 'step': 1}
         return render(request, 'gateways/activate_step1_phone.html', context)
     
-    # Step 2: Verify OTP
+    # Step 2: Verify OTP (DISABLED - skipping OTP verification)
     elif step == '2':
-        phone = request.session.get('activation_phone')
-        if not phone:
-            return redirect(f'/gateways/activate/{qr_code}/?step=1')
-        
-        if request.method == 'POST':
-            otp = request.POST.get('otp', '').strip()
-            
-            from apps.accounts.phone_auth import verify_otp, mark_phone_verified
-            if verify_otp(phone, otp):
-                mark_phone_verified(phone)
-                messages.success(request, 'Phone verified successfully!')
-                return redirect(f'/gateways/activate/{qr_code}/?step=3')
-            else:
-                messages.error(request, 'Invalid OTP. Please try again.')
-                return redirect(f'/gateways/activate/{qr_code}/?step=2')
-        
-        context = {'qr': qr, 'step': 2, 'phone': phone}
-        return render(request, 'gateways/activate_step2_otp.html', context)
+        # Redirect to step 3 directly
+        return redirect(f'/gateways/activate/{qr_code}/?step=3')
     
     # Step 3: Enter details and activate
     elif step == '3':
@@ -394,9 +379,7 @@ def activate_qr_code(request, qr_code):
         if not phone:
             return redirect(f'/gateways/activate/{qr_code}/?step=1')
         
-        from apps.accounts.phone_auth import is_phone_verified
-        if not is_phone_verified(phone):
-            return redirect(f'/gateways/activate/{qr_code}/?step=2')
+        # Skip OTP verification check - phone is already marked as verified in step 1
         
         if request.method == 'POST':
             try:

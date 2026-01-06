@@ -16,7 +16,7 @@ NC='\033[0m'
 
 # Config
 PROJECT_DIR="/var/www/scan2talk"
-VENV_PATH="$PROJECT_DIR/venv"
+VENV_PATH="/var/www/venv"  # Virtual environment is outside project directory
 BRANCH="main"
 
 # Helpers
