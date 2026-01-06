@@ -117,13 +117,13 @@ CACHES = {
     }
 }
 
-# Session Configuration
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
-SESSION_COOKIE_AGE = 600  # 10 minutes for security
+# Session Configuration - Use database sessions for reliability
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 1209600  # 2 weeks
 SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Lax'  # Changed from Strict to Lax for admin
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Celery Configuration
 CELERY_BROKER_URL = REDIS_URL
