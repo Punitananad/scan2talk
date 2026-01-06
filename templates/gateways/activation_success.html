@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Code Activated!{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-lg card-shadow p-8 text-center">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">🎉 Activation Successful!</h1>
+        <p class="text-lg text-gray-600 mb-8">
+            Your QR code <span class="font-mono font-bold text-blue-600">{{ qr.qr_code }}</span> is now active!
+        </p>
+
+        <div class="bg-gray-50 rounded-lg p-6 mb-8 text-left">
+            <h2 class="font-semibold text-gray-900 mb-4">Your Vehicle Details:</h2>
+            <div class="space-y-2 text-gray-700">
+                <p><strong>Name:</strong> {{ user.first_name }}</p>
+                <p><strong>Vehicle:</strong> {{ gateway.title }}</p>
+                <p><strong>License Plate:</strong> {{ gateway.identifier_text }}</p>
+                {% if gateway.description %}
+                <p><strong>Model:</strong> {{ gateway.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8 text-left">
+            <h3 class="font-semibold text-blue-900 mb-3">What's Next?</h3>
+            <ul class="space-y-2 text-blue-800">
+                <li>✓ Place the QR sticker on your vehicle windshield</li>
+                <li>✓ Others can scan it to contact you about your vehicle</li>
+                <li>✓ You'll receive SMS notifications when someone contacts you</li>
+                <li>✓ Your phone number stays completely private</li>
+            </ul>
+        </div>
+
+        <div class="space-y-3">
+            <a 
+                href="/"
+                class="block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+                Go to Homepage
+            </a>
+            <p class="text-sm text-gray-500">
+                Save this page or take a screenshot for your records
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

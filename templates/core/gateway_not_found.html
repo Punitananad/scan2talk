@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Gateway Not Found - Gateway Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+            <!-- Error Icon -->
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+
+            <!-- Error Message -->
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">
+                Gateway Not Found
+            </h1>
+            
+            <p class="text-gray-600 mb-6">
+                The communication gateway you're looking for doesn't exist or is no longer available.
+            </p>
+
+            <!-- Possible Reasons -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6 text-left">
+                <h3 class="font-semibold text-yellow-900 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Possible reasons:
+                </h3>
+                <ul class="space-y-2 text-sm text-yellow-800">
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        The gateway has been deactivated by its owner
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        The link or QR code may be outdated or incorrect
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        The gateway identifier may have been changed
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        There may be a temporary system issue
+                    </li>
+                </ul>
+            </div>
+
+            <!-- What to do -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 text-left">
+                <h3 class="font-semibold text-blue-900 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                    What you can do:
+                </h3>
+                <ul class="space-y-2 text-sm text-blue-800">
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        Double-check the link or QR code you scanned
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        Contact the person or organization directly if you have their information
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        Try again later in case of temporary issues
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        Look for an updated QR code or link from the source
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-3">
+                <a href="{% url 'core:home' %}" 
+                   class="inline-block bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                    Go to Homepage
+                </a>
+                
+                <div class="text-sm text-gray-500">
+                    <button onclick="history.back()" class="text-blue-600 hover:text-blue-800">
+                        ← Go Back
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Need Help?</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">For Gateway Owners</h4>
+                    <p class="text-gray-600 mb-2">
+                        If you own a gateway and it's not working, check your dashboard to ensure it's active and properly configured.
+                    </p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800">Access Dashboard →</a>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Technical Support</h4>
+                    <p class="text-gray-600 mb-2">
+                        If you believe this is a technical issue, please contact our support team with the gateway identifier.
+                    </p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800">Contact Support →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-sm text-gray-500 mt-8">
+            <p>
+                Powered by 
+                <a href="{% url 'core:home' %}" class="text-blue-600 hover:text-blue-800">Gateway Platform</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

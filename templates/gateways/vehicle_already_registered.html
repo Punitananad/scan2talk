@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Already Registered{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-lg card-shadow p-8">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">Vehicle Already Registered</h1>
+            <p class="text-lg text-gray-600 mb-2">
+                Vehicle number <span class="font-bold text-red-600">{{ vehicle_number }}</span> is already registered with another QR code.
+            </p>
+            <p class="text-gray-500">
+                Each vehicle can only have one active QR code in the system.
+            </p>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+            <h3 class="font-semibold text-yellow-900 mb-3">Why is this restricted?</h3>
+            <ul class="space-y-2 text-sm text-yellow-800">
+                <li>✓ Prevents confusion for people trying to contact you</li>
+                <li>✓ Ensures one official QR code per vehicle</li>
+                <li>✓ Maintains system integrity and security</li>
+                <li>✓ Avoids duplicate registrations</li>
+            </ul>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h3 class="font-semibold text-blue-900 mb-3">What can you do?</h3>
+            <div class="space-y-3 text-sm text-blue-800">
+                <div class="flex items-start">
+                    <span class="font-bold mr-2">1.</span>
+                    <div>
+                        <strong>Use a different vehicle number</strong>
+                        <p class="text-blue-700">If you have another vehicle, use its number instead</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="font-bold mr-2">2.</span>
+                    <div>
+                        <strong>Check if you already registered</strong>
+                        <p class="text-blue-700">You might have already activated a QR code for this vehicle</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="font-bold mr-2">3.</span>
+                    <div>
+                        <strong>Contact support</strong>
+                        <p class="text-blue-700">If you believe this is an error, contact our support team</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <a 
+                href="/gateways/activate/{{ qr_code }}/?step=3"
+                class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-center hover:bg-blue-700 transition-colors"
+            >
+                Try Different Vehicle Number
+            </a>
+            <a 
+                href="/"
+                class="flex-1 bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold text-center hover:bg-gray-700 transition-colors"
+            >
+                Go to Homepage
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

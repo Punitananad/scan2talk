@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Code Already Activated{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-lg card-shadow p-8 text-center">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">QR Code Active</h1>
+        <p class="text-lg text-gray-600 mb-8">
+            This QR code (<span class="font-mono font-bold text-blue-600">{{ qr.qr_code }}</span>) is already activated and belongs to <strong>{{ owner_name }}</strong>.
+        </p>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h3 class="font-semibold text-blue-900 mb-3">Need to contact the vehicle owner?</h3>
+            <p class="text-blue-800 mb-4">
+                You can send a message about this vehicle without revealing the owner's phone number.
+            </p>
+            <a 
+                href="/gateways/g/{{ qr.qr_code }}/"
+                class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+                Contact Vehicle Owner
+            </a>
+        </div>
+
+        <div class="text-sm text-gray-500">
+            <p>This QR code was activated on {{ qr.activated_at|date:"F d, Y" }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,181 @@
+"""
+Core views for the gateway platform.
+"""
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import TemplateView, View
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.contrib import messages
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
+from django.utils import timezone as django_timezone
+from django_ratelimit.decorators import ratelimit
+from apps.gateways.models import Gateway, EntryPoint
+from apps.routing.services import RoutingService
+from apps.interactions.services import InteractionService
+
+
+class HomeView(TemplateView):
+    """Homepage view."""
+    template_name = 'core/home.html'
+
+
+class PrivacyPolicyView(TemplateView):
+    """Privacy policy view."""
+    template_name = 'core/privacy.html'
+
+
+class TermsOfServiceView(TemplateView):
+    """Terms of service view."""
+    template_name = 'core/terms.html'
+
+
+class HealthCheckView(View):
+    """Health check endpoint for monitoring."""
+    
+    def get(self, request):
+        return JsonResponse({
+            'status': 'healthy',
+            'timestamp': django_timezone.now().isoformat()
+        })
+
+
+@method_decorator(never_cache, name='dispatch')
+@method_decorator(ratelimit(key='ip', rate='10/m', method='GET'), name='get')
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST'), name='post')
+class GatewayAccessView(View):
+    """
+    Public gateway access view for initiating communication.
+    This is the main entry point for external users.
+    Supports both EntryPoint identifiers and QR codes.
+    """
+    
+    def get(self, request, identifier):
+        """Display gateway access form."""
+        try:
+            # Try to find by EntryPoint first
+            try:
+                entry_point = EntryPoint.objects.select_related('gateway').get(
+                    public_identifier=identifier,
+                    is_active=True,
+                    gateway__is_active=True
+                )
+                gateway = entry_point.gateway
+            except EntryPoint.DoesNotExist:
+                # Try to find by QR code
+                from apps.gateways.qr_models import PreGeneratedQR
+                qr = PreGeneratedQR.objects.select_related('gateway').get(
+                    qr_code=identifier.upper(),
+                    status='activated',
+                    gateway__is_active=True
+                )
+                gateway = qr.gateway
+                entry_point = None
+            
+            # Check if gateway allows access
+            routing_service = RoutingService()
+            if not routing_service.can_access_gateway(gateway, request):
+                return render(request, 'core/gateway_unavailable.html', {
+                    'message': 'This gateway is currently unavailable.'
+                })
+            
+            # Get available communication channels
+            available_channels = routing_service.get_available_channels(gateway)
+            
+            context = {
+                'gateway': gateway,
+                'entry_point': entry_point,
+                'available_channels': available_channels,
+                'identifier': identifier,
+            }
+            
+            return render(request, 'core/gateway_access.html', context)
+            
+        except (EntryPoint.DoesNotExist, PreGeneratedQR.DoesNotExist):
+            return render(request, 'core/gateway_not_found.html')
+    
+    def post(self, request, identifier):
+        """Process communication request."""
+        try:
+            # Try to find by EntryPoint first
+            try:
+                entry_point = EntryPoint.objects.select_related('gateway').get(
+                    public_identifier=identifier,
+                    is_active=True,
+                    gateway__is_active=True
+                )
+                gateway = entry_point.gateway
+            except EntryPoint.DoesNotExist:
+                # Try to find by QR code
+                from apps.gateways.qr_models import PreGeneratedQR
+                qr = PreGeneratedQR.objects.select_related('gateway').get(
+                    qr_code=identifier.upper(),
+                    status='activated',
+                    gateway__is_active=True
+                )
+                gateway = qr.gateway
+                entry_point = None
+            
+            channel = request.POST.get('channel')
+            message = request.POST.get('message', '').strip()
+            intent = request.POST.get('intent', 'general')
+            
+            # Validate inputs
+            if not channel or not message:
+                messages.error(request, 'Please select a communication method and provide a message.')
+                return redirect('core:gateway_access', identifier=identifier)
+            
+            if len(message) > 500:
+                messages.error(request, 'Message is too long. Please keep it under 500 characters.')
+                return redirect('core:gateway_access', identifier=identifier)
+            
+            # Process the communication request
+            routing_service = RoutingService()
+            interaction_service = InteractionService()
+            
+            # Check routing rules
+            if not routing_service.can_route_request(gateway, channel, intent):
+                messages.error(request, 'Communication request cannot be processed at this time.')
+                return redirect('core:gateway_access', identifier=identifier)
+            
+            # Create interaction session
+            session_data = {
+                'gateway_id': str(gateway.id),
+                'channel': channel,
+                'message': message,
+                'intent': intent,
+                'ip_address': self.get_client_ip(request),
+                'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+            }
+            
+            # Route the communication
+            result = interaction_service.initiate_communication(
+                gateway=gateway,
+                channel=channel,
+                message=message,
+                intent=intent,
+                session_data=session_data
+            )
+            
+            if result['success']:
+                return render(request, 'core/communication_sent.html', {
+                    'gateway': gateway,
+                    'channel': channel,
+                    'reference_id': result.get('reference_id'),
+                })
+            else:
+                messages.error(request, result.get('error', 'Failed to send communication.'))
+                return redirect('core:gateway_access', identifier=identifier)
+                
+        except Exception as e:
+            messages.error(request, 'An error occurred. Please try again.')
+            return redirect('core:gateway_access', identifier=identifier)
+    
+    def get_client_ip(self, request):
+        """Get client IP address."""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Activate Your Vehicle QR Code{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-lg card-shadow p-8">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Activate Your QR Code</h1>
+            <p class="text-gray-600">QR Code: <span class="font-mono font-bold text-blue-600">{{ qr.qr_code }}</span></p>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="vehicle_type" class="block text-sm font-medium text-gray-700 mb-2">
+                    Vehicle Type *
+                </label>
+                <select 
+                    id="vehicle_type" 
+                    name="vehicle_type" 
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                    <option value="car">Car</option>
+                    <option value="bike">Bike/Motorcycle</option>
+                    <option value="truck">Truck</option>
+                    <option value="van">Van</option>
+                    <option value="bus">Bus</option>
+                    <option value="scooter">Scooter</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="vehicle_number" class="block text-sm font-medium text-gray-700 mb-2">
+                    Vehicle Number / License Plate *
+                </label>
+                <input 
+                    type="text" 
+                    id="vehicle_number" 
+                    name="vehicle_number" 
+                    required
+                    placeholder="e.g., ABC-1234"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                >
+            </div>
+
+            <div>
+                <label for="vehicle_model" class="block text-sm font-medium text-gray-700 mb-2">
+                    Vehicle Make & Model (Optional)
+                </label>
+                <input 
+                    type="text" 
+                    id="vehicle_model" 
+                    name="vehicle_model" 
+                    placeholder="e.g., Toyota Camry 2020"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-900 mb-2">What happens next?</h3>
+                <ul class="space-y-1 text-sm text-blue-800">
+                    <li>✓ Your QR code will be linked to this vehicle</li>
+                    <li>✓ Others can scan it to contact you about your vehicle</li>
+                    <li>✓ Your phone number stays private</li>
+                    <li>✓ You can manage notifications and settings</li>
+                </ul>
+            </div>
+
+            <button 
+                type="submit"
+                class="w-full bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors"
+            >
+                Activate QR Code
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

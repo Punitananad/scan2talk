@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Registrations - Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Vehicle Registrations</h1>
+            <p class="text-gray-600">View and manage all activated QR code registrations</p>
+        </div>
+        <div class="flex gap-3">
+            <a 
+                href="{% url 'gateways:qr_dashboard' %}"
+                class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+            >
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white p-6 rounded-lg card-shadow text-center">
+            <div class="text-3xl font-bold text-blue-600">{{ stats.total_registrations }}</div>
+            <div class="text-sm text-gray-600 mt-1">Total Registrations</div>
+        </div>
+        <div class="bg-white p-6 rounded-lg card-shadow text-center">
+            <div class="text-3xl font-bold text-green-600">{{ stats.total_access_count }}</div>
+            <div class="text-sm text-gray-600 mt-1">Total QR Scans</div>
+        </div>
+        <div class="bg-white p-6 rounded-lg card-shadow text-center">
+            <div class="text-3xl font-bold text-purple-600">{{ stats.total_interactions }}</div>
+            <div class="text-sm text-gray-600 mt-1">Total Contact Requests</div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="bg-white rounded-lg card-shadow p-6 mb-6">
+        <form method="get" class="flex gap-4">
+            <div class="flex-1">
+                <input 
+                    type="text" 
+                    name="search" 
+                    value="{{ search }}"
+                    placeholder="Search by QR code, vehicle number, owner name, or phone..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                Search
+            </button>
+            {% if search %}
+            <a href="{% url 'gateways:registrations' %}" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
+                Clear
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Registrations Table -->
+    <div class="bg-white rounded-lg card-shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">QR Code</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vehicle Number</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vehicle Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scans</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contacts</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activated</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for item in registration_data %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if item.qr_code %}
+                                <div class="font-mono font-semibold text-blue-600">{{ item.qr_code.qr_code }}</div>
+                            {% else %}
+                                <div class="text-gray-400 text-sm">No QR</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-semibold text-gray-900">
+                                {{ item.gateway.owner_name|default:"Not provided" }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ item.gateway.owner.phone_number|default:"N/A" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-bold text-gray-900 uppercase">
+                                {{ item.gateway.identifier_text|default:"N/A" }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize">
+                            {{ item.gateway.context_type|default:"N/A" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if item.qr_code %}
+                                <span class="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-800 rounded-full font-semibold">
+                                    {{ item.qr_code.access_count }}
+                                </span>
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center justify-center w-10 h-10 bg-green-100 text-green-800 rounded-full font-semibold">
+                                {{ item.gateway.total_interactions }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ item.gateway.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            {% if item.qr_code %}
+                                <a href="{% url 'gateways:qr_detail' item.qr_code.id %}" 
+                                   class="text-purple-600 hover:text-purple-800 mr-3 font-semibold">
+                                    View Details
+                                </a>
+                            {% endif %}
+                            <button 
+                                onclick="deregisterGateway('{{ item.gateway.id }}', '{% if item.qr_code %}{{ item.qr_code.qr_code }}{% else %}N/A{% endif %}', '{{ item.gateway.identifier_text }}')"
+                                class="text-red-600 hover:text-red-800 font-semibold">
+                                Deregister
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                            {% if search %}
+                                No registrations found matching "{{ search }}". <a href="{% url 'gateways:registrations' %}" class="text-blue-600 hover:underline">Clear search</a>
+                            {% else %}
+                                No registrations yet. Vehicles will appear here once registered.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 class="font-semibold text-blue-900 mb-3">About Deregistration</h3>
+        <div class="text-sm text-blue-800 space-y-2">
+            <p><strong>What happens when you deregister a QR code?</strong></p>
+            <ul class="list-disc list-inside space-y-1 ml-4">
+                <li>The gateway is marked as inactive (is_active = False)</li>
+                <li>The QR code status changes back to "Available"</li>
+                <li>The vehicle number becomes available for new registrations</li>
+                <li>The QR code can be activated again by another user</li>
+                <li>All historical data (access count, interactions) is preserved</li>
+            </ul>
+            <p class="mt-3"><strong>Use cases:</strong></p>
+            <ul class="list-disc list-inside space-y-1 ml-4">
+                <li>User requests to remove their registration</li>
+                <li>Vehicle sold or transferred to new owner</li>
+                <li>Duplicate or incorrect registrations</li>
+                <li>Testing or administrative cleanup</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Deregister Confirmation Form -->
+<form id="deregisterForm" method="post" style="display: none;">
+    {% csrf_token %}
+</form>
+
+<script>
+function deregisterGateway(gatewayId, qrCode, vehicleNumber) {
+    const qrText = qrCode !== 'N/A' ? `QR Code: ${qrCode}\n` : '';
+    const message = `Are you sure you want to deregister this vehicle?\n\n` +
+                   qrText +
+                   `Vehicle: ${vehicleNumber}\n\n` +
+                   `This will:\n` +
+                   `• Mark the gateway as inactive\n` +
+                   `• Make the QR code available for reuse (if applicable)\n` +
+                   `• Free up the vehicle number for new registrations\n\n` +
+                   `This action can be reversed by reactivating.`;
+    
+    if (confirm(message)) {
+        const form = document.getElementById('deregisterForm');
+        form.action = `/gateways/qr/${gatewayId}/deregister/`;
+        form.submit();
+    }
+}
+</script>
+{% endblock %}
