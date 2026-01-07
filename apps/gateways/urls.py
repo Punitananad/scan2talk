@@ -5,6 +5,7 @@ from django.urls import path
 from . import views
 from . import qr_views
 from . import qr_download_views
+from . import call_masking_views
 
 app_name = 'gateways'
 
@@ -31,6 +32,10 @@ urlpatterns = [
     
     # Public QR Access
     path('g/<str:qr_code>/', qr_views.public_qr_access, name='public_qr_access'),
+    
+    # Call Masking
+    path('call/<str:qr_code>/', call_masking_views.generate_masked_call_url, name='generate_masked_call'),
+    path('call/<str:qr_code>/info/', call_masking_views.get_call_info, name='get_call_info'),
     
     # QR API Endpoints
     path('api/qr/generate/', qr_views.api_generate_qr_batch, name='api_generate_qr'),
