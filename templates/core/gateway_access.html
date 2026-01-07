@@ -176,7 +176,6 @@
                                 <div>
                                     <h3 class="font-bold text-lg text-gray-900 mb-1">Masked Call</h3>
                                     <p class="text-sm text-gray-600">Make an anonymous call without revealing your number</p>
-                                    <span class="inline-block mt-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Coming Soon</span>
                                 </div>
                             </div>
                         </button>
@@ -251,7 +250,8 @@
 
                 <!-- Submit Button -->
                 <button 
-                    type="submit" 
+                    type="button"
+                    @click="handleAction"
                     :disabled="!canSubmit"
                     :class="canSubmit ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'bg-gray-400 cursor-not-allowed'"
                     class="w-full text-white py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg"
@@ -260,6 +260,17 @@
                     <span x-show="contactMethod === 'call'">Initiate Call</span>
                     <span x-show="!contactMethod">Select Contact Method</span>
                 </button>
+                
+                <!-- Loading state -->
+                <div x-show="loading" class="mt-4 text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="text-sm text-gray-600 mt-2">Processing...</p>
+                </div>
+                
+                <!-- Error message -->
+                <div x-show="errorMessage" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p class="text-sm text-red-800" x-text="errorMessage"></p>
+                </div>
                 
                 </div><!-- End of verified section -->
             </form>
@@ -287,6 +298,8 @@ function contactForm() {
         contactMethod: '',
         message: '',
         channel: 'sms',
+        loading: false,
+        errorMessage: '',
         
         reasonMessages: {
             'headlights': 'Hi! Your car headlights are still on. You might want to check to avoid battery drain.',
@@ -331,17 +344,64 @@ function contactForm() {
             return false;
         },
         
-        handleSubmit(e) {
-            if (!this.verified) {
-                e.preventDefault();
-                alert('Please verify the vehicle number first');
+        async handleAction() {
+            if (!this.canSubmit) {
+                alert('Please complete all required fields');
                 return;
             }
             
-            if (!this.canSubmit) {
-                e.preventDefault();
-                alert('Please complete all required fields');
+            if (this.contactMethod === 'call') {
+                await this.initiateCall();
+            } else if (this.contactMethod === 'message') {
+                this.submitForm();
             }
+        },
+        
+        async initiateCall() {
+            this.loading = true;
+            this.errorMessage = '';
+            
+            try {
+                const response = await fetch('/gateways/call/{{ identifier }}/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Redirect to call URL
+                    window.location.href = data.call_url;
+                } else {
+                    this.errorMessage = data.error || 'Failed to initiate call. Please try again.';
+                }
+            } catch (error) {
+                this.errorMessage = 'Network error. Please check your connection and try again.';
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        submitForm() {
+            // Submit the form normally for messages
+            document.querySelector('form').submit();
+        },
+        
+        getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
     }
 }
