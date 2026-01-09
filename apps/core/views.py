@@ -84,7 +84,14 @@ class GatewayAccessView(View):
     
     def get(self, request, identifier):
         """Display gateway access form."""
+        from apps.gateways.qr_models import PreGeneratedQR
+        from apps.accounts.recharge_models import QRWallet
+        
         try:
+            gateway = None
+            entry_point = None
+            qr_obj = None
+            
             # Try to find by EntryPoint first
             try:
                 entry_point = EntryPoint.objects.select_related('gateway').get(
@@ -95,14 +102,15 @@ class GatewayAccessView(View):
                 gateway = entry_point.gateway
             except EntryPoint.DoesNotExist:
                 # Try to find by QR code
-                from apps.gateways.qr_models import PreGeneratedQR
-                qr = PreGeneratedQR.objects.select_related('gateway').get(
-                    qr_code=identifier.upper(),
-                    status='activated',
-                    gateway__is_active=True
-                )
-                gateway = qr.gateway
-                entry_point = None
+                try:
+                    qr_obj = PreGeneratedQR.objects.select_related('gateway', 'category').get(
+                        qr_code=identifier.upper(),
+                        status='activated',
+                        gateway__is_active=True
+                    )
+                    gateway = qr_obj.gateway
+                except PreGeneratedQR.DoesNotExist:
+                    return render(request, 'core/gateway_not_found.html')
             
             # Check if gateway allows access
             routing_service = RoutingService()
@@ -114,39 +122,29 @@ class GatewayAccessView(View):
             # Get available communication channels
             available_channels = routing_service.get_available_channels(gateway)
             
-            # Check if this is a prepaid category QR
+            # Check if this is a prepaid category QR and handle payment
             payment_required = False
             payer = None
             cost_per_action = 0.00
             
-            try:
-                from apps.gateways.qr_models import PreGeneratedQR
-                qr = PreGeneratedQR.objects.select_related('category').get(
-                    qr_code=identifier.upper(),
-                    status='activated'
-                )
-                
-                if qr.category and qr.category.category_type == 'prepaid':
-                    # Check wallet balance
-                    try:
-                        from apps.accounts.recharge_models import QRWallet
-                        wallet = QRWallet.objects.get(qr_code=qr)
-                        
-                        if wallet.balance >= 1.00:
-                            # Owner has balance - will be deducted
-                            payment_required = False
-                            payer = 'owner'
-                        else:
-                            # Owner has ₹0 - visitor must pay
-                            payment_required = True
-                            payer = 'visitor'
-                            cost_per_action = 1.00
-                    except QRWallet.DoesNotExist:
-                        # No wallet found, treat as free
+            if qr_obj and qr_obj.category and qr_obj.category.category_type == 'prepaid':
+                # Check wallet balance
+                try:
+                    wallet = QRWallet.objects.get(qr_code=qr_obj)
+                    
+                    if wallet.balance >= 1.00:
+                        # Owner has balance - will be deducted
                         payment_required = False
-                        payer = None
-            except PreGeneratedQR.DoesNotExist:
-                pass  # Not a QR code, continue normally
+                        payer = 'owner'
+                    else:
+                        # Owner has ₹0 - visitor must pay
+                        payment_required = True
+                        payer = 'visitor'
+                        cost_per_action = 1.00
+                except QRWallet.DoesNotExist:
+                    # No wallet found, treat as free
+                    payment_required = False
+                    payer = None
             
             context = {
                 'gateway': gateway,
@@ -160,7 +158,11 @@ class GatewayAccessView(View):
             
             return render(request, 'core/gateway_access.html', context)
             
-        except (EntryPoint.DoesNotExist, PreGeneratedQR.DoesNotExist):
+        except Exception as e:
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in gateway access view: {str(e)}", exc_info=True)
             return render(request, 'core/gateway_not_found.html')
     
     def post(self, request, identifier):
