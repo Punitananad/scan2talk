@@ -155,7 +155,7 @@ class PreGeneratedQR(models.Model):
         """Get the access URL after activation."""
         protocol = 'http' if settings.DEBUG else 'https'
         if self.status == 'activated' and self.gateway:
-            return f"{protocol}://{settings.PLATFORM_DOMAIN}/gateways/g/{self.qr_code}/"
+            return f"{protocol}://{settings.PLATFORM_DOMAIN}/g/{self.qr_code}/"
         return self.get_activation_url()
     
     def activate(self, user, gateway=None, by_admin=False):
