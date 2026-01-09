@@ -306,3 +306,71 @@ class QRWalletTransaction(BaseModel):
     
     def __str__(self):
         return f"{self.get_transaction_type_display()} - ₹{self.amount} - {self.wallet.qr_code.qr_code}"
+
+
+class VisitorPayment(BaseModel):
+    """
+    Track visitor payments when owner's wallet is empty
+    """
+    qr_code = models.ForeignKey(
+        'gateways.PreGeneratedQR',
+        on_delete=models.CASCADE,
+        related_name='visitor_payments'
+    )
+    
+    # Payment details
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=1.00)
+    payment_type = models.CharField(
+        max_length=20,
+        choices=[('message', 'Message'), ('call', 'Call')],
+        default='message'
+    )
+    
+    # Visitor info (optional, for tracking)
+    visitor_phone = models.CharField(max_length=20, blank=True)
+    visitor_ip = models.GenericIPAddressField(blank=True, null=True)
+    
+    # PhonePe payment tracking
+    order_id = models.CharField(max_length=100, unique=True)
+    gateway_order_id = models.CharField(max_length=100, blank=True)
+    gateway_payment_id = models.CharField(max_length=100, blank=True)
+    
+    # Status
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    
+    # Message/Call content (stored after payment)
+    message_content = models.TextField(blank=True)
+    intent = models.CharField(max_length=50, blank=True)
+    channel = models.CharField(max_length=20, blank=True)
+    
+    # Completion tracking
+    communication_sent = models.BooleanField(default=False)
+    communication_sent_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'visitor_payments'
+        verbose_name = 'Visitor Payment'
+        verbose_name_plural = 'Visitor Payments'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Visitor Payment ₹{self.amount} - {self.qr_code.qr_code} - {self.status}"
+    
+    def mark_completed(self, gateway_payment_id):
+        """Mark payment as completed"""
+        self.status = 'completed'
+        self.gateway_payment_id = gateway_payment_id
+        self.save()
+    
+    def mark_failed(self, reason=''):
+        """Mark payment as failed"""
+        self.status = 'failed'
+        self.save()

@@ -186,6 +186,37 @@
                 <div class="mb-8" x-show="contactMethod === 'message'" x-transition>
                     <h2 class="text-xl font-bold text-gray-900 mb-4">Your Message</h2>
                     
+                    <!-- Payment Notice (shown when owner has ₹0) -->
+                    {% if payment_required and payer == 'visitor' %}
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-6 mb-6">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-yellow-900 mb-2">💳 Small Payment Required</h3>
+                                <p class="text-yellow-800 mb-3">
+                                    The vehicle owner's wallet is currently empty. To send your message, 
+                                    a small fee of <strong class="text-xl">₹{{ cost_per_action }}</strong> is required.
+                                </p>
+                                <div class="bg-white rounded-lg p-4 mb-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">📱 Message Fee</span>
+                                        <span class="text-2xl font-bold text-gray-900">₹{{ cost_per_action }}</span>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-yellow-700">
+                                    ✅ Secure payment via PhonePe<br>
+                                    ✅ Your message will be sent immediately after payment<br>
+                                    ✅ One-time payment per contact
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <!-- Pre-filled message based on reason -->
                     <div class="mb-4">
                         <textarea 
@@ -256,8 +287,13 @@
                     :class="canSubmit ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'bg-gray-400 cursor-not-allowed'"
                     class="w-full text-white py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg"
                 >
-                    <span x-show="contactMethod === 'message'">Send Message</span>
-                    <span x-show="contactMethod === 'call'">Initiate Call</span>
+                    {% if payment_required and payer == 'visitor' %}
+                        <span x-show="contactMethod === 'message'">Pay ₹{{ cost_per_action }} & Send Message</span>
+                        <span x-show="contactMethod === 'call'">Pay ₹{{ cost_per_action }} & Call</span>
+                    {% else %}
+                        <span x-show="contactMethod === 'message'">Send Message</span>
+                        <span x-show="contactMethod === 'call'">Initiate Call</span>
+                    {% endif %}
                     <span x-show="!contactMethod">Select Contact Method</span>
                 </button>
                 
@@ -350,12 +386,52 @@ function contactForm() {
                 return;
             }
             
+            {% if payment_required and payer == 'visitor' %}
+            // Visitor payment required
+            await this.initiateVisitorPayment();
+            {% else %}
+            // Normal flow (owner pays or free)
             if (this.contactMethod === 'call') {
                 await this.initiateCall();
             } else if (this.contactMethod === 'message') {
                 this.submitForm();
             }
+            {% endif %}
         },
+        
+        {% if payment_required and payer == 'visitor' %}
+        async initiateVisitorPayment() {
+            this.loading = true;
+            this.errorMessage = '';
+            
+            try {
+                const formData = new FormData();
+                formData.append('payment_type', this.contactMethod);
+                formData.append('message', this.message);
+                formData.append('intent', this.reason);
+                formData.append('channel', this.channel);
+                formData.append('csrfmiddlewaretoken', this.getCookie('csrftoken'));
+                
+                const response = await fetch('/api/v1/auth/wallet/visitor-pay/{{ identifier }}/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Redirect to PhonePe payment page
+                    window.location.href = data.payment_url;
+                } else {
+                    this.errorMessage = data.error || 'Failed to initiate payment';
+                }
+            } catch (error) {
+                this.errorMessage = 'Network error. Please try again.';
+            } finally {
+                this.loading = false;
+            }
+        },
+        {% endif %}
         
         async initiateCall() {
             this.loading = true;

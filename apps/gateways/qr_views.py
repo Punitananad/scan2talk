@@ -525,6 +525,23 @@ def activate_qr_code(request, qr_code):
                     # Activate QR code
                     qr.activate(user, gateway, by_admin=False)
                     
+                    # Auto-create QR wallet if category is prepaid
+                    if qr.category and qr.category.category_type == 'prepaid':
+                        from apps.accounts.recharge_models import QRWallet
+                        
+                        # Create wallet with ₹0 balance
+                        wallet, created = QRWallet.objects.get_or_create(
+                            qr_code=qr,
+                            defaults={
+                                'category': qr.category,
+                                'balance': 0.00,  # Start with ₹0
+                                'is_active': True
+                            }
+                        )
+                        
+                        if created:
+                            print(f"✅ Auto-created QR wallet for {qr.qr_code} with ₹0 balance")
+                    
                     # Auto-login the user
                     from django.contrib.auth import login
                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')

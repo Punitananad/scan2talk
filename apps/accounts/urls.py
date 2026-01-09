@@ -27,6 +27,12 @@ urlpatterns = [
     path('wallet/test-payment/<str:order_id>/', wallet_views.test_payment_page, name='test_payment_page'),
     path('wallet/test-payment/<str:order_id>/complete/', wallet_views.test_payment_complete, name='test_payment_complete'),
     
+    # Visitor payment routes (for prepaid QR codes)
+    path('wallet/visitor-pay/<str:identifier>/', wallet_views.initiate_visitor_payment, name='initiate_visitor_payment'),
+    path('wallet/visitor-pay/callback/', wallet_views.visitor_payment_callback, name='visitor_payment_callback'),
+    path('wallet/visitor-pay/success/<str:order_id>/', wallet_views.visitor_payment_success, name='visitor_payment_success'),
+    path('wallet/visitor-pay/failed/', wallet_views.visitor_payment_failed, name='visitor_payment_failed'),
+    
     # Admin Super Dashboard
     path('admin/dashboard/', admin_views.admin_super_dashboard, name='admin_super_dashboard'),
     path('admin/categories/', admin_views.manage_categories, name='admin_manage_categories'),

@@ -288,3 +288,218 @@ def phonepe_callback(request):
     except Exception as e:
         messages.error(request, f'Callback error: {str(e)}')
         return redirect('accounts:wallet_dashboard')
+
+
+
+# Visitor Payment Views (for prepaid QR codes with ₹0 balance)
+
+def get_client_ip(request):
+    """Get client IP address"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
+@require_http_methods(["POST"])
+def initiate_visitor_payment(request, identifier):
+    """
+    Initiate visitor payment for contacting owner with ₹0 balance
+    POST /api/v1/auth/wallet/visitor-pay/<identifier>/
+    """
+    try:
+        from apps.gateways.qr_models import PreGeneratedQR
+        from .phonepe_service import PhonePeGatewayService
+        
+        # Get QR code
+        qr = get_object_or_404(
+            PreGeneratedQR,
+            qr_code=identifier.upper(),
+            status='activated'
+        )
+        
+        # Verify it's prepaid and owner has ₹0
+        if not qr.category or qr.category.category_type != 'prepaid':
+            return JsonResponse({
+                'success': False,
+                'error': 'This QR code does not require payment'
+            })
+        
+        try:
+            wallet = qr.qr_wallet
+            if wallet.balance >= 1.00:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Owner has balance. No payment required.'
+                })
+        except:
+            return JsonResponse({
+                'success': False,
+                'error': 'Wallet not found'
+            })
+        
+        # Get form data
+        payment_type = request.POST.get('payment_type', 'message')  # 'message' or 'call'
+        message_content = request.POST.get('message', '')
+        intent = request.POST.get('intent', 'general')
+        channel = request.POST.get('channel', 'sms')
+        visitor_phone = request.POST.get('visitor_phone', '')
+        
+        # Create visitor payment record
+        order_id = f"VP{uuid4().hex[:20].upper()}"
+        
+        visitor_payment = VisitorPayment.objects.create(
+            qr_code=qr,
+            amount=1.00,
+            payment_type=payment_type,
+            visitor_phone=visitor_phone,
+            visitor_ip=get_client_ip(request),
+            order_id=order_id,
+            message_content=message_content,
+            intent=intent,
+            channel=channel,
+            status='pending'
+        )
+        
+        # Create a temporary order object for PhonePe
+        class TempOrder:
+            def __init__(self, visitor_payment):
+                self.order_id = visitor_payment.order_id
+                self.amount = visitor_payment.amount
+                self.user = type('obj', (object,), {'id': 0})()  # Dummy user
+                self.gateway_order_id = ''
+                self.status = 'pending'
+            
+            def save(self):
+                visitor_payment.gateway_order_id = self.gateway_order_id
+                visitor_payment.save()
+            
+            def mark_failed(self, reason):
+                visitor_payment.mark_failed(reason)
+        
+        temp_order = TempOrder(visitor_payment)
+        result = PhonePeGatewayService.initiate_payment(temp_order)
+        
+        if result['success']:
+            visitor_payment.gateway_order_id = result['transaction_id']
+            visitor_payment.save()
+            
+            return JsonResponse({
+                'success': True,
+                'payment_url': result['payment_url'],
+                'order_id': order_id
+            })
+        else:
+            visitor_payment.mark_failed(result.get('error', 'Payment initiation failed'))
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', 'Payment initiation failed')
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+
+@csrf_exempt
+@require_http_methods(["POST", "GET"])
+def visitor_payment_callback(request):
+    """
+    Handle PhonePe callback for visitor payments
+    POST/GET /api/v1/auth/wallet/visitor-pay/callback/
+    """
+    try:
+        from .phonepe_service import PhonePeGatewayService
+        
+        # Get callback data
+        if request.method == 'POST':
+            callback_data = request.POST.dict()
+        else:
+            callback_data = request.GET.dict()
+        
+        # Handle callback
+        result = PhonePeGatewayService.handle_callback(callback_data)
+        
+        if result['success']:
+            # Find visitor payment by order_id
+            order_id = result.get('order_id', '')
+            
+            # Check if it's a visitor payment (starts with VP)
+            if order_id.startswith('VP'):
+                try:
+                    visitor_payment = VisitorPayment.objects.get(order_id=order_id)
+                    visitor_payment.mark_completed(result.get('payment_id', ''))
+                    
+                    # Send the message/call now
+                    send_visitor_communication(visitor_payment)
+                    
+                    # Redirect to success page
+                    return redirect('accounts:visitor_payment_success', order_id=order_id)
+                except VisitorPayment.DoesNotExist:
+                    pass
+        
+        # Redirect to failure page
+        return redirect('accounts:visitor_payment_failed')
+        
+    except Exception as e:
+        return redirect('accounts:visitor_payment_failed')
+
+
+def send_visitor_communication(visitor_payment):
+    """
+    Send the message/call after visitor payment is completed
+    """
+    try:
+        from apps.interactions.services import InteractionService
+        
+        qr = visitor_payment.qr_code
+        gateway = qr.gateway
+        
+        if not gateway:
+            return
+        
+        interaction_service = InteractionService()
+        
+        # Send the communication
+        result = interaction_service.initiate_communication(
+            gateway=gateway,
+            channel=visitor_payment.channel,
+            message=visitor_payment.message_content,
+            intent=visitor_payment.intent,
+            session_data={
+                'visitor_payment_id': str(visitor_payment.id),
+                'paid_by': 'visitor',
+                'amount': float(visitor_payment.amount)
+            }
+        )
+        
+        if result['success']:
+            visitor_payment.communication_sent = True
+            visitor_payment.communication_sent_at = timezone.now()
+            visitor_payment.save()
+            
+    except Exception as e:
+        print(f"Error sending visitor communication: {e}")
+
+
+def visitor_payment_success(request, order_id):
+    """Visitor payment success page"""
+    try:
+        visitor_payment = VisitorPayment.objects.get(order_id=order_id)
+        context = {
+            'visitor_payment': visitor_payment,
+            'qr_code': visitor_payment.qr_code,
+        }
+        return render(request, 'accounts/visitor_payment_success.html', context)
+    except VisitorPayment.DoesNotExist:
+        messages.error(request, 'Payment not found')
+        return redirect('core:home')
+
+
+def visitor_payment_failed(request):
+    """Visitor payment failed page"""
+    return render(request, 'accounts/visitor_payment_failed.html')

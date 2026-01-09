@@ -114,11 +114,46 @@ class GatewayAccessView(View):
             # Get available communication channels
             available_channels = routing_service.get_available_channels(gateway)
             
+            # Check if this is a prepaid category QR
+            payment_required = False
+            payer = None
+            cost_per_action = 0.00
+            
+            try:
+                from apps.gateways.qr_models import PreGeneratedQR
+                qr = PreGeneratedQR.objects.get(
+                    qr_code=identifier.upper(),
+                    status='activated'
+                )
+                
+                if qr.category and qr.category.category_type == 'prepaid':
+                    # Check wallet balance
+                    try:
+                        wallet = qr.qr_wallet
+                        
+                        if wallet.balance >= 1.00:
+                            # Owner has balance - will be deducted
+                            payment_required = False
+                            payer = 'owner'
+                        else:
+                            # Owner has ₹0 - visitor must pay
+                            payment_required = True
+                            payer = 'visitor'
+                            cost_per_action = 1.00
+                    except:
+                        # No wallet found, treat as free
+                        pass
+            except:
+                pass  # Not a QR code or no wallet
+            
             context = {
                 'gateway': gateway,
                 'entry_point': entry_point,
                 'available_channels': available_channels,
                 'identifier': identifier,
+                'payment_required': payment_required,
+                'payer': payer,
+                'cost_per_action': cost_per_action,
             }
             
             return render(request, 'core/gateway_access.html', context)
@@ -160,6 +195,47 @@ class GatewayAccessView(View):
             if len(message) > 500:
                 messages.error(request, 'Message is too long. Please keep it under 500 characters.')
                 return redirect('core:gateway_access', identifier=identifier)
+            
+            # Check if prepaid category and handle payment
+            try:
+                from apps.gateways.qr_models import PreGeneratedQR
+                qr = PreGeneratedQR.objects.get(
+                    qr_code=identifier.upper(),
+                    status='activated'
+                )
+                
+                if qr.category and qr.category.category_type == 'prepaid':
+                    try:
+                        wallet = qr.qr_wallet
+                        
+                        # Check balance
+                        if wallet.balance >= 1.00:
+                            # Owner has balance - deduct ₹1
+                            wallet.balance -= 1.00
+                            wallet.save()
+                            
+                            # Create transaction record
+                            from apps.accounts.recharge_models import QRWalletTransaction
+                            QRWalletTransaction.objects.create(
+                                wallet=wallet,
+                                transaction_type='deduction',
+                                amount=1.00,
+                                description=f'{channel.upper()} charge - {intent}',
+                                notes=f'Message: {message[:50]}'
+                            )
+                            
+                            print(f"✅ Deducted ₹1 from owner's wallet. New balance: ₹{wallet.balance}")
+                            # Continue with normal flow
+                        else:
+                            # Owner has ₹0 - visitor must pay
+                            # This should not happen if frontend is working correctly
+                            messages.error(request, 'Payment required. Please complete payment to send message.')
+                            return redirect('core:gateway_access', identifier=identifier)
+                    except Exception as e:
+                        print(f"Wallet error: {e}")
+                        pass  # Continue with normal flow if wallet check fails
+            except:
+                pass  # Not a prepaid QR, continue normally
             
             # Process the communication request
             routing_service = RoutingService()
