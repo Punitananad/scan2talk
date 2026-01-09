@@ -55,7 +55,8 @@ def generate_masked_call_url(request, qr_code):
         # Check if prepaid category and handle payment
         if qr.category and qr.category.category_type == 'prepaid':
             try:
-                wallet = qr.qr_wallet
+                from apps.accounts.recharge_models import QRWallet, QRWalletTransaction
+                wallet = QRWallet.objects.get(qr_code=qr)
                 
                 # Check balance
                 if wallet.balance >= 1.00:
@@ -64,7 +65,6 @@ def generate_masked_call_url(request, qr_code):
                     wallet.save()
                     
                     # Create transaction record
-                    from apps.accounts.recharge_models import QRWalletTransaction
                     QRWalletTransaction.objects.create(
                         wallet=wallet,
                         transaction_type='deduction',
@@ -84,6 +84,10 @@ def generate_masked_call_url(request, qr_code):
                         'cost': 1.00,
                         'error': 'Payment required. Owner wallet is empty.'
                     }, status=402)  # 402 Payment Required
+            except QRWallet.DoesNotExist:
+                # No wallet found, continue with call generation (free)
+                logger.info(f"⚠️ No wallet found for QR {qr_code}, treating as free")
+                pass
             except Exception as e:
                 logger.error(f"Wallet check error for QR {qr_code}: {e}")
                 # Continue with call generation if wallet check fails

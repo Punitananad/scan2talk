@@ -121,7 +121,7 @@ class GatewayAccessView(View):
             
             try:
                 from apps.gateways.qr_models import PreGeneratedQR
-                qr = PreGeneratedQR.objects.get(
+                qr = PreGeneratedQR.objects.select_related('category').get(
                     qr_code=identifier.upper(),
                     status='activated'
                 )
@@ -129,7 +129,8 @@ class GatewayAccessView(View):
                 if qr.category and qr.category.category_type == 'prepaid':
                     # Check wallet balance
                     try:
-                        wallet = qr.qr_wallet
+                        from apps.accounts.recharge_models import QRWallet
+                        wallet = QRWallet.objects.get(qr_code=qr)
                         
                         if wallet.balance >= 1.00:
                             # Owner has balance - will be deducted
@@ -140,11 +141,12 @@ class GatewayAccessView(View):
                             payment_required = True
                             payer = 'visitor'
                             cost_per_action = 1.00
-                    except:
+                    except QRWallet.DoesNotExist:
                         # No wallet found, treat as free
-                        pass
-            except:
-                pass  # Not a QR code or no wallet
+                        payment_required = False
+                        payer = None
+            except PreGeneratedQR.DoesNotExist:
+                pass  # Not a QR code, continue normally
             
             context = {
                 'gateway': gateway,
@@ -199,14 +201,16 @@ class GatewayAccessView(View):
             # Check if prepaid category and handle payment
             try:
                 from apps.gateways.qr_models import PreGeneratedQR
-                qr = PreGeneratedQR.objects.get(
+                from apps.accounts.recharge_models import QRWallet, QRWalletTransaction
+                
+                qr = PreGeneratedQR.objects.select_related('category').get(
                     qr_code=identifier.upper(),
                     status='activated'
                 )
                 
                 if qr.category and qr.category.category_type == 'prepaid':
                     try:
-                        wallet = qr.qr_wallet
+                        wallet = QRWallet.objects.get(qr_code=qr)
                         
                         # Check balance
                         if wallet.balance >= 1.00:
@@ -215,7 +219,6 @@ class GatewayAccessView(View):
                             wallet.save()
                             
                             # Create transaction record
-                            from apps.accounts.recharge_models import QRWalletTransaction
                             QRWalletTransaction.objects.create(
                                 wallet=wallet,
                                 transaction_type='deduction',
@@ -231,11 +234,15 @@ class GatewayAccessView(View):
                             # This should not happen if frontend is working correctly
                             messages.error(request, 'Payment required. Please complete payment to send message.')
                             return redirect('core:gateway_access', identifier=identifier)
-                    except Exception as e:
-                        print(f"Wallet error: {e}")
-                        pass  # Continue with normal flow if wallet check fails
-            except:
+                    except QRWallet.DoesNotExist:
+                        # No wallet found, continue with normal flow (free)
+                        print(f"⚠️ No wallet found for QR {identifier}, treating as free")
+                        pass
+            except PreGeneratedQR.DoesNotExist:
                 pass  # Not a prepaid QR, continue normally
+            except Exception as e:
+                print(f"❌ Wallet error: {e}")
+                pass  # Continue with normal flow if wallet check fails
             
             # Process the communication request
             routing_service = RoutingService()
