@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Gateway Platform{% endblock %}</title>
+    <title>{% block title %}Scan2Talk - Smart Vehicle Contact Management{% endblock %}</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/logo.png' %}?v=3">
@@ -40,37 +40,33 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="{% url 'core:home' %}" class="flex items-center">
-                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                            <span class="text-white font-bold text-sm">GP</span>
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                            </svg>
                         </div>
-                        <span class="text-xl font-semibold text-gray-900">Gateway Platform</span>
+                        <div>
+                            <span class="text-xl font-bold text-gray-900 block leading-tight">Scan2Talk</span>
+                            <span class="text-xs text-gray-500">Vehicle Contact Manager</span>
+                        </div>
                     </a>
                 </div>
                 
                 <div class="flex items-center space-x-4">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'accounts:dashboard' %}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        {% if user.is_staff and request.path|slice:":7" == "/admin/" or request.path|slice:":10" == "/accounts/" and "admin" in request.path or request.path|slice:":10" == "/gateways/" and "qr" in request.path or request.path|slice:":10" == "/gateways/" and "registrations" in request.path %}
+                        <!-- Admin Navigation -->
+                        <a href="{% url 'accounts:admin_super_dashboard' %}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                             Dashboard
                         </a>
-                        <a href="{% url 'gateways:list' %}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                            Gateways
-                        </a>
-                        <a href="{% url 'accounts:wallet_dashboard' %}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            Wallet
-                        </a>
-                        {% if user.is_staff %}
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                                Admin
+                                Admin Tools
                                 <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="{% url 'accounts:admin_super_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🎛️ Super Dashboard</a>
                                 <a href="{% url 'gateways:qr_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📱 QR Dashboard</a>
                                 <a href="{% url 'accounts:admin_manage_categories' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📂 Categories</a>
                                 <a href="{% url 'accounts:admin_manage_plans' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">💳 Plans</a>
@@ -79,7 +75,6 @@
                                 <a href="{% url 'gateways:registrations' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📋 Registrations</a>
                             </div>
                         </div>
-                        {% endif %}
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                                 {% if user.first_name %}
@@ -94,10 +89,53 @@
                                 </svg>
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="{% url 'accounts:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                                <a href="{% url 'core:home' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🏠 User View</a>
+                                <a href="{% url 'accounts:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🚪 Logout</a>
                             </div>
                         </div>
+                        {% else %}
+                        <!-- User Navigation -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                                Profile
+                                <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">👤 My Profile</a>
+                                <a href="{% url 'accounts:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📊 Dashboard</a>
+                                <a href="{% url 'core:contact' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">❓ Help</a>
+                            </div>
+                        </div>
+                        <a href="{% url 'accounts:wallet_dashboard' %}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Wallet
+                        </a>
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                                {% if user.first_name %}
+                                    {{ user.first_name }}
+                                {% elif user.get_full_name %}
+                                    {{ user.get_full_name }}
+                                {% else %}
+                                    {{ user.email }}
+                                {% endif %}
+                                <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                {% if user.is_staff %}
+                                <a href="{% url 'accounts:admin_super_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">⚙️ Admin Panel</a>
+                                <div class="border-t border-gray-200 my-1"></div>
+                                {% endif %}
+                                <a href="{% url 'accounts:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🚪 Logout</a>
+                            </div>
+                        </div>
+                        {% endif %}
                     {% else %}
                         <a href="{% url 'accounts:phone_login' %}" class="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-md text-sm font-medium">
                             Login
@@ -130,23 +168,28 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center mb-4">
-                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                            <span class="text-white font-bold text-sm">GP</span>
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                            </svg>
                         </div>
-                        <span class="text-lg font-semibold text-gray-900">Gateway Platform</span>
+                        <div>
+                            <span class="text-lg font-bold text-gray-900 block leading-tight">Scan2Talk</span>
+                            <span class="text-xs text-gray-600">Vehicle Contact Manager</span>
+                        </div>
                     </div>
                     <p class="text-gray-600 text-sm">
-                        Privacy-first communication routing platform for secure, anonymous contact initiation.
+                        Smart QR-based vehicle contact management. Connect with vehicle owners for parking issues, emergencies, and more—without sharing personal numbers.
                     </p>
                 </div>
                 
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Platform</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Features</h3>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="{% url 'core:home' %}" class="hover:text-blue-600">Home</a></li>
-                        <li><a href="#" class="hover:text-blue-600">Features</a></li>
-                        <li><a href="#" class="hover:text-blue-600">Pricing</a></li>
-                        <li><a href="#" class="hover:text-blue-600">Documentation</a></li>
+                        <li><a href="{% url 'core:home' %}" class="hover:text-blue-600">🏠 Home</a></li>
+                        <li><a href="#" class="hover:text-blue-600">🚗 Vehicle QR Codes</a></li>
+                        <li><a href="#" class="hover:text-blue-600">🅿️ Parking Management</a></li>
+                        <li><a href="#" class="hover:text-blue-600">📱 Contact Solutions</a></li>
                     </ul>
                 </div>
                 
@@ -173,7 +216,7 @@
             
             <div class="border-t border-gray-200 mt-8 pt-8 text-center">
                 <p class="text-sm text-gray-600">
-                    © 2024 Gateway Platform. All rights reserved. Built with privacy and security in mind.
+                    © 2024 Scan2Talk. All rights reserved. Smart vehicle contact management with privacy protection.
                 </p>
             </div>
         </div>
