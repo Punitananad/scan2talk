@@ -49,9 +49,17 @@ else
   warn "No sqlite DB found (skipping backup)"
 fi
 
-# Step 3: Git pull
+# Step 3: Git pull (with stash for local changes)
 info "Pulling latest code"
 git fetch origin
+
+# Check for local changes
+if ! git diff-index --quiet HEAD --; then
+  warn "Local changes detected, stashing..."
+  git stash push -m "Auto-stash before deployment $(date +%Y%m%d_%H%M%S)"
+  ok "Local changes stashed"
+fi
+
 git pull origin "$BRANCH"
 ok "Code updated"
 

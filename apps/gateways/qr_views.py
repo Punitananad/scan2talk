@@ -30,15 +30,31 @@ def generate_qr_codes(request):
     if request.method == 'POST':
         try:
             quantity = int(request.POST.get('quantity', 10))
+            batch_name = request.POST.get('batch_name', '').strip()
             purpose = request.POST.get('purpose', '')
             notes = request.POST.get('notes', '')
+            category_id = request.POST.get('category', '')
             
             if quantity < 1 or quantity > 1000:
                 messages.error(request, 'Quantity must be between 1 and 1000')
                 return redirect('gateways:generate_qr')
             
-            # Generate batch number
-            batch_number = f"BATCH-{django_timezone.now().strftime('%Y%m%d')}-{generate_short_code(6).upper()}"
+            if not batch_name:
+                messages.error(request, 'Batch name is required')
+                return redirect('gateways:generate_qr')
+            
+            # Get category if provided
+            category = None
+            if category_id:
+                from apps.accounts.recharge_models import RechargeCategory
+                try:
+                    category = RechargeCategory.objects.get(id=category_id)
+                except RechargeCategory.DoesNotExist:
+                    messages.error(request, 'Invalid category selected')
+                    return redirect('gateways:generate_qr')
+            
+            # Use custom batch name with unique suffix to ensure uniqueness
+            batch_number = f"{batch_name}-{generate_short_code(4).upper()}"
             
             # Create batch record
             batch = QRBatch.objects.create(
@@ -46,6 +62,7 @@ def generate_qr_codes(request):
                 quantity=quantity,
                 purpose=purpose,
                 notes=notes,
+                category=category,
                 created_by=request.user,
                 available_count=quantity
             )
@@ -54,11 +71,21 @@ def generate_qr_codes(request):
             qr_codes = []
             for _ in range(quantity):
                 qr = PreGeneratedQR.objects.create(
-                    batch_number=batch_number
+                    batch_number=batch_number,
+                    category=category
                 )
                 qr_codes.append(qr)
+                
+                # Create QR wallet if category is assigned
+                if category:
+                    from apps.accounts.recharge_models import QRWallet
+                    QRWallet.objects.create(
+                        qr_code=qr,
+                        category=category
+                    )
             
-            messages.success(request, f'Successfully generated {quantity} QR codes in batch {batch_number}')
+            messages.success(request, f'Successfully generated {quantity} QR codes in batch {batch_number}' + 
+                           (f' with category {category.name}' if category else ''))
             return redirect('gateways:qr_dashboard')
             
         except Exception as e:
@@ -66,10 +93,14 @@ def generate_qr_codes(request):
             return redirect('gateways:generate_qr')
     
     # GET request - show form
+    from apps.accounts.recharge_models import RechargeCategory
+    categories = RechargeCategory.objects.filter(is_active=True)
+    
     context = {
         'total_qr_codes': PreGeneratedQR.objects.count(),
         'available_qr_codes': PreGeneratedQR.objects.filter(status='available').count(),
         'activated_qr_codes': PreGeneratedQR.objects.filter(status='activated').count(),
+        'categories': categories,
     }
     return render(request, 'gateways/generate_qr.html', context)
 
@@ -82,21 +113,26 @@ def qr_dashboard(request):
     # Get filter parameters
     status_filter = request.GET.get('status', '')
     batch_filter = request.GET.get('batch', '')
+    category_filter = request.GET.get('category', '')
     search = request.GET.get('search', '')
     
     # Base queryset
-    qr_codes = PreGeneratedQR.objects.select_related('owner', 'gateway').all()
+    qr_codes = PreGeneratedQR.objects.select_related('owner', 'gateway', 'category').all()
     
     # Apply filters
     if status_filter:
         qr_codes = qr_codes.filter(status=status_filter)
     if batch_filter:
         qr_codes = qr_codes.filter(batch_number=batch_filter)
+    if category_filter:
+        qr_codes = qr_codes.filter(category_id=category_filter)
     if search:
         qr_codes = qr_codes.filter(qr_code__icontains=search)
     
-    # Get batches for filter dropdown
+    # Get batches and categories for filter dropdowns
     batches = QRBatch.objects.all().order_by('-created_at')
+    from apps.accounts.recharge_models import RechargeCategory
+    categories = RechargeCategory.objects.filter(is_active=True)
     
     # Statistics
     stats = {
@@ -107,15 +143,63 @@ def qr_dashboard(request):
         'expired': PreGeneratedQR.objects.filter(status='expired').count(),
     }
     
+    # Category-wise statistics
+    category_stats = []
+    for category in categories:
+        cat_qr_count = PreGeneratedQR.objects.filter(category=category).count()
+        cat_activated = PreGeneratedQR.objects.filter(category=category, status='activated').count()
+        category_stats.append({
+            'category': category,
+            'total': cat_qr_count,
+            'activated': cat_activated,
+            'available': cat_qr_count - cat_activated
+        })
+    
     context = {
         'qr_codes': qr_codes[:100],  # Limit to 100 for performance
         'batches': batches,
+        'categories': categories,
+        'category_stats': category_stats,
         'stats': stats,
         'status_filter': status_filter,
         'batch_filter': batch_filter,
+        'category_filter': category_filter,
         'search': search,
     }
     return render(request, 'gateways/qr_dashboard.html', context)
+
+
+@staff_member_required
+def category_users_view(request, category_id):
+    """
+    View all users/QR codes under a specific category.
+    """
+    from apps.accounts.recharge_models import RechargeCategory
+    category = get_object_or_404(RechargeCategory, id=category_id)
+    
+    # Get all QR codes in this category
+    qr_codes = PreGeneratedQR.objects.filter(category=category).select_related(
+        'owner', 'gateway', 'category'
+    ).order_by('-activated_at', '-created_at')
+    
+    # Get activated QR codes with user details
+    activated_qrs = qr_codes.filter(status='activated')
+    
+    # Statistics for this category
+    stats = {
+        'total_qr': qr_codes.count(),
+        'activated': activated_qrs.count(),
+        'available': qr_codes.filter(status='available').count(),
+        'total_access': qr_codes.aggregate(total=models.Sum('access_count'))['total'] or 0,
+    }
+    
+    context = {
+        'category': category,
+        'qr_codes': qr_codes,
+        'activated_qrs': activated_qrs,
+        'stats': stats,
+    }
+    return render(request, 'gateways/category_users.html', context)
 
 
 @staff_member_required

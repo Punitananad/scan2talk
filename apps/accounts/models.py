@@ -10,6 +10,9 @@ from apps.core.utils import encrypt_data, decrypt_data
 # Import wallet models to register them
 from .wallet_models import Wallet, WalletTransaction, RechargeOrder
 
+# Import recharge models to register them
+from .recharge_models import RechargeCategory, RechargePlan, QRWallet, QRWalletTransaction
+
 
 class User(AbstractUser):
     """

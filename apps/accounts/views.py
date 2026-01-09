@@ -50,6 +50,28 @@ class ProfileView(TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # Get user's QR codes with categories
+        from apps.gateways.qr_models import PreGeneratedQR
+        user_qr_codes = PreGeneratedQR.objects.filter(
+            owner=user,
+            status='activated'
+        ).select_related('category', 'gateway')
+        
+        # Get unique categories for this user
+        categories = set()
+        for qr in user_qr_codes:
+            if qr.category:
+                categories.add(qr.category)
+        
+        context['user_qr_codes'] = user_qr_codes
+        context['user_categories'] = list(categories)
+        
+        return context
 
 
 # API Views

@@ -13,6 +13,7 @@ urlpatterns = [
     # QR Code Management (Admin)
     path('gqr/', qr_views.generate_qr_codes, name='generate_qr'),
     path('qr/dashboard/', qr_views.qr_dashboard, name='qr_dashboard'),
+    path('qr/category/<uuid:category_id>/', qr_views.category_users_view, name='category_users'),
     path('qr/registrations/', qr_views.registrations_page, name='registrations'),
     path('qr/<uuid:qr_id>/details/', qr_views.qr_detail, name='qr_detail'),
     path('qr/<uuid:qr_id>/deregister/', qr_views.deregister_qr, name='deregister_qr'),

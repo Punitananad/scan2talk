@@ -70,6 +70,14 @@ class PreGeneratedQR(models.Model):
     
     # Metadata
     batch_number = models.CharField(max_length=50, blank=True, db_index=True)
+    category = models.ForeignKey(
+        'accounts.RechargeCategory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='qr_codes',
+        help_text='Category determines pricing and features'
+    )
     notes = models.TextField(blank=True)
     
     # Tracking
@@ -206,6 +214,16 @@ class QRBatch(models.Model):
     quantity = models.PositiveIntegerField()
     purpose = models.CharField(max_length=200, blank=True)
     notes = models.TextField(blank=True)
+    
+    # Category assignment
+    category = models.ForeignKey(
+        'accounts.RechargeCategory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='qr_batches',
+        help_text='Category for all QR codes in this batch'
+    )
     
     # Statistics
     activated_count = models.PositiveIntegerField(default=0)
