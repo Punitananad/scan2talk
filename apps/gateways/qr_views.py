@@ -565,21 +565,35 @@ def public_qr_access(request, qr_code):
     IMPORTANT: Once activated, always shows public contact page.
     No owner checks, no authentication logic - pure public access.
     """
-    qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
+    import logging
+    logger = logging.getLogger(__name__)
     
-    # Increment access count
-    qr.increment_access_count()
-    
-    # If not activated, redirect to activation page
-    if qr.status != 'activated':
-        return redirect('gateways:activate_qr', qr_code=qr_code)
-    
-    # If activated, ALWAYS show the public contact page
-    # This is the permanent behavior - no exceptions
-    if qr.gateway:
+    try:
+        qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
+        
+        logger.info(f"Public QR access for: {qr.qr_code}, status: {qr.status}")
+        
+        # Increment access count
+        qr.increment_access_count()
+        
+        # If not activated, redirect to activation page
+        if qr.status != 'activated':
+            logger.info(f"QR {qr.qr_code} not activated, redirecting to activation")
+            return redirect('gateways:activate_qr', qr_code=qr_code)
+        
+        # Check if gateway exists
+        if not qr.gateway:
+            logger.error(f"QR {qr.qr_code} has no gateway")
+            return render(request, 'gateways/qr_not_found.html')
+        
+        # If activated, ALWAYS show the public contact page
+        # This is the permanent behavior - no exceptions
+        logger.info(f"QR {qr.qr_code} activated, redirecting to gateway access")
         return redirect('core:gateway_access', identifier=qr.qr_code)
-    
-    return render(request, 'gateways/qr_not_found.html')
+        
+    except Exception as e:
+        logger.error(f"Error in public_qr_access for {qr_code}: {str(e)}", exc_info=True)
+        return render(request, 'gateways/qr_not_found.html')
 
 
 
