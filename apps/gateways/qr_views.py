@@ -403,7 +403,9 @@ def activate_qr_code(request, qr_code):
     User activates their QR code by scanning or entering the code.
     Route: /activate/<qr_code>/
     NO LOGIN REQUIRED - Uses phone OTP authentication
-    Auto-login if already activated by this user
+    
+    IMPORTANT: Once activated, QR becomes public-facing permanently.
+    No repeated activation checks, no owner-side messages.
     """
     from django.contrib.auth import login
     
@@ -412,15 +414,9 @@ def activate_qr_code(request, qr_code):
     # Increment access count
     qr.increment_access_count()
     
-    # Check if already activated
+    # If already activated, ALWAYS redirect to public contact page
+    # No messages, no checks, no owner logic - just direct access
     if qr.status == 'activated':
-        # If user is authenticated and is the owner, redirect to dashboard
-        if request.user.is_authenticated and request.user == qr.owner:
-            messages.info(request, f'This QR code is already activated by you.')
-            return redirect('accounts:dashboard')
-        
-        # For everyone else (visitors and non-authenticated users), redirect to contact page
-        # This ensures visitors always see the contact form, not the login page
         return redirect('core:gateway_access', identifier=qr.qr_code)
     
     # Check if available
@@ -557,18 +553,21 @@ def public_qr_access(request, qr_code):
     """
     Public access to QR code - shows contact form or activation page.
     Route: /g/<qr_code>/
+    
+    IMPORTANT: Once activated, always shows public contact page.
+    No owner checks, no authentication logic - pure public access.
     """
     qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
     
     # Increment access count
     qr.increment_access_count()
     
-    # If not activated, show activation page (for owner to register)
+    # If not activated, redirect to activation page
     if qr.status != 'activated':
         return redirect('gateways:activate_qr', qr_code=qr_code)
     
-    # If activated, ALWAYS show the gateway contact form (for visitors to contact owner)
-    # Never show login page - visitors should directly see contact form
+    # If activated, ALWAYS show the public contact page
+    # This is the permanent behavior - no exceptions
     if qr.gateway:
         return redirect('core:gateway_access', identifier=qr.qr_code)
     
