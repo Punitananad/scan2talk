@@ -4,32 +4,322 @@
 
 {% block content %}
 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Vehicle Information Card -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
-            <div class="text-center mb-6">
-                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+            <div class="text-center">
+                <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                     </svg>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Contact Vehicle Owner</h1>
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Contact Vehicle Owner</h1>
                 {% if gateway.identifier_text %}
-                    <div class="inline-block bg-blue-100 px-6 py-2 rounded-full">
-                        <p class="text-2xl font-bold text-blue-900 uppercase tracking-wider">{{ gateway.identifier_text }}</p>
+                    <div class="inline-block bg-blue-100 px-8 py-3 rounded-full mb-4">
+                        <p class="text-3xl font-bold text-blue-900 uppercase tracking-wider">{{ gateway.identifier_text }}</p>
                     </div>
                 {% endif %}
-                <p class="text-gray-600 mt-3 capitalize">{{ gateway.context_type }} • {{ gateway.description|default:"Vehicle" }}</p>
+                <p class="text-gray-600 text-lg capitalize">{{ gateway.context_type }} • {{ gateway.description|default:"Vehicle" }}</p>
             </div>
         </div>
 
-        <!-- Contact Form -->
-        <div class="bg-white rounded-2xl shadow-xl p-6" x-data="contactForm()">
-            <form method="post" @submit="handleSubmit">
-                {% csrf_token %}
+        <!-- Simple Contact Options -->
+        <div class="bg-white rounded-2xl shadow-xl p-8" x-data="simpleContact()">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Choose How to Contact</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Call Option -->
+                <button 
+                    @click="initiateCall()"
+                    class="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl p-8 transition-all transform hover:scale-105 shadow-lg"
+                >
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">📞 Call Owner</h3>
+                        <p class="text-green-100">Make an anonymous call</p>
+                        <p class="text-sm text-green-100 mt-2">Your number stays private</p>
+                    </div>
+                </button>
+
+                <!-- Message Option -->
+                <button 
+                    @click="showMessageForm = true"
+                    class="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl p-8 transition-all transform hover:scale-105 shadow-lg"
+                >
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">💬 Send Message</h3>
+                        <p class="text-blue-100">Send SMS or WhatsApp</p>
+                        <p class="text-sm text-blue-100 mt-2">100% anonymous</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Message Form (shown when message button clicked) -->
+            <div x-show="showMessageForm" x-transition class="border-t-2 border-gray-200 pt-8">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Payment Notice (ONLY if visitor must pay) -->
+                    {% if payment_required and payer == 'visitor' %}
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-6 mb-6">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-yellow-900 mb-2">💳 Payment Required</h3>
+                                <p class="text-yellow-800 mb-3">
+                                    The vehicle owner's wallet is empty. A small fee of <strong class="text-xl">₹{{ cost_per_action }}</strong> is required to send your message.
+                                </p>
+                                <div class="bg-white rounded-lg p-4 mb-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">📱 Message Fee</span>
+                                        <span class="text-2xl font-bold text-gray-900">₹{{ cost_per_action }}</span>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-yellow-700">
+                                    ✅ Secure payment via PhonePe<br>
+                                    ✅ Message sent immediately after payment
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Quick Reason Buttons -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-bold text-gray-900 mb-4">What's the reason?</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <button type="button" @click="selectReason('headlights')" 
+                                    :class="reason === 'headlights' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="p-4 rounded-xl transition-all text-center font-semibold">
+                                <div class="text-3xl mb-2">💡</div>
+                                <div class="text-sm">Headlights On</div>
+                            </button>
+                            
+                            <button type="button" @click="selectReason('blocking')" 
+                                    :class="reason === 'blocking' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="p-4 rounded-xl transition-all text-center font-semibold">
+                                <div class="text-3xl mb-2">🚫</div>
+                                <div class="text-sm">Blocking Way</div>
+                            </button>
+                            
+                            <button type="button" @click="selectReason('accident')" 
+                                    :class="reason === 'accident' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="p-4 rounded-xl transition-all text-center font-semibold">
+                                <div class="text-3xl mb-2">⚠️</div>
+                                <div class="text-sm">Accident</div>
+                            </button>
+                            
+                            <button type="button" @click="selectReason('towing')" 
+                                    :class="reason === 'towing' ? 'bg-yellow-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="p-4 rounded-xl transition-all text-center font-semibold">
+                                <div class="text-3xl mb-2">🚗</div>
+                                <div class="text-sm">Towing Alert</div>
+                            </button>
+                            
+                            <button type="button" @click="selectReason('theft')" 
+                                    :class="reason === 'theft' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="p-4 rounded-xl transition-all text-center font-semibold">
+                                <div class="text-3xl mb-2">🚨</div>
+                                <div class="text-sm">Security</div>
+                            </button>
+                            
+                            <button type="button" @click="selectReason('other')" 
+                                    :class="reason === 'other' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="p-4 rounded-xl transition-all text-center font-semibold">
+                                <div class="text-3xl mb-2">💬</div>
+                                <div class="text-sm">Other</div>
+                            </button>
+                        </div>
+                        <input type="hidden" name="intent" :value="reason">
+                    </div>
+
+                    <!-- Message Text -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-bold text-gray-900 mb-3">Your Message</label>
+                        <textarea 
+                            name="message" 
+                            x-model="message"
+                            rows="4" 
+                            maxlength="500"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                            placeholder="Type your message here..."
+                        ></textarea>
+                        <div class="mt-2 text-sm text-gray-500 text-right" x-text="`${message.length}/500`"></div>
+                    </div>
+
+                    <!-- Channel Selection -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-bold text-gray-900 mb-3">Send via:</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="channel" value="sms" x-model="channel" class="sr-only">
+                                <div :class="channel === 'sms' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'"
+                                     class="border-2 rounded-xl p-4 transition-all text-center">
+                                    <div class="text-3xl mb-2">📱</div>
+                                    <div class="font-bold">SMS</div>
+                                </div>
+                            </label>
+                            
+                            <label class="cursor-pointer">
+                                <input type="radio" name="channel" value="whatsapp" x-model="channel" class="sr-only">
+                                <div :class="channel === 'whatsapp' ? 'border-green-500 bg-green-50' : 'border-gray-300'"
+                                     class="border-2 rounded-xl p-4 transition-all text-center">
+                                    <div class="text-3xl mb-2">💚</div>
+                                    <div class="font-bold">WhatsApp</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit"
+                        :disabled="!message.trim() || !reason"
+                        :class="message.trim() && reason ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'bg-gray-400 cursor-not-allowed'"
+                        class="w-full text-white py-5 px-6 rounded-xl font-bold text-xl transition-all shadow-lg"
+                    >
+                        {% if payment_required and payer == 'visitor' %}
+                            Pay ₹{{ cost_per_action }} & Send Message
+                        {% else %}
+                            Send Message Now
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+
+            <!-- Privacy Notice -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mt-8">
+                <div class="flex items-start">
+                    <svg class="w-8 h-8 text-blue-600 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <div>
+                        <p class="text-blue-900 font-bold text-lg mb-2">🔒 100% Anonymous</p>
+                        <p class="text-blue-800">
+                            Your phone number and identity remain completely private. No login required. No verification needed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div x-show="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-2xl p-8 text-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                    <p class="text-lg font-semibold text-gray-900">Processing...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function simpleContact() {
+    return {
+        showMessageForm: false,
+        reason: '',
+        message: '',
+        channel: 'sms',
+        loading: false,
+        
+        reasonMessages: {
+            'headlights': 'Hi! Your car headlights are still on. You might want to check to avoid battery drain.',
+            'blocking': 'Hello, your vehicle is blocking the way. Could you please move it? Thank you!',
+            'accident': 'URGENT: Your vehicle has been involved in an incident. Please contact immediately.',
+            'towing': 'WARNING: Your vehicle is parked in a no-parking zone and may be towed soon.',
+            'theft': 'ALERT: Suspicious activity detected around your vehicle. Please check immediately.',
+            'other': 'Hello, I need to contact you regarding your vehicle.'
+        },
+        
+        selectReason(reason) {
+            this.reason = reason;
+            this.message = this.reasonMessages[reason] || '';
+        },
+        
+        async initiateCall() {
+            this.loading = true;
+            
+            try {
+                const response = await fetch('/gateways/call/{{ identifier }}/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    }
+                });
                 
-                <!-- Step 0: Vehicle Verification -->
-                <div class="mb-8" x-show="!verified">
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Owner has balance - redirect to call
+                    window.location.href = data.call_url;
+                } else if (data.payment_required) {
+                    // Owner has ₹0 - visitor must pay
+                    {% if payment_required and payer == 'visitor' %}
+                        // Redirect to visitor payment
+                        const paymentResponse = await fetch('/api/v1/auth/wallet/visitor-pay/{{ identifier }}/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': this.getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                payment_type: 'call'
+                            })
+                        });
+                        
+                        const paymentData = await paymentResponse.json();
+                        
+                        if (paymentData.success) {
+                            window.location.href = paymentData.payment_url;
+                        } else {
+                            alert(paymentData.error || 'Payment failed');
+                            this.loading = false;
+                        }
+                    {% else %}
+                        alert('Payment required. Please refresh the page.');
+                        this.loading = false;
+                    {% endif %}
+                } else {
+                    alert(data.error || 'Failed to initiate call');
+                    this.loading = false;
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+                this.loading = false;
+            }
+        },
+        
+        getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    }
+}
+</script>
+{% endblock %}
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

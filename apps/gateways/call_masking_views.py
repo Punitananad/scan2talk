@@ -22,6 +22,10 @@ def generate_masked_call_url(request, qr_code):
     
     Route: POST /gateways/call/<qr_code>/
     
+    Handles payment logic:
+    - If owner has balance >= ₹1: Deduct from owner, generate call
+    - If owner has ₹0: Visitor must pay (handled by frontend redirect)
+    
     Returns:
         JSON: {
             'success': bool,
@@ -29,13 +33,14 @@ def generate_masked_call_url(request, qr_code):
             'pin': str,
             'did_number': str,
             'expires_in_minutes': int,
+            'payment_required': bool (if visitor must pay),
             'error': str (if failed)
         }
     """
     try:
         # Get QR code
         qr = get_object_or_404(
-            PreGeneratedQR.objects.select_related('owner', 'gateway'),
+            PreGeneratedQR.objects.select_related('owner', 'gateway', 'category'),
             qr_code=qr_code.upper(),
             status='activated'
         )
@@ -46,6 +51,43 @@ def generate_masked_call_url(request, qr_code):
                 'success': False,
                 'error': 'Gateway is not active'
             }, status=400)
+        
+        # Check if prepaid category and handle payment
+        if qr.category and qr.category.category_type == 'prepaid':
+            try:
+                wallet = qr.qr_wallet
+                
+                # Check balance
+                if wallet.balance >= 1.00:
+                    # Owner has balance - deduct ₹1
+                    wallet.balance -= 1.00
+                    wallet.save()
+                    
+                    # Create transaction record
+                    from apps.accounts.recharge_models import QRWalletTransaction
+                    QRWalletTransaction.objects.create(
+                        wallet=wallet,
+                        transaction_type='deduction',
+                        amount=1.00,
+                        description='Call charge',
+                        notes=f'Masked call to {qr.owner.get_decrypted_phone()}'
+                    )
+                    
+                    logger.info(f"✅ Deducted ₹1 from owner's wallet for call. New balance: ₹{wallet.balance}")
+                    # Continue with call generation
+                else:
+                    # Owner has ₹0 - visitor must pay
+                    logger.info(f"⚠️ Owner wallet empty. Visitor payment required for QR {qr_code}")
+                    return JsonResponse({
+                        'success': False,
+                        'payment_required': True,
+                        'cost': 1.00,
+                        'error': 'Payment required. Owner wallet is empty.'
+                    }, status=402)  # 402 Payment Required
+            except Exception as e:
+                logger.error(f"Wallet check error for QR {qr_code}: {e}")
+                # Continue with call generation if wallet check fails
+                pass
         
         # Generate masked call
         result = create_masked_call_for_qr(qr)
