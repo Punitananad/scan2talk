@@ -109,12 +109,17 @@ class GatewayAccessView(View):
                 logger.info(f"EntryPoint not found, trying QR code lookup")
                 # Try to find by QR code
                 try:
+                    # First check if QR exists at all (any status)
                     qr_obj = PreGeneratedQR.objects.select_related('gateway', 'category').get(
-                        qr_code=identifier.upper(),
-                        status='activated'
+                        qr_code=identifier.upper()
                     )
                     
-                    logger.info(f"Found QR code: {qr_obj.qr_code}")
+                    logger.info(f"Found QR code: {qr_obj.qr_code}, status: {qr_obj.status}")
+                    
+                    # If not activated, redirect to activation page
+                    if qr_obj.status != 'activated':
+                        logger.info(f"QR code {identifier} not activated, redirecting to activation")
+                        return redirect('gateways:activate_qr', qr_code=identifier.upper())
                     
                     if not qr_obj.gateway:
                         logger.error(f"QR code {identifier} has no gateway")
@@ -131,7 +136,7 @@ class GatewayAccessView(View):
                     gateway = qr_obj.gateway
                     logger.info(f"Successfully loaded gateway {gateway.id}")
                 except PreGeneratedQR.DoesNotExist:
-                    logger.error(f"QR code {identifier} not found or not activated")
+                    logger.error(f"QR code {identifier} not found")
                     return render(request, 'core/gateway_not_found.html')
             
             # Check if gateway allows access
