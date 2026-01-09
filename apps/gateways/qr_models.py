@@ -20,9 +20,31 @@ class PreGeneratedQR(models.Model):
         ('disabled', 'Disabled'),
     ]
     
+    SERVICE_MODE_CHOICES = [
+        ('direct', 'Direct Service (Free)'),
+        ('wallet', 'Wallet Service (Paid)'),
+        ('both', 'Both Services'),
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     qr_code = models.CharField(max_length=20, unique=True, db_index=True)
     qr_image = models.ImageField(upload_to='qr_codes/pregenerated/', null=True, blank=True)
+    
+    # Service mode configuration (Admin controlled)
+    service_mode = models.CharField(
+        max_length=20,
+        choices=SERVICE_MODE_CHOICES,
+        default='direct',
+        help_text='Admin decides if this QR uses wallet service, direct service, or both'
+    )
+    wallet_enabled = models.BooleanField(
+        default=False,
+        help_text='Enable wallet-based paid calls for this QR'
+    )
+    direct_service_enabled = models.BooleanField(
+        default=True,
+        help_text='Enable free direct service for this QR'
+    )
     
     # Status and ownership
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available', db_index=True)

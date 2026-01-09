@@ -319,7 +319,10 @@ def activate_qr_code(request, qr_code):
     User activates their QR code by scanning or entering the code.
     Route: /activate/<qr_code>/
     NO LOGIN REQUIRED - Uses phone OTP authentication
+    Auto-login if already activated by this user
     """
+    from django.contrib.auth import login
+    
     qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
     
     # Increment access count
@@ -327,7 +330,16 @@ def activate_qr_code(request, qr_code):
     
     # Check if already activated
     if qr.status == 'activated':
-        # Show already activated message
+        # Auto-login the owner if not already logged in
+        if qr.owner and not request.user.is_authenticated:
+            login(request, qr.owner, backend='django.contrib.auth.backends.ModelBackend')
+        
+        # If user is the owner, redirect to dashboard
+        if request.user.is_authenticated and request.user == qr.owner:
+            messages.success(request, f'Welcome back! You are now logged in.')
+            return redirect('accounts:dashboard')
+        
+        # Show already activated message for non-owners
         owner_name = qr.gateway.owner_name if qr.gateway and qr.gateway.owner_name else (qr.owner.first_name if qr.owner and qr.owner.first_name else 'Vehicle Owner')
         context = {
             'qr': qr,
@@ -426,18 +438,17 @@ def activate_qr_code(request, qr_code):
                     # Activate QR code
                     qr.activate(user, gateway, by_admin=False)
                     
+                    # Auto-login the user
+                    from django.contrib.auth import login
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    
                     # Clear session
                     request.session.pop('activation_phone', None)
                     request.session.pop('activation_qr_code', None)
                     
-                    # Success message
-                    context = {
-                        'qr': qr,
-                        'gateway': gateway,
-                        'user': user,
-                        'success': True
-                    }
-                    return render(request, 'gateways/activation_success.html', context)
+                    # Success message and redirect to dashboard
+                    messages.success(request, f'🎉 Activation successful! Welcome {name}!')
+                    return redirect('accounts:dashboard')
                     
             except Exception as e:
                 messages.error(request, f'Error activating QR code: {str(e)}')

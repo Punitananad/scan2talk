@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Scan2Talk{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <!-- Logo/Header -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-2xl">GP</span>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back!</h1>
+                <p class="text-gray-600">Login with your mobile number</p>
+            </div>
+
+            <!-- Login Form -->
+            <form method="post" action="{% url 'accounts:phone_login' %}">
+                {% csrf_token %}
+                
+                <div class="mb-6">
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                        Mobile Number *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3 text-gray-500">+91</span>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            required
+                            maxlength="10"
+                            pattern="[0-9]{10}"
+                            placeholder="Enter 10-digit mobile number"
+                            class="w-full pl-16 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                        >
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Enter your mobile number to login or create an account
+                    </p>
+                </div>
+
+                <button 
+                    type="submit"
+                    class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-lg shadow-lg"
+                >
+                    Login
+                </button>
+
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600">
+                        New here? Just enter your mobile number to get started!
+                    </p>
+                </div>
+            </form>
+
+            <!-- Info Box -->
+            <div class="mt-8 bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-semibold mb-1">Quick & Easy Login</p>
+                        <p>No password needed! Just enter your mobile number. If you're new, we'll create an account for you automatically.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Links -->
+        <div class="text-center mt-6 text-sm text-gray-600">
+            <a href="{% url 'core:privacy' %}" class="hover:text-blue-600">Privacy Policy</a>
+            <span class="mx-2">•</span>
+            <a href="{% url 'core:terms' %}" class="hover:text-blue-600">Terms & Conditions</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

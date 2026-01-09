@@ -274,3 +274,16 @@ PLATFORM_NAME = 'Gateway Platform'
 PLATFORM_DOMAIN = env('PLATFORM_DOMAIN', default='localhost:8000')
 GATEWAY_SESSION_TIMEOUT = 600  # 10 minutes
 MAX_GATEWAYS_PER_USER = env('MAX_GATEWAYS_PER_USER', default=100)
+
+# Wallet & Recharge Settings
+# PhonePe Payment Gateway (Production)
+PHONEPE_MERCHANT_ID = env('PHONEPE_MERCHANT_ID', default='M227BOU8BBNV7')  # Your merchant ID
+PHONEPE_SALT_KEY = env('PHONEPE_SALT_KEY', default='5fb67f81-c6d6-4989-9bf4-e10c6db8ae8d')  # Your salt key
+PHONEPE_SALT_INDEX = env('PHONEPE_SALT_INDEX', default=1)  # Usually 1 for production
+PHONEPE_PRODUCTION = env('PHONEPE_PRODUCTION', default=False)  # Set True for production
+
+# Legacy settings (kept for backward compatibility)
+RECHARGE_API_KEY = '5fb67f81-c6d6-4989-9bf4-e10c6db8ae8d'
+RECHARGE_CLIENT_ID = 'SU2504042021229572318914'
+RECHARGE_TEST_MODE = env('RECHARGE_TEST_MODE', default=True)
+RECHARGE_GATEWAY_URL = env('RECHARGE_GATEWAY_URL', default='https://api.rechargegateway.in')

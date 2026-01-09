@@ -12,8 +12,10 @@ urlpatterns = [
     # Gateway web routes (QR codes, activation, etc.)
     path('gateways/', include('apps.gateways.urls')),
     
+    # Account web routes (login, dashboard, wallet, etc.)
+    path('accounts/', include('apps.accounts.urls')),
+    
     # API routes
-    path('api/v1/auth/', include('apps.accounts.urls')),
     path('api/v1/routing/', include('apps.routing.urls')),
     path('api/v1/interactions/', include('apps.interactions.urls')),
     path('api/v1/communications/', include('apps.communications.urls')),

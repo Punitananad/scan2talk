@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Super Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">🎛️ Super Admin Dashboard</h1>
+        <p class="text-gray-600">Complete system overview and management</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <a href="{% url 'accounts:admin_manage_categories' %}" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg hover:shadow-lg transition-all">
+            <div class="text-2xl mb-2">📂</div>
+            <div class="font-semibold">Manage Categories</div>
+        </a>
+        <a href="{% url 'accounts:admin_manage_plans' %}" class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg hover:shadow-lg transition-all">
+            <div class="text-2xl mb-2">💳</div>
+            <div class="font-semibold">Manage Plans</div>
+        </a>
+        <a href="{% url 'accounts:admin_manage_qr_wallets' %}" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg hover:shadow-lg transition-all">
+            <div class="text-2xl mb-2">👛</div>
+            <div class="font-semibold">QR Wallets</div>
+        </a>
+        <a href="{% url 'accounts:admin_user_management' %}" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-lg hover:shadow-lg transition-all">
+            <div class="text-2xl mb-2">👥</div>
+            <div class="font-semibold">User Management</div>
+        </a>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <!-- Users -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-medium text-gray-600">Total Users</h3>
+                <span class="text-2xl">👥</span>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">{{ total_users }}</p>
+            <p class="text-sm text-green-600 mt-2">+{{ new_users_week }} this week</p>
+        </div>
+
+        <!-- QR Codes -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-medium text-gray-600">QR Codes</h3>
+                <span class="text-2xl">📱</span>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">{{ total_qr_codes }}</p>
+            <p class="text-sm text-blue-600 mt-2">{{ activated_qr_codes }} activated</p>
+        </div>
+
+        <!-- Revenue -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-medium text-gray-600">Total Revenue</h3>
+                <span class="text-2xl">💰</span>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">₹{{ total_revenue|floatformat:2 }}</p>
+            <p class="text-sm text-green-600 mt-2">₹{{ revenue_month|floatformat:2 }} this month</p>
+        </div>
+
+        <!-- Interactions -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-medium text-gray-600">Interactions</h3>
+                <span class="text-2xl">💬</span>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">{{ total_interactions }}</p>
+            <p class="text-sm text-blue-600 mt-2">{{ interactions_week }} this week</p>
+        </div>
+    </div>
+
+    <!-- Wallet Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">💼 Wallet Overview</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">User Wallets Balance</span>
+                    <span class="text-xl font-bold text-blue-600">₹{{ total_user_wallet_balance|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">QR Wallets Balance</span>
+                    <span class="text-xl font-bold text-green-600">₹{{ total_qr_wallet_balance|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total Message Credits</span>
+                    <span class="text-xl font-bold text-purple-600">{{ total_message_credits }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total Call Minutes</span>
+                    <span class="text-xl font-bold text-orange-600">{{ total_call_minutes }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">📊 Revenue Breakdown</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Today</span>
+                    <span class="text-xl font-bold text-green-600">₹{{ revenue_today|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">This Week</span>
+                    <span class="text-xl font-bold text-blue-600">₹{{ revenue_week|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">This Month</span>
+                    <span class="text-xl font-bold text-purple-600">₹{{ revenue_month|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">All Time</span>
+                    <span class="text-xl font-bold text-orange-600">₹{{ total_revenue|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Distribution -->
+    <div class="bg-white rounded-lg card-shadow p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">📂 Category Distribution</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% for stat in category_stats %}
+            <div class="border-2 border-gray-200 rounded-lg p-4">
+                <h3 class="font-semibold text-gray-900">{{ stat.category__name|default:"No Category" }}</h3>
+                <p class="text-sm text-gray-600">{{ stat.category__category_type|title }}</p>
+                <div class="mt-2">
+                    <span class="text-2xl font-bold text-blue-600">{{ stat.count }}</span>
+                    <span class="text-sm text-gray-600">QR codes</span>
+                </div>
+                <div class="mt-1">
+                    <span class="text-lg font-semibold text-green-600">₹{{ stat.total_balance|floatformat:2 }}</span>
+                    <span class="text-sm text-gray-600">balance</span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 col-span-3 text-center py-4">No categories assigned yet</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Alerts & Warnings -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Low Balance QRs -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">⚠️ Low Balance QR Codes</h2>
+            <div class="space-y-3">
+                {% for wallet in low_balance_qrs %}
+                <div class="flex justify-between items-center border-b pb-2">
+                    <div>
+                        <p class="font-mono font-semibold">{{ wallet.qr_code.qr_code }}</p>
+                        <p class="text-sm text-gray-600">{{ wallet.category.name }}</p>
+                    </div>
+                    <span class="text-red-600 font-bold">₹{{ wallet.balance }}</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">All QR wallets have sufficient balance</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Suspended Wallets -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">🚫 Suspended Wallets</h2>
+            <div class="space-y-3">
+                {% for wallet in suspended_wallets %}
+                <div class="flex justify-between items-center border-b pb-2">
+                    <div>
+                        <p class="font-mono font-semibold">{{ wallet.qr_code.qr_code }}</p>
+                        <p class="text-sm text-gray-600">{{ wallet.suspension_reason|truncatewords:10 }}</p>
+                    </div>
+                    <a href="{% url 'accounts:admin_manage_qr_wallets' %}" class="text-blue-600 text-sm">Manage</a>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No suspended wallets</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Recent Activations -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">🆕 Recent Activations</h2>
+            <div class="space-y-3">
+                {% for qr in recent_activations %}
+                <div class="flex justify-between items-center border-b pb-2">
+                    <div>
+                        <p class="font-mono font-semibold">{{ qr.qr_code }}</p>
+                        <p class="text-sm text-gray-600">{{ qr.owner.email }}</p>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ qr.activated_at|timesince }} ago</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No recent activations</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">💸 Recent Transactions</h2>
+            <div class="space-y-3">
+                {% for txn in recent_transactions %}
+                <div class="flex justify-between items-center border-b pb-2">
+                    <div>
+                        <p class="font-semibold">{{ txn.wallet.user.email }}</p>
+                        <p class="text-sm text-gray-600">{{ txn.get_transaction_type_display }}</p>
+                    </div>
+                    <span class="font-bold {% if txn.transaction_type == 'credit' %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if txn.transaction_type == 'credit' %}+{% else %}-{% endif %}₹{{ txn.amount }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No recent transactions</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

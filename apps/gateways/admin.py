@@ -12,10 +12,10 @@ class PreGeneratedQRAdmin(admin.ModelAdmin):
     """Pre-generated QR code admin."""
     
     list_display = [
-        'qr_code', 'status', 'owner', 'batch_number',
+        'qr_code', 'status', 'service_mode', 'wallet_enabled', 'owner', 'batch_number',
         'access_count', 'activated_at', 'created_at', 'qr_image_preview'
     ]
-    list_filter = ['status', 'activated_by_admin', 'batch_number', 'created_at']
+    list_filter = ['status', 'service_mode', 'wallet_enabled', 'direct_service_enabled', 'activated_by_admin', 'batch_number', 'created_at']
     search_fields = ['qr_code', 'owner__email', 'batch_number', 'notes']
     readonly_fields = [
         'id', 'qr_code', 'activation_token', 'qr_image_preview',
@@ -26,6 +26,10 @@ class PreGeneratedQRAdmin(admin.ModelAdmin):
     fieldsets = (
         ('QR Code Information', {
             'fields': ('qr_code', 'qr_image_preview', 'status', 'batch_number')
+        }),
+        ('Service Configuration (Admin Control)', {
+            'fields': ('service_mode', 'wallet_enabled', 'direct_service_enabled'),
+            'description': 'Control whether this QR uses wallet service (paid), direct service (free), or both'
         }),
         ('Ownership', {
             'fields': ('owner', 'gateway', 'activated_at', 'activated_by_admin')
@@ -47,7 +51,7 @@ class PreGeneratedQRAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['mark_as_available', 'mark_as_expired']
+    actions = ['mark_as_available', 'mark_as_expired', 'enable_wallet_service', 'disable_wallet_service', 'enable_both_services']
     
     def qr_image_preview(self, obj):
         if obj.qr_image:
@@ -74,6 +78,24 @@ class PreGeneratedQRAdmin(admin.ModelAdmin):
         queryset.update(status='expired')
         self.message_user(request, f'{queryset.count()} QR codes marked as expired')
     mark_as_expired.short_description = 'Mark selected as expired'
+    
+    def enable_wallet_service(self, request, queryset):
+        """Enable wallet service for selected QR codes."""
+        queryset.update(service_mode='wallet', wallet_enabled=True, direct_service_enabled=False)
+        self.message_user(request, f'{queryset.count()} QR codes set to wallet service (paid calls)')
+    enable_wallet_service.short_description = 'Enable wallet service (paid)'
+    
+    def disable_wallet_service(self, request, queryset):
+        """Disable wallet service for selected QR codes."""
+        queryset.update(service_mode='direct', wallet_enabled=False, direct_service_enabled=True)
+        self.message_user(request, f'{queryset.count()} QR codes set to direct service (free)')
+    disable_wallet_service.short_description = 'Enable direct service (free)'
+    
+    def enable_both_services(self, request, queryset):
+        """Enable both wallet and direct service."""
+        queryset.update(service_mode='both', wallet_enabled=True, direct_service_enabled=True)
+        self.message_user(request, f'{queryset.count()} QR codes set to both services')
+    enable_both_services.short_description = 'Enable both services'
 
 
 @admin.register(QRBatch)

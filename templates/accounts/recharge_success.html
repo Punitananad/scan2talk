@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Recharge Successful - Gateway Platform{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+        <!-- Success Icon -->
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Recharge Successful!</h1>
+        <p class="text-gray-600 mb-8">Your wallet has been credited successfully.</p>
+
+        {% if order_id %}
+        <div class="bg-gray-50 rounded-lg p-4 mb-8">
+            <p class="text-sm text-gray-600 mb-1">Order ID</p>
+            <p class="text-lg font-mono font-semibold text-gray-900">{{ order_id }}</p>
+        </div>
+        {% endif %}
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'accounts:wallet_dashboard' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                View Wallet
+            </a>
+            <a href="{% url 'core:home' %}" class="border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                Go to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

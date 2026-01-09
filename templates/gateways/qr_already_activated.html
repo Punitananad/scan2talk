@@ -5,6 +5,47 @@
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-12">
     <div class="bg-white rounded-lg card-shadow p-8 text-center">
+        {% if user.is_authenticated and user == qr.owner %}
+        <!-- Owner View - Already Logged In -->
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Welcome Back, {{ owner_name }}! 👋</h1>
+        <p class="text-lg text-gray-600 mb-8">
+            You've been automatically logged in. This is your activated QR code.
+        </p>
+
+        <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+            <p class="text-sm text-blue-800">
+                <strong>Your Vehicle:</strong> {{ qr.gateway.identifier_text|default:"Vehicle" }}
+            </p>
+            <p class="text-sm text-blue-800 mt-2">
+                <strong>QR Code:</strong> <span class="font-mono">{{ qr.qr_code }}</span>
+            </p>
+            <p class="text-sm text-blue-800 mt-2">
+                <strong>Activated:</strong> {{ qr.activated_at|date:"F d, Y" }}
+            </p>
+        </div>
+
+        <div class="space-y-3">
+            <a href="{% url 'accounts:dashboard' %}" 
+               class="block w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                Go to Dashboard
+            </a>
+            
+            {% if qr.gateway %}
+            <a href="{% url 'gateways:qr_detail' qr.id %}" 
+               class="block w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                View QR Details
+            </a>
+            {% endif %}
+        </div>
+        
+        {% else %}
+        <!-- Non-Owner View -->
         <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -32,6 +73,7 @@
         <div class="text-sm text-gray-500">
             <p>This QR code was activated on {{ qr.activated_at|date:"F d, Y" }}</p>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Payment - Gateway Platform{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <!-- Test Mode Banner -->
+        <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-6">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <strong>TEST MODE:</strong> This is a simulated payment for development/testing
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">Test Payment Gateway</h1>
+
+        <!-- Order Details -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Details</h2>
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Order ID:</span>
+                    <span class="font-mono font-semibold">{{ order.order_id }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Amount:</span>
+                    <span class="text-2xl font-bold text-green-600">₹{{ order.amount }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Credits to Add:</span>
+                    <span class="font-semibold">{{ order.credits_to_add }} call credits</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Simulation -->
+        <div class="border-t border-gray-200 pt-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Simulate Payment</h3>
+            <p class="text-gray-600 mb-6">
+                In production, this would redirect to the actual payment gateway. 
+                For testing, click the button below to simulate a successful payment.
+            </p>
+
+            <form method="POST" action="{% url 'accounts:test_payment_complete' order.order_id %}">
+                {% csrf_token %}
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="submit" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Simulate Successful Payment
+                    </button>
+                    <a href="{% url 'accounts:recharge_cancel' %}" class="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 class="font-semibold text-blue-900 mb-2">Development Mode Info</h4>
+            <ul class="text-sm text-blue-800 space-y-1">
+                <li>• This is a test payment page for development</li>
+                <li>• No real money will be charged</li>
+                <li>• Credits will be added to your wallet immediately</li>
+                <li>• To use real payment gateway, set RECHARGE_TEST_MODE=False in settings</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

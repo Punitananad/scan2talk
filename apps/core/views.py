@@ -30,6 +30,38 @@ class TermsOfServiceView(TemplateView):
     template_name = 'core/terms.html'
 
 
+class RefundPolicyView(TemplateView):
+    """Refund policy view."""
+    template_name = 'core/refund.html'
+
+
+class ContactView(View):
+    """Contact page view with fake form submission."""
+    template_name = 'core/contact.html'
+    
+    def get(self, request):
+        """Display contact form."""
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        """Handle form submission - show success message without actually sending."""
+        # Get form data (but don't actually send it)
+        name = request.POST.get('name', '')
+        email = request.POST.get('email', '')
+        subject = request.POST.get('subject', '')
+        message = request.POST.get('message', '')
+        
+        # Show success message
+        messages.success(
+            request,
+            f'Thank you {name}! Your message has been sent successfully. '
+            'We will get back to you within 24 hours.'
+        )
+        
+        # Redirect back to contact page
+        return redirect('core:contact')
+
+
 class HealthCheckView(View):
     """Health check endpoint for monitoring."""
     

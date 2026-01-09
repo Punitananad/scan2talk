@@ -143,6 +143,61 @@ def logout_api(request):
     return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
 
 
+def logout_web(request):
+    """Web logout view - logs out and redirects to home."""
+    from django.contrib.auth import logout as auth_logout
+    auth_logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('core:home')
+
+
+def phone_login(request):
+    """Phone-based login without OTP - creates account if doesn't exist."""
+    from django.contrib.auth import login as auth_login
+    from .phone_auth import get_or_create_user_by_phone
+    
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        
+        if not phone or len(phone) != 10:
+            messages.error(request, 'Please enter a valid 10-digit mobile number.')
+            return redirect('accounts:phone_login')
+        
+        # Find user by phone
+        users = User.objects.all()
+        user_found = None
+        
+        for user in users:
+            if user.get_decrypted_phone() == phone:
+                user_found = user
+                break
+        
+        # If user not found, create a new user
+        if not user_found:
+            user_found, created = get_or_create_user_by_phone(phone, name=f"User {phone[-4:]}")
+        
+        # Check if user has any QR codes
+        from apps.gateways.qr_models import PreGeneratedQR
+        user_qr_count = PreGeneratedQR.objects.filter(owner=user_found).count()
+        
+        # Login the user
+        auth_login(request, user_found, backend='django.contrib.auth.backends.ModelBackend')
+        
+        if user_qr_count == 0:
+            # User has no QR codes - show message and redirect to home
+            messages.warning(
+                request,
+                'Welcome! You don\'t have any QR codes yet. Get your first QR code to get started!'
+            )
+            return redirect('core:home')
+        else:
+            # User has QR codes - go to dashboard
+            messages.success(request, f'Welcome back, {user_found.first_name or user_found.email}!')
+            return redirect('accounts:dashboard')
+    
+    return render(request, 'accounts/phone_login.html')
+
+
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     """User profile API endpoint."""
     serializer_class = UserProfileSerializer

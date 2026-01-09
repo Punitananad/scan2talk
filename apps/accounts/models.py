@@ -7,6 +7,9 @@ from django.db import models
 from django.utils import timezone as django_timezone
 from apps.core.utils import encrypt_data, decrypt_data
 
+# Import wallet models to register them
+from .wallet_models import Wallet, WalletTransaction, RechargeOrder
+
 
 class User(AbstractUser):
     """
