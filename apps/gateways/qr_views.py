@@ -330,23 +330,26 @@ def activate_qr_code(request, qr_code):
     
     # Check if already activated
     if qr.status == 'activated':
-        # Auto-login the owner if not already logged in
-        if qr.owner and not request.user.is_authenticated:
-            login(request, qr.owner, backend='django.contrib.auth.backends.ModelBackend')
-        
-        # If user is the owner, redirect to dashboard
+        # If user is authenticated and is the owner, redirect to dashboard
         if request.user.is_authenticated and request.user == qr.owner:
-            messages.success(request, f'Welcome back! You are now logged in.')
+            messages.info(request, f'This QR code is already activated by you.')
             return redirect('accounts:dashboard')
         
-        # Show already activated message for non-owners
-        owner_name = qr.gateway.owner_name if qr.gateway and qr.gateway.owner_name else (qr.owner.first_name if qr.owner and qr.owner.first_name else 'Vehicle Owner')
-        context = {
-            'qr': qr,
-            'already_activated': True,
-            'owner_name': owner_name
-        }
-        return render(request, 'gateways/qr_already_activated.html', context)
+        # If user is not authenticated but is the owner, auto-login them
+        if qr.owner and not request.user.is_authenticated:
+            # Show login option for owner
+            owner_name = qr.gateway.owner_name if qr.gateway and qr.gateway.owner_name else (qr.owner.first_name if qr.owner and qr.owner.first_name else 'Vehicle Owner')
+            context = {
+                'qr': qr,
+                'already_activated': True,
+                'owner_name': owner_name,
+                'is_owner_page': True
+            }
+            return render(request, 'gateways/qr_already_activated.html', context)
+        
+        # For non-owners (visitors), redirect to contact page
+        messages.info(request, 'This QR code is already activated. You can contact the owner.')
+        return redirect('core:gateway_access', identifier=qr.qr_code)
     
     # Check if available
     if qr.status != 'available':
@@ -471,11 +474,11 @@ def public_qr_access(request, qr_code):
     # Increment access count
     qr.increment_access_count()
     
-    # If not activated, redirect to activation page
+    # If not activated, show activation page (for owner to register)
     if qr.status != 'activated':
-        return render(request, 'gateways/qr_not_activated.html', {'qr': qr})
+        return redirect('gateways:activate_qr', qr_code=qr_code)
     
-    # If activated, show the gateway contact form
+    # If activated, show the gateway contact form (for visitors to contact owner)
     if qr.gateway:
         return redirect('core:gateway_access', identifier=qr.qr_code)
     
