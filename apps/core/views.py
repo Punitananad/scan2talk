@@ -100,10 +100,19 @@ class GatewayAccessView(View):
             try:
                 entry_point = EntryPoint.objects.select_related('gateway').get(
                     public_identifier=identifier,
-                    is_active=True,
-                    gateway__is_active=True
+                    is_active=True
+                    # CRITICAL FIX: Do NOT filter by gateway__is_active=True
+                    # Gateway may be temporarily inactive but should be reactivated
                 )
                 gateway = entry_point.gateway
+                
+                # CRITICAL FIX: Reactivate gateway if inactive
+                if gateway and not gateway.is_active:
+                    logger.warning(f"EntryPoint {identifier} gateway was inactive - reactivating automatically")
+                    gateway.is_active = True
+                    gateway.save(update_fields=['is_active'])
+                    logger.info(f"Gateway {gateway.id} reactivated successfully")
+                    
                 logger.info(f"Found EntryPoint: {entry_point.id}")
             except EntryPoint.DoesNotExist:
                 logger.info(f"EntryPoint not found, trying QR code lookup")
@@ -206,20 +215,33 @@ class GatewayAccessView(View):
             try:
                 entry_point = EntryPoint.objects.select_related('gateway').get(
                     public_identifier=identifier,
-                    is_active=True,
-                    gateway__is_active=True
+                    is_active=True
+                    # CRITICAL FIX: Do NOT filter by gateway__is_active=True
+                    # Gateway may be temporarily inactive but should be reactivated
                 )
                 gateway = entry_point.gateway
+                
+                # CRITICAL FIX: Reactivate gateway if inactive
+                if gateway and not gateway.is_active:
+                    gateway.is_active = True
+                    gateway.save(update_fields=['is_active'])
+                    
             except EntryPoint.DoesNotExist:
                 # Try to find by QR code
                 from apps.gateways.qr_models import PreGeneratedQR
                 qr = PreGeneratedQR.objects.select_related('gateway').get(
                     qr_code=identifier.upper(),
-                    status='activated',
-                    gateway__is_active=True
+                    status='activated'
+                    # CRITICAL FIX: Do NOT filter by gateway__is_active=True
+                    # Once activated, QR must ALWAYS work regardless of gateway status
                 )
                 gateway = qr.gateway
                 entry_point = None
+                
+                # CRITICAL FIX: Reactivate gateway if inactive
+                if gateway and not gateway.is_active:
+                    gateway.is_active = True
+                    gateway.save(update_fields=['is_active'])
             
             channel = request.POST.get('channel')
             message = request.POST.get('message', '').strip()
