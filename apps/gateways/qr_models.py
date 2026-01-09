@@ -159,9 +159,18 @@ class PreGeneratedQR(models.Model):
         return self.get_activation_url()
     
     def activate(self, user, gateway=None, by_admin=False):
-        """Activate this QR code for a user."""
+        """
+        Activate this QR code for a user.
+        CRITICAL: Once activated, the QR and gateway must remain permanently valid.
+        """
         if self.status != 'available':
             raise ValueError(f"QR code is {self.status}, cannot activate")
+        
+        if not gateway:
+            raise ValueError("Gateway is required for activation")
+        
+        if not gateway.is_active:
+            raise ValueError("Gateway must be active for activation")
         
         self.owner = user
         self.gateway = gateway

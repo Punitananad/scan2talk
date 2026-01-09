@@ -275,6 +275,9 @@ def deregister_qr(request, qr_id):
     """
     Deregister/deactivate a gateway registration.
     Works for both QR-based and direct registrations.
+    
+    IMPORTANT: This is the ONLY legitimate way to deactivate a gateway.
+    Admin explicitly chooses to deregister a vehicle.
     """
     try:
         # qr_id is actually gateway_id in this context
@@ -284,11 +287,11 @@ def deregister_qr(request, qr_id):
             messages.error(request, f'Gateway is already inactive')
             return redirect('gateways:registrations')
         
-        # Deactivate the gateway
+        # Deactivate the gateway (admin action only)
         gateway.is_active = False
         gateway.save()
         
-        # If there's an associated QR code, reset it
+        # If there's an associated QR code, reset it to available
         try:
             qr = PreGeneratedQR.objects.get(gateway=gateway)
             qr.status = 'available'
@@ -505,13 +508,15 @@ def activate_qr_code(request, qr_code):
                     user, created = get_or_create_user_by_phone(phone, name)
                     
                     # Create gateway for the user
+                    # CRITICAL: Gateway must be created as active and remain active permanently
                     gateway = Gateway.objects.create(
                         owner=user,
                         owner_name=name,  # Save owner's name
                         title=f"{vehicle_type.title()} - {vehicle_number}",
                         context_type='vehicle',
                         description=f"{vehicle_model}",
-                        identifier_text=vehicle_number
+                        identifier_text=vehicle_number,
+                        is_active=True  # Explicitly set to active
                     )
                     
                     # Activate QR code

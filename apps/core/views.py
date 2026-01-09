@@ -121,17 +121,21 @@ class GatewayAccessView(View):
                         logger.info(f"QR code {identifier} not activated, redirecting to activation")
                         return redirect('gateways:activate_qr', qr_code=identifier.upper())
                     
+                    # CRITICAL FIX: For activated QRs, ensure gateway exists and is active
+                    # If gateway is missing or inactive, this is a data integrity issue
                     if not qr_obj.gateway:
-                        logger.error(f"QR code {identifier} has no gateway")
-                        return render(request, 'core/gateway_not_found.html')
-                    
-                    logger.info(f"QR gateway: {qr_obj.gateway.id}, is_active: {qr_obj.gateway.is_active}")
-                    
-                    if not qr_obj.gateway.is_active:
-                        logger.error(f"QR code {identifier} gateway is not active")
-                        return render(request, 'core/gateway_unavailable.html', {
-                            'message': 'This gateway is currently unavailable.'
+                        logger.error(f"QR code {identifier} is activated but has no gateway - data integrity issue")
+                        return render(request, 'core/gateway_not_found.html', {
+                            'message': 'This QR code has a configuration error. Please contact support.'
                         })
+                    
+                    # CRITICAL FIX: Activated QRs must ALWAYS have active gateways
+                    # If gateway is inactive, reactivate it automatically
+                    if not qr_obj.gateway.is_active:
+                        logger.warning(f"QR code {identifier} gateway was inactive - reactivating automatically")
+                        qr_obj.gateway.is_active = True
+                        qr_obj.gateway.save(update_fields=['is_active'])
+                        logger.info(f"Gateway {qr_obj.gateway.id} reactivated successfully")
                     
                     gateway = qr_obj.gateway
                     logger.info(f"Successfully loaded gateway {gateway.id}")
