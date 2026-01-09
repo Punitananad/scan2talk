@@ -34,6 +34,7 @@ def generate_qr_codes(request):
             purpose = request.POST.get('purpose', '')
             notes = request.POST.get('notes', '')
             category_id = request.POST.get('category', '')
+            action = request.POST.get('action', 'generate_only')  # New: get action type
             
             if quantity < 1 or quantity > 1000:
                 messages.error(request, 'Quantity must be between 1 and 1000')
@@ -84,9 +85,16 @@ def generate_qr_codes(request):
                         category=category
                     )
             
-            messages.success(request, f'Successfully generated {quantity} QR codes in batch {batch_number}' + 
-                           (f' with category {category.name}' if category else ''))
-            return redirect('gateways:qr_dashboard')
+            # Check if user wants to download PDF immediately
+            if action == 'generate_and_download_pdf':
+                # Redirect to PDF download
+                messages.success(request, f'Generated {quantity} QR codes in batch {batch_number}. Downloading PDF...')
+                return redirect('gateways:download_batch_pdf', batch_number=batch_number)
+            else:
+                # Just show success message and redirect to dashboard
+                messages.success(request, f'Successfully generated {quantity} QR codes in batch {batch_number}' + 
+                               (f' with category {category.name}' if category else ''))
+                return redirect('gateways:qr_dashboard')
             
         except Exception as e:
             messages.error(request, f'Error generating QR codes: {str(e)}')
