@@ -419,20 +419,8 @@ def activate_qr_code(request, qr_code):
             messages.info(request, f'This QR code is already activated by you.')
             return redirect('accounts:dashboard')
         
-        # If user is not authenticated but is the owner, auto-login them
-        if qr.owner and not request.user.is_authenticated:
-            # Show login option for owner
-            owner_name = qr.gateway.owner_name if qr.gateway and qr.gateway.owner_name else (qr.owner.first_name if qr.owner and qr.owner.first_name else 'Vehicle Owner')
-            context = {
-                'qr': qr,
-                'already_activated': True,
-                'owner_name': owner_name,
-                'is_owner_page': True
-            }
-            return render(request, 'gateways/qr_already_activated.html', context)
-        
-        # For non-owners (visitors), redirect to contact page
-        messages.info(request, 'This QR code is already activated. You can contact the owner.')
+        # For everyone else (visitors and non-authenticated users), redirect to contact page
+        # This ensures visitors always see the contact form, not the login page
         return redirect('core:gateway_access', identifier=qr.qr_code)
     
     # Check if available
@@ -579,7 +567,8 @@ def public_qr_access(request, qr_code):
     if qr.status != 'activated':
         return redirect('gateways:activate_qr', qr_code=qr_code)
     
-    # If activated, show the gateway contact form (for visitors to contact owner)
+    # If activated, ALWAYS show the gateway contact form (for visitors to contact owner)
+    # Never show login page - visitors should directly see contact form
     if qr.gateway:
         return redirect('core:gateway_access', identifier=qr.qr_code)
     
