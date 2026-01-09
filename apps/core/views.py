@@ -86,11 +86,15 @@ class GatewayAccessView(View):
         """Display gateway access form."""
         from apps.gateways.qr_models import PreGeneratedQR
         from apps.accounts.recharge_models import QRWallet
+        import logging
+        logger = logging.getLogger(__name__)
         
         try:
             gateway = None
             entry_point = None
             qr_obj = None
+            
+            logger.info(f"Gateway access request for identifier: {identifier}")
             
             # Try to find by EntryPoint first
             try:
@@ -100,21 +104,40 @@ class GatewayAccessView(View):
                     gateway__is_active=True
                 )
                 gateway = entry_point.gateway
+                logger.info(f"Found EntryPoint: {entry_point.id}")
             except EntryPoint.DoesNotExist:
+                logger.info(f"EntryPoint not found, trying QR code lookup")
                 # Try to find by QR code
                 try:
                     qr_obj = PreGeneratedQR.objects.select_related('gateway', 'category').get(
                         qr_code=identifier.upper(),
-                        status='activated',
-                        gateway__is_active=True
+                        status='activated'
                     )
+                    
+                    logger.info(f"Found QR code: {qr_obj.qr_code}")
+                    
+                    if not qr_obj.gateway:
+                        logger.error(f"QR code {identifier} has no gateway")
+                        return render(request, 'core/gateway_not_found.html')
+                    
+                    logger.info(f"QR gateway: {qr_obj.gateway.id}, is_active: {qr_obj.gateway.is_active}")
+                    
+                    if not qr_obj.gateway.is_active:
+                        logger.error(f"QR code {identifier} gateway is not active")
+                        return render(request, 'core/gateway_unavailable.html', {
+                            'message': 'This gateway is currently unavailable.'
+                        })
+                    
                     gateway = qr_obj.gateway
+                    logger.info(f"Successfully loaded gateway {gateway.id}")
                 except PreGeneratedQR.DoesNotExist:
+                    logger.error(f"QR code {identifier} not found or not activated")
                     return render(request, 'core/gateway_not_found.html')
             
             # Check if gateway allows access
             routing_service = RoutingService()
             if not routing_service.can_access_gateway(gateway, request):
+                logger.warning(f"Gateway {gateway.id} access denied")
                 return render(request, 'core/gateway_unavailable.html', {
                     'message': 'This gateway is currently unavailable.'
                 })
@@ -136,15 +159,18 @@ class GatewayAccessView(View):
                         # Owner has balance - will be deducted
                         payment_required = False
                         payer = 'owner'
+                        logger.info(f"Owner has balance: ₹{wallet.balance}")
                     else:
                         # Owner has ₹0 - visitor must pay
                         payment_required = True
                         payer = 'visitor'
                         cost_per_action = 1.00
+                        logger.info(f"Owner wallet empty, visitor must pay")
                 except QRWallet.DoesNotExist:
                     # No wallet found, treat as free
                     payment_required = False
                     payer = None
+                    logger.info(f"No wallet found for QR {identifier}, treating as free")
             
             context = {
                 'gateway': gateway,
@@ -156,13 +182,12 @@ class GatewayAccessView(View):
                 'cost_per_action': cost_per_action,
             }
             
+            logger.info(f"Rendering gateway access page for {identifier}")
             return render(request, 'core/gateway_access.html', context)
             
         except Exception as e:
             # Log the error for debugging
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Error in gateway access view: {str(e)}", exc_info=True)
+            logger.error(f"Error in gateway access view for {identifier}: {str(e)}", exc_info=True)
             return render(request, 'core/gateway_not_found.html')
     
     def post(self, request, identifier):
