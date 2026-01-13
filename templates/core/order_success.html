@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmed - Scan2Talk{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <!-- Success Icon -->
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">Order Confirmed!</h1>
+            <p class="text-xl text-gray-600 mb-8">Thank you for your order. Your QR tag is on its way!</p>
+
+            <!-- Order Details -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-8 text-left">
+                <h2 class="font-bold text-gray-900 mb-4 text-center">Order Details</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Order ID:</span>
+                        <span class="font-semibold">{{ order.order_id }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Quantity:</span>
+                        <span class="font-semibold">{{ order.quantity }} Tag(s)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Amount Paid:</span>
+                        <span class="font-semibold text-green-600">₹{{ order.total }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Delivery Address:</span>
+                        <span class="font-semibold text-right">{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Expected Delivery:</span>
+                        <span class="font-semibold">{{ delivery_date }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What's Next -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-8 text-left">
+                <h3 class="font-bold text-gray-900 mb-4 text-center">What Happens Next?</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-bold">1</div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Order Confirmation Email</p>
+                            <p class="text-sm text-gray-600">Check your email ({{ order.email }}) for order details</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-bold">2</div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Tag Preparation</p>
+                            <p class="text-sm text-gray-600">Your unique QR code will be printed on premium material</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-bold">3</div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Shipping</p>
+                            <p class="text-sm text-gray-600">Free delivery within 5-7 business days</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-bold">4</div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Activation</p>
+                            <p class="text-sm text-gray-600">Scan the QR code and activate it with your phone number</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'core:home' %}" class="bg-blue-600 text-white hover:bg-blue-700 px-8 py-3 rounded-xl font-semibold transition-colors">
+                    Back to Home
+                </a>
+                <a href="mailto:{{ order.email }}" class="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-xl font-semibold transition-colors">
+                    Email Confirmation
+                </a>
+            </div>
+
+            <!-- Support -->
+            <div class="mt-8 pt-6 border-t-2 border-gray-200">
+                <p class="text-sm text-gray-600">
+                    Need help? Contact us at <a href="mailto:support@scan2talk.in" class="text-blue-600 hover:text-blue-800 font-semibold">support@scan2talk.in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

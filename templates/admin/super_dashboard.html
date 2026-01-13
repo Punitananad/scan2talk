@@ -11,7 +11,7 @@
     </div>
 
     <!-- Main Actions - Big & Clear -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- QR Dashboard - Primary Action -->
         <a href="{% url 'gateways:qr_dashboard' %}" class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
             <div class="text-5xl mb-4">📱</div>
@@ -38,6 +38,15 @@
             <div class="text-3xl font-bold">{{ activated_qr_codes }}</div>
             <div class="text-sm text-purple-100">Active Vehicles</div>
         </a>
+
+        <!-- Tag Orders - NEW -->
+        <a href="{% url 'accounts:manage_tag_orders' %}" class="bg-orange-600 hover:bg-orange-700 text-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <div class="text-5xl mb-4">📦</div>
+            <h2 class="text-2xl font-bold mb-2">Tag Orders</h2>
+            <p class="text-orange-100 mb-4">Manage customer orders and deliveries</p>
+            <div class="text-3xl font-bold">{{ total_tag_orders|default:0 }}</div>
+            <div class="text-sm text-orange-100">Total Orders</div>
+        </a>
     </div>
 
     <!-- Secondary Actions -->
@@ -57,10 +66,10 @@
             <div class="font-semibold text-gray-900">Users</div>
             <div class="text-sm text-gray-600 mt-1">View all users</div>
         </a>
-        <a href="{% url 'accounts:admin_manage_plans' %}" class="bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-lg p-6 text-center transition-all hover:border-blue-400">
-            <div class="text-3xl mb-2">💳</div>
-            <div class="font-semibold text-gray-900">Plans</div>
-            <div class="text-sm text-gray-600 mt-1">Recharge plans</div>
+        <a href="{% url 'accounts:manage_tag_orders' %}" class="bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-lg p-6 text-center transition-all hover:border-blue-400">
+            <div class="text-3xl mb-2">📦</div>
+            <div class="font-semibold text-gray-900">Tag Orders</div>
+            <div class="text-sm text-gray-600 mt-1">Manage deliveries</div>
         </a>
     </div>
 

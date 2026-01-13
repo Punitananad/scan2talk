@@ -18,6 +18,7 @@ from .recharge_models import (
 from apps.gateways.qr_models import PreGeneratedQR, QRBatch
 from apps.gateways.models import Gateway
 from apps.interactions.models import InteractionLog
+from apps.core.models import TagOrder
 
 
 @staff_member_required
@@ -83,6 +84,10 @@ def admin_super_dashboard(request):
     interactions_today = InteractionLog.objects.filter(created_at__date=today).count()
     interactions_week = InteractionLog.objects.filter(created_at__date__gte=week_ago).count()
     
+    # Tag Orders Statistics
+    total_tag_orders = TagOrder.objects.count()
+    pending_tag_orders = TagOrder.objects.filter(status='pending').count()
+    
     # Category Distribution
     category_stats = QRWallet.objects.values(
         'category__name', 'category__category_type'
@@ -140,6 +145,10 @@ def admin_super_dashboard(request):
         'total_interactions': total_interactions,
         'interactions_today': interactions_today,
         'interactions_week': interactions_week,
+        
+        # Tag Orders stats
+        'total_tag_orders': total_tag_orders,
+        'pending_tag_orders': pending_tag_orders,
         
         # Detailed data
         'category_stats': category_stats,
@@ -393,3 +402,93 @@ def admin_user_management(request):
         'search': search,
     }
     return render(request, 'admin/user_management.html', context)
+
+
+
+@staff_member_required
+def manage_tag_orders(request):
+    """
+    Manage physical tag orders - view, update status, track delivery
+    """
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'all')
+    search_query = request.GET.get('search', '')
+    
+    # Base queryset
+    orders = TagOrder.objects.all()
+    
+    # Apply filters
+    if status_filter != 'all':
+        orders = orders.filter(status=status_filter)
+    
+    if search_query:
+        orders = orders.filter(
+            Q(order_id__icontains=search_query) |
+            Q(name__icontains=search_query) |
+            Q(phone__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+    
+    # Statistics
+    stats = {
+        'total': TagOrder.objects.count(),
+        'pending': TagOrder.objects.filter(status='pending').count(),
+        'processing': TagOrder.objects.filter(status='processing').count(),
+        'shipped': TagOrder.objects.filter(status='shipped').count(),
+        'delivered': TagOrder.objects.filter(status='delivered').count(),
+        'total_revenue': TagOrder.objects.aggregate(
+            total=Sum('total_amount')
+        )['total'] or 0,
+        'total_tags': TagOrder.objects.aggregate(
+            total=Sum('quantity')
+        )['total'] or 0,
+    }
+    
+    context = {
+        'orders': orders[:100],  # Limit to 100 for performance
+        'stats': stats,
+        'status_filter': status_filter,
+        'search_query': search_query,
+        'status_choices': TagOrder.STATUS_CHOICES,
+    }
+    
+    return render(request, 'admin/manage_tag_orders.html', context)
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def update_order_status(request, order_id):
+    """
+    Update order status (AJAX endpoint)
+    """
+    try:
+        order = get_object_or_404(TagOrder, order_id=order_id)
+        new_status = request.POST.get('status')
+        tracking_number = request.POST.get('tracking_number', '')
+        notes = request.POST.get('notes', '')
+        
+        if new_status not in dict(TagOrder.STATUS_CHOICES):
+            return JsonResponse({'success': False, 'error': 'Invalid status'})
+        
+        # Update order
+        order.status = new_status
+        if tracking_number:
+            order.tracking_number = tracking_number
+        if notes:
+            order.notes = notes
+        
+        # Set timestamps
+        if new_status == 'shipped' and not order.shipped_at:
+            order.shipped_at = timezone.now()
+        elif new_status == 'delivered' and not order.delivered_at:
+            order.delivered_at = timezone.now()
+        
+        order.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Order {order_id} updated to {order.get_status_display()}'
+        })
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

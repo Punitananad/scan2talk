@@ -72,6 +72,100 @@ class HealthCheckView(View):
         })
 
 
+class OrderTagView(View):
+    """Order physical QR tag page."""
+    template_name = 'core/order_tag.html'
+    
+    def get(self, request):
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        # Store order data in session
+        order_data = {
+            'name': request.POST.get('name'),
+            'phone': request.POST.get('phone'),
+            'email': request.POST.get('email'),
+            'address': request.POST.get('address'),
+            'city': request.POST.get('city'),
+            'state': request.POST.get('state'),
+            'pincode': request.POST.get('pincode'),
+            'quantity': int(request.POST.get('quantity', 1)),
+        }
+        
+        # Calculate total
+        prices = {1: 299, 2: 549, 3: 799, 5: 1299}
+        order_data['total'] = prices.get(order_data['quantity'], 299)
+        
+        # Store in session
+        request.session['order_data'] = order_data
+        
+        return redirect('core:order_payment')
+
+
+class OrderPaymentView(View):
+    """Fake payment page for tag order."""
+    template_name = 'core/order_payment.html'
+    
+    def get(self, request):
+        order_data = request.session.get('order_data')
+        if not order_data:
+            return redirect('core:order_tag')
+        
+        return render(request, self.template_name, {'order': order_data})
+    
+    def post(self, request):
+        order_data = request.session.get('order_data')
+        if not order_data:
+            return redirect('core:order_tag')
+        
+        # Generate order ID
+        import uuid
+        order_id = f"ORD{uuid.uuid4().hex[:8].upper()}"
+        order_data['order_id'] = order_id
+        
+        # Save order to database
+        from apps.core.models import TagOrder
+        TagOrder.objects.create(
+            order_id=order_id,
+            name=order_data['name'],
+            phone=order_data['phone'],
+            email=order_data['email'],
+            address=order_data['address'],
+            city=order_data['city'],
+            state=order_data['state'],
+            pincode=order_data['pincode'],
+            quantity=order_data['quantity'],
+            total_amount=order_data['total']
+        )
+        
+        # Store in session for success page
+        request.session['completed_order'] = order_data
+        
+        # Clear order data
+        del request.session['order_data']
+        
+        return redirect('core:order_success')
+
+
+class OrderSuccessView(View):
+    """Order success confirmation page."""
+    template_name = 'core/order_success.html'
+    
+    def get(self, request):
+        order_data = request.session.get('completed_order')
+        if not order_data:
+            return redirect('core:home')
+        
+        # Calculate delivery date (7 days from now)
+        from datetime import timedelta
+        delivery_date = (django_timezone.now() + timedelta(days=7)).strftime('%d %B %Y')
+        
+        return render(request, self.template_name, {
+            'order': order_data,
+            'delivery_date': delivery_date
+        })
+
+
 @method_decorator(never_cache, name='dispatch')
 @method_decorator(ratelimit(key='ip', rate='10/m', method='GET'), name='get')
 @method_decorator(ratelimit(key='ip', rate='5/m', method='POST'), name='post')

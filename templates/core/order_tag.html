@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Your QR Tag - Scan2Talk{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Order Your QR Tag</h1>
+            <p class="text-xl text-gray-600">Get a premium physical tag delivered to your doorstep</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Order Form -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Delivery Details</h2>
+                
+                <form method="post" x-data="orderForm()">
+                    {% csrf_token %}
+                    
+                    <!-- Name -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                        <input 
+                            type="text" 
+                            name="name" 
+                            x-model="name"
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter your full name"
+                        >
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                        <input 
+                            type="tel" 
+                            name="phone" 
+                            x-model="phone"
+                            required
+                            pattern="[0-9]{10}"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="10-digit mobile number"
+                        >
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            x-model="email"
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="your@email.com"
+                        >
+                    </div>
+
+                    <!-- Address -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
+                        <textarea 
+                            name="address" 
+                            x-model="address"
+                            required
+                            rows="3"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="House/Flat No., Street, Locality"
+                        ></textarea>
+                    </div>
+
+                    <!-- City -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                        <input 
+                            type="text" 
+                            name="city" 
+                            x-model="city"
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter city"
+                        >
+                    </div>
+
+                    <!-- State & PIN -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                            <input 
+                                type="text" 
+                                name="state" 
+                                x-model="state"
+                                required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="State"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">PIN Code *</label>
+                            <input 
+                                type="text" 
+                                name="pincode" 
+                                x-model="pincode"
+                                required
+                                pattern="[0-9]{6}"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="6-digit PIN"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <select 
+                            name="quantity" 
+                            x-model="quantity"
+                            @change="updateTotal()"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="1">1 Tag - ₹299</option>
+                            <option value="2">2 Tags - ₹549 (Save ₹49)</option>
+                            <option value="3">3 Tags - ₹799 (Save ₹98)</option>
+                            <option value="5">5 Tags - ₹1,299 (Save ₹196)</option>
+                        </select>
+                    </div>
+
+                    <!-- Price Summary -->
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700">Subtotal</span>
+                            <span class="text-gray-900 font-semibold" x-text="`₹${subtotal}`"></span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700">Shipping</span>
+                            <span class="text-green-600 font-semibold">FREE</span>
+                        </div>
+                        <div class="border-t-2 border-blue-300 pt-3 mt-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold text-gray-900">Total</span>
+                                <span class="text-2xl font-bold text-blue-600" x-text="`₹${total}`"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit"
+                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg"
+                    >
+                        Proceed to Payment
+                    </button>
+
+                    <p class="text-sm text-gray-500 text-center mt-4">
+                        🔒 Secure payment • 📦 Free shipping • ✅ 7-day delivery
+                    </p>
+                </form>
+            </div>
+
+            <!-- Tag Preview -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">What You'll Get</h2>
+                
+                <!-- Tag Image -->
+                <div class="mb-6">
+                    <img 
+                        src="{% static 'tag/final-poster.jpeg' %}" 
+                        alt="QR Tag Preview" 
+                        class="w-full rounded-xl shadow-lg"
+                    >
+                </div>
+
+                <!-- Features -->
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Premium Quality</h3>
+                            <p class="text-sm text-gray-600">Waterproof, UV-resistant, durable material</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Easy Installation</h3>
+                            <p class="text-sm text-gray-600">Self-adhesive backing, sticks to any surface</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Unique QR Code</h3>
+                            <p class="text-sm text-gray-600">Pre-activated and ready to use</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Lifetime Service</h3>
+                            <p class="text-sm text-gray-600">No subscription, works forever</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial -->
+                <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
+                    <div class="flex items-center mb-3">
+                        <div class="flex text-yellow-400">
+                            ⭐⭐⭐⭐⭐
+                        </div>
+                    </div>
+                    <p class="text-gray-700 italic mb-3">
+                        "Best investment for my car! Someone messaged me about my headlights being on. Saved my battery!"
+                    </p>
+                    <p class="text-sm text-gray-600 font-semibold">- Rahul S., Delhi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function orderForm() {
+    return {
+        name: '',
+        phone: '',
+        email: '',
+        address: '',
+        city: '',
+        state: '',
+        pincode: '',
+        quantity: 1,
+        subtotal: 299,
+        total: 299,
+        
+        prices: {
+            1: 299,
+            2: 549,
+            3: 799,
+            5: 1299
+        },
+        
+        updateTotal() {
+            this.subtotal = this.prices[this.quantity];
+            this.total = this.subtotal;
+        }
+    }
+}
+</script>
+{% endblock %}
