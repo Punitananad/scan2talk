@@ -68,6 +68,10 @@ staticfiles/
 !logs/.gitkeep
 !media/qr_codes/.gitkeep
 !static/.gitkeep
+!static/tag/
+!static/tag/*.jpeg
+!static/tag/*.jpg
+!static/tag/*.png
 
 # Testing
 .coverage
