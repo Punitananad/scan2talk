@@ -42,6 +42,8 @@ urlpatterns = [
     path('admin/qr-wallet/<uuid:wallet_id>/assign-category/', admin_views.admin_assign_category, name='admin_assign_category'),
     path('admin/qr-wallet/<uuid:wallet_id>/suspend/', admin_views.admin_suspend_wallet, name='admin_suspend_wallet'),
     path('admin/users/', admin_views.admin_user_management, name='admin_user_management'),
+    path('admin/users/<uuid:user_id>/', admin_views.admin_user_profile, name='admin_user_profile'),
+    path('admin/users/<uuid:user_id>/assign-category/', admin_views.admin_assign_user_category, name='admin_assign_user_category'),
     path('admin/orders/', admin_views.manage_tag_orders, name='manage_tag_orders'),
     path('admin/orders/<str:order_id>/update/', admin_views.update_order_status, name='update_order_status'),
     

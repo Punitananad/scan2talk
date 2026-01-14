@@ -380,28 +380,182 @@ def admin_suspend_wallet(request, wallet_id):
 
 @staff_member_required
 def admin_user_management(request):
-    """Manage all users"""
+    """Manage all users - shows everyone who has logged in"""
     search = request.GET.get('search', '')
     
+    # Get ALL users (whether they have vehicles/gateways or not)
     users = User.objects.all()
     
     if search:
         users = users.filter(
             Q(email__icontains=search) |
             Q(first_name__icontains=search) |
-            Q(last_name__icontains=search)
+            Q(last_name__icontains=search) |
+            Q(phone__icontains=search)
         )
     
-    users = users.annotate(
-        gateway_count=Count('gateways'),
+    # Annotate with related counts and wallet balance
+    # Note: Apply slice [:100] at the very end after all filters and annotations
+    users = users.select_related('wallet').annotate(
+        gateway_count=Count('gateways', filter=Q(gateways__is_active=True)),
+        qr_count=Count('qr_codes', distinct=True),
         wallet_balance=F('wallet__balance')
     ).order_by('-created_at')[:100]
     
     context = {
         'users': users,
         'search': search,
+        'total_users': User.objects.count(),
     }
     return render(request, 'admin/user_management.html', context)
+
+
+@staff_member_required
+def admin_user_profile(request, user_id):
+    """
+    Complete A-to-Z user profile view
+    Shows everything about a user in one place
+    """
+    user = get_object_or_404(User, id=user_id)
+    
+    # Get all categories for the dropdown
+    categories = RechargeCategory.objects.all()
+    
+    # Get all related data
+    gateways = Gateway.objects.filter(owner=user).select_related().order_by('-created_at')
+    qr_codes = PreGeneratedQR.objects.filter(owner=user).select_related('gateway', 'category').order_by('-created_at')
+    
+    # Wallet data
+    try:
+        wallet = user.wallet
+        wallet_transactions = WalletTransaction.objects.filter(
+            wallet=wallet
+        ).order_by('-created_at')[:20]
+    except:
+        wallet = None
+        wallet_transactions = []
+    
+    # QR Wallet data
+    qr_wallets = QRWallet.objects.filter(
+        qr_code__owner=user
+    ).select_related('qr_code', 'category')
+    
+    # Get user's primary category (from their QR codes)
+    user_categories = qr_codes.filter(category__isnull=False).values_list('category__name', flat=True).distinct()
+    
+    # Recharge orders
+    from apps.core.models import TagOrder
+    recharge_orders = TagOrder.objects.filter(
+        email=user.email
+    ).order_by('-created_at')[:10]
+    
+    # Interaction logs
+    interaction_logs = InteractionLog.objects.filter(
+        gateway__owner=user
+    ).select_related('gateway').order_by('-created_at')[:20]
+    
+    # Login attempts
+    from .models import LoginAttempt
+    login_attempts = LoginAttempt.objects.filter(
+        email=user.email
+    ).order_by('-created_at')[:20]
+    
+    # Statistics - calculate counts before slicing
+    total_gateways = gateways.count()
+    active_gateways = gateways.filter(is_active=True).count()
+    total_qr_codes = qr_codes.count()
+    activated_qr_codes = qr_codes.filter(status='activated').count()
+    available_qr_codes = qr_codes.filter(status='available').count()
+    total_interactions = interaction_logs.count()
+    total_orders = recharge_orders.count()
+    
+    # Calculate failed logins separately (before the slice)
+    failed_logins = LoginAttempt.objects.filter(
+        email=user.email,
+        success=False
+    ).count()
+    
+    # Calculate wallet stats
+    if wallet:
+        total_recharged = WalletTransaction.objects.filter(
+            wallet=wallet,
+            transaction_type='credit'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        total_spent = WalletTransaction.objects.filter(
+            wallet=wallet,
+            transaction_type='debit'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+    else:
+        total_recharged = 0
+        total_spent = 0
+    
+    stats = {
+        'total_gateways': total_gateways,
+        'active_gateways': active_gateways,
+        'total_qr_codes': total_qr_codes,
+        'activated_qr_codes': activated_qr_codes,
+        'available_qr_codes': available_qr_codes,
+        'total_interactions': total_interactions,
+        'wallet_balance': wallet.balance if wallet else 0,
+        'total_recharged': total_recharged,
+        'total_spent': total_spent,
+        'total_orders': total_orders,
+        'failed_logins': failed_logins,
+    }
+    
+    # QR Wallet totals
+    qr_wallet_totals = qr_wallets.aggregate(
+        total_balance=Sum('balance'),
+        total_message_credits=Sum('message_credits'),
+        total_call_minutes=Sum('call_minutes')
+    )
+    
+    context = {
+        'profile_user': user,  # Renamed to avoid conflict with request.user
+        'categories': categories,
+        'user_categories': list(user_categories),
+        'gateways': gateways,
+        'qr_codes': qr_codes,
+        'wallet': wallet,
+        'wallet_transactions': wallet_transactions,
+        'qr_wallets': qr_wallets,
+        'qr_wallet_totals': qr_wallet_totals,
+        'recharge_orders': recharge_orders,
+        'interaction_logs': interaction_logs,
+        'login_attempts': login_attempts,
+        'stats': stats,
+    }
+    
+    return render(request, 'admin/user_profile.html', context)
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def admin_assign_user_category(request, user_id):
+    """Assign category to all user's QR codes"""
+    user = get_object_or_404(User, id=user_id)
+    category_id = request.POST.get('category_id')
+    
+    if category_id:
+        category = get_object_or_404(RechargeCategory, id=category_id)
+        
+        # Update all user's QR codes with this category
+        qr_codes = PreGeneratedQR.objects.filter(owner=user)
+        updated_count = qr_codes.update(category=category)
+        
+        # Also update QR wallets
+        QRWallet.objects.filter(qr_code__owner=user).update(category=category)
+        
+        messages.success(request, f'Assigned category "{category.name}" to {updated_count} QR codes for user {user.email}')
+    else:
+        # Remove category from all QR codes
+        qr_codes = PreGeneratedQR.objects.filter(owner=user)
+        updated_count = qr_codes.update(category=None)
+        
+        messages.success(request, f'Removed category from {updated_count} QR codes for user {user.email}')
+    
+    return redirect('accounts:admin_user_profile', user_id=user_id)
 
 
 

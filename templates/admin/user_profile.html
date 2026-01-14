@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile - {{ profile_user.email }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'accounts:admin_user_management' %}" class="text-blue-600 hover:text-blue-800 mb-4 inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Users
+        </a>
+        
+        <div class="flex items-center justify-between mt-4">
+            <div class="flex items-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <span class="text-blue-600 font-bold text-2xl">
+                        {{ profile_user.first_name|first|default:profile_user.email|first|upper }}
+                    </span>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">
+                        {% if profile_user.first_name %}
+                            {{ profile_user.first_name }} {{ profile_user.last_name }}
+                        {% else %}
+                            {{ profile_user.username }}
+                        {% endif %}
+                    </h1>
+                    <p class="text-gray-600">{{ profile_user.email }}</p>
+                    {% if profile_user.is_staff %}
+                    <span class="inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                        ADMIN
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                {% if profile_user.is_active %}
+                <span class="px-4 py-2 text-sm font-semibold rounded-lg bg-green-100 text-green-800">
+                    ✓ Active
+                </span>
+                {% else %}
+                <span class="px-4 py-2 text-sm font-semibold rounded-lg bg-red-100 text-red-800">
+                    ✗ Inactive
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">Gateways</div>
+            <div class="text-3xl font-bold text-blue-600">{{ stats.total_gateways }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ stats.active_gateways }} active</div>
+        </div>
+        
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">QR Codes</div>
+            <div class="text-3xl font-bold text-purple-600">{{ stats.total_qr_codes }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ stats.activated_qr_codes }} activated</div>
+        </div>
+        
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">Wallet Balance</div>
+            <div class="text-3xl font-bold text-green-600">₹{{ stats.wallet_balance }}</div>
+            <div class="text-xs text-gray-500 mt-1">Total recharged: ₹{{ stats.total_recharged }}</div>
+        </div>
+        
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <div class="text-sm text-gray-600 mb-1">Interactions</div>
+            <div class="text-3xl font-bold text-orange-600">{{ stats.total_interactions }}</div>
+            <div class="text-xs text-gray-500 mt-1">Total activity</div>
+        </div>
+    </div>
+
+    <!-- Tabbed Content -->
+    <div class="bg-white rounded-lg card-shadow">
+        <!-- Tabs -->
+        <div class="border-b border-gray-200">
+            <nav class="flex -mb-px">
+                <button onclick="showTab('overview')" id="tab-overview" class="tab-button active px-6 py-4 text-sm font-medium border-b-2 border-blue-600 text-blue-600">
+                    Overview
+                </button>
+                <button onclick="showTab('gateways')" id="tab-gateways" class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    Gateways ({{ stats.total_gateways }})
+                </button>
+                <button onclick="showTab('qr-codes')" id="tab-qr-codes" class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    QR Codes ({{ stats.total_qr_codes }})
+                </button>
+                <button onclick="showTab('wallet')" id="tab-wallet" class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    Wallet & Transactions
+                </button>
+                <button onclick="showTab('activity')" id="tab-activity" class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    Activity Log
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6">
+            <!-- Overview Tab -->
+            <div id="content-overview" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Account Information -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Account Information</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-sm text-gray-600">User ID</div>
+                                <div class="font-mono text-sm">{{ profile_user.id }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Email</div>
+                                <div class="font-semibold">{{ profile_user.email }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Phone</div>
+                                <div class="font-semibold">
+                                    {% if profile_user.phone %}
+                                        {{ profile_user.get_decrypted_phone }}
+                                        {% if profile_user.is_phone_verified %}
+                                        <span class="text-green-600 text-xs">✓ Verified</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-gray-400">Not provided</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Role</div>
+                                <div class="font-semibold capitalize">{{ profile_user.role }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Created</div>
+                                <div>{{ profile_user.created_at|date:"F d, Y H:i" }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Last Login</div>
+                                <div>
+                                    {% if profile_user.last_login %}
+                                        {{ profile_user.last_login|date:"F d, Y H:i" }}
+                                    {% else %}
+                                        <span class="text-gray-400">Never</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Last Login IP</div>
+                                <div class="font-mono text-sm">{{ profile_user.last_login_ip|default:"N/A" }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Failed Login Attempts</div>
+                                <div class="font-semibold {% if profile_user.failed_login_attempts > 0 %}text-red-600{% endif %}">
+                                    {{ profile_user.failed_login_attempts }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscription & Limits -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Subscription & Limits</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-sm text-gray-600">Subscription Tier</div>
+                                <div class="font-semibold capitalize">{{ profile_user.subscription_tier }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Assigned Categories</div>
+                                <div class="font-semibold">
+                                    {% if user_categories %}
+                                        {% for cat in user_categories %}
+                                            <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 mr-1">
+                                                {{ cat }}
+                                            </span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-gray-400">No category assigned</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Gateway Limit</div>
+                                <div class="font-semibold">
+                                    {{ stats.active_gateways }} / {{ profile_user.gateway_limit }}
+                                    <span class="text-xs text-gray-500">({{ profile_user.gateway_limit|add:"-"|add:stats.active_gateways }} remaining)</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Monthly Interaction Limit</div>
+                                <div class="font-semibold">{{ profile_user.monthly_interaction_limit }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Change Category Form -->
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">Change User Category</h4>
+                            <form method="post" action="{% url 'accounts:admin_assign_user_category' profile_user.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Category</label>
+                                    <select name="category_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="">-- No Category --</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.id }}">{{ category.name }} ({{ category.get_category_type_display }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                    Assign Category to All QR Codes
+                                </button>
+                                <p class="text-xs text-gray-500 mt-2">This will assign the selected category to all of this user's QR codes</p>
+                            </form>
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 mt-6">QR Wallet Summary</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-sm text-gray-600">Total Balance</div>
+                                <div class="text-2xl font-bold text-green-600">₹{{ qr_wallet_totals.total_balance|default:0 }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Message Credits</div>
+                                <div class="text-xl font-bold text-blue-600">{{ qr_wallet_totals.total_message_credits|default:0 }}</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Call Minutes</div>
+                                <div class="text-xl font-bold text-purple-600">{{ qr_wallet_totals.total_call_minutes|default:0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gateways Tab -->
+            <div id="content-gateways" class="tab-content hidden">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">User's Gateways</h3>
+                {% if gateways %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Identifier</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Interactions</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for gateway in gateways %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-semibold">{{ gateway.title }}</td>
+                                <td class="px-4 py-3 text-sm capitalize">{{ gateway.get_context_type_display }}</td>
+                                <td class="px-4 py-3 text-sm font-mono">{{ gateway.identifier_text|default:"-" }}</td>
+                                <td class="px-4 py-3 text-sm font-bold text-blue-600">{{ gateway.total_interactions }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ gateway.created_at|date:"M d, Y" }}</td>
+                                <td class="px-4 py-3">
+                                    {% if gateway.is_active %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                    {% else %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Inactive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-center py-8">No gateways found</p>
+                {% endif %}
+            </div>
+
+            <!-- QR Codes Tab -->
+            <div id="content-qr-codes" class="tab-content hidden">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">User's QR Codes</h3>
+                {% if qr_codes %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">QR Code</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Batch</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gateway</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activated</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scans</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for qr in qr_codes %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-mono text-sm font-semibold">{{ qr.qr_code }}</td>
+                                <td class="px-4 py-3 text-sm">{{ qr.batch_number|default:"-" }}</td>
+                                <td class="px-4 py-3">
+                                    {% if qr.status == 'activated' %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activated</span>
+                                    {% elif qr.status == 'available' %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Available</span>
+                                    {% else %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ qr.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-sm">
+                                    {% if qr.gateway %}
+                                        {{ qr.gateway.title }}
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">
+                                    {% if qr.activated_at %}
+                                        {{ qr.activated_at|date:"M d, Y" }}
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-sm font-bold text-purple-600">{{ qr.scan_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-center py-8">No QR codes found</p>
+                {% endif %}
+            </div>
+
+            <!-- Wallet Tab -->
+            <div id="content-wallet" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <div class="text-sm text-green-700 mb-1">Current Balance</div>
+                        <div class="text-3xl font-bold text-green-600">₹{{ stats.wallet_balance }}</div>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="text-sm text-blue-700 mb-1">Total Recharged</div>
+                        <div class="text-3xl font-bold text-blue-600">₹{{ stats.total_recharged }}</div>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-4">
+                        <div class="text-sm text-red-700 mb-1">Total Spent</div>
+                        <div class="text-3xl font-bold text-red-600">₹{{ stats.total_spent }}</div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Transactions</h3>
+                {% if wallet_transactions %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for txn in wallet_transactions %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ txn.created_at|date:"M d, Y H:i" }}</td>
+                                <td class="px-4 py-3 text-sm capitalize">{{ txn.transaction_type }}</td>
+                                <td class="px-4 py-3 text-sm font-bold {% if txn.transaction_type == 'credit' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if txn.transaction_type == 'credit' %}+{% else %}-{% endif %}₹{{ txn.amount }}
+                                </td>
+                                <td class="px-4 py-3 text-sm font-semibold">₹{{ txn.balance_after }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ txn.description|truncatewords:10 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-center py-8">No transactions found</p>
+                {% endif %}
+            </div>
+
+            <!-- Activity Log Tab -->
+            <div id="content-activity" class="tab-content hidden">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
+                
+                <!-- Interaction Logs -->
+                <div class="mb-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Gateway Interactions</h4>
+                    {% if interaction_logs %}
+                    <div class="space-y-2">
+                        {% for log in interaction_logs %}
+                        <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="font-semibold">{{ log.gateway.title }}</span>
+                                    <span class="text-gray-600">- {{ log.interaction_type }}</span>
+                                </div>
+                                <span class="text-xs text-gray-500">{{ log.created_at|date:"M d, H:i" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-sm">No interactions yet</p>
+                    {% endif %}
+                </div>
+
+                <!-- Login Attempts -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Login History</h4>
+                    {% if login_attempts %}
+                    <div class="space-y-2">
+                        {% for attempt in login_attempts %}
+                        <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    {% if attempt.success %}
+                                    <span class="text-green-600 font-semibold">✓ Successful login</span>
+                                    {% else %}
+                                    <span class="text-red-600 font-semibold">✗ Failed login</span>
+                                    {% if attempt.failure_reason %}
+                                    <span class="text-gray-600">- {{ attempt.failure_reason }}</span>
+                                    {% endif %}
+                                    {% endif %}
+                                    <div class="text-xs text-gray-500 mt-1 font-mono">IP: {{ attempt.ip_address }}</div>
+                                </div>
+                                <span class="text-xs text-gray-500">{{ attempt.created_at|date:"M d, H:i" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-sm">No login history</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active', 'border-blue-600', 'text-blue-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Show selected tab content
+    document.getElementById('content-' + tabName).classList.remove('hidden');
+    
+    // Add active class to selected tab button
+    const activeButton = document.getElementById('tab-' + tabName);
+    activeButton.classList.add('active', 'border-blue-600', 'text-blue-600');
+    activeButton.classList.remove('border-transparent', 'text-gray-500');
+}
+</script>
+{% endblock %}

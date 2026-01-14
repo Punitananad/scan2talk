@@ -1,158 +1,471 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Gateway Platform - Contact Vehicle Owners Privately{% endblock %}
+{% block title %}Scan2Talk - Privacy-Focused QR Code Vehicle Contact Platform{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
+    body {
+        background: #ffffff;
+    }
+    
+    .text-indigo {
+        color: #312e81;
+    }
+    
+    .bg-indigo {
+        background-color: #312e81;
+    }
+    
+    .text-yellow {
+        color: #fbbf24;
+    }
+    
+    .bg-yellow {
+        background-color: #fbbf24;
+    }
+    
+    /* Premium Card Styles */
+    .feature-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+    
+    .feature-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transform: translateY(-4px);
+        border-color: rgba(99, 102, 241, 0.1);
+    }
+    
+    .step-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 3rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+    
+    .step-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transform: translateY(-4px);
+    }
+    
+    .step-number {
+        position: absolute;
+        top: -1.5rem;
+        left: 2rem;
+        width: 3.5rem;
+        height: 3.5rem;
+        background: linear-gradient(135deg, #1f2937, #111827);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .icon-minimal {
+        width: 4rem;
+        height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+    }
+    
+    /* Floating Animation */
+    @keyframes float {
+        0%, 100% { 
+            transform: translateY(0px);
+        }
+        50% { 
+            transform: translateY(-12px);
+        }
+    }
+    
+    .animate-float {
+        animation: float 4s ease-in-out infinite;
+    }
+    
+    /* Smooth Transitions */
+    a, button {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="gradient-bg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div class="text-center">
-            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
-                Connect With Vehicle Owners
-                <span class="block text-blue-200">Without Sharing Numbers</span>
-            </h1>
-            <p class="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Place a QR code on your car, bike, or any vehicle. Let others contact you about parking issues, 
-                lights left on, emergencies, or accidents—all without revealing your personal phone number.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{% url 'core:order_tag' %}" class="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
-                    Get Your QR Code
-                </a>
-                <a href="#features" class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
-                    How It Works
-                </a>
+<!-- Hero Section - Flush with Navbar -->
+<section class="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-amber-50/30 pt-12 md:pt-16 pb-16 md:pb-20">
+    
+    <!-- Subtle Depth Elements (3% opacity) -->
+    <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-100/[0.03] rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-yellow-100/[0.03] rounded-full blur-3xl"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            
+            <!-- Left Content -->
+            <div class="space-y-7 text-center lg:text-left">
+                
+                <!-- Enhanced Trust Badge -->
+                <div class="inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200/60 text-amber-900 px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm">
+                    <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Enterprise-Grade Privacy Protection</span>
+                </div>
+                
+                <!-- Headline -->
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
+                    <span class="block text-gray-900">Connect Without</span>
+                    <span class="block text-amber-500">Sharing Numbers</span>
+                </h1>
+                
+                <!-- Subheadline -->
+                <p class="text-xl sm:text-2xl text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                    Smart QR code for your vehicle. Let others contact you for parking, emergencies & more—
+                    <span class="font-semibold text-gray-900">without revealing your phone number.</span>
+                </p>
+                
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+                    <a href="{% url 'core:order_tag' %}" 
+                       class="group inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200">
+                        <span>Order Your QR Code</span>
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </a>
+                    <a href="#how-it-works" 
+                       class="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 px-8 py-4 rounded-xl font-semibold text-lg shadow-sm hover:shadow-md transition-all duration-200">
+                        <span>See How It Works</span>
+                    </a>
+                </div>
+                
+                <!-- Trust Indicators -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4 text-sm text-gray-600">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="font-medium">No app needed</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="font-medium">2-minute setup</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="font-medium">5,000+ users</span>
+                    </div>
+                </div>
             </div>
+            
+            <!-- Right - Product Image (Moved Up) -->
+            <div class="relative lg:order-last order-first -mt-4 lg:mt-0">
+                
+                <!-- Main Image Container -->
+                <div class="relative group">
+                    
+                    <!-- Image Card -->
+                    <div class="relative bg-white p-5 rounded-2xl shadow-xl border border-gray-200/60 transform group-hover:scale-[1.01] transition-transform duration-300">
+                        <img src="{% static 'tag/final-poster.jpeg' %}" 
+                             alt="Scan2Talk QR Code - Contact Vehicle Owners Privately" 
+                             class="w-full h-auto rounded-xl"
+                             style="filter: brightness(1.05) contrast(1.03) saturate(1.08);">
+                    </div>
+                    
+                    <!-- Grounded Trust Badge (Bottom Left) -->
+                    <div class="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg border border-gray-200/60 p-3.5 hidden lg:block">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900 text-sm leading-tight">100% Secure</div>
+                                <div class="text-xs text-gray-600">Privacy Protected</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Anchored Badge (Top Right - Aligned to Card) -->
+                    <div class="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg border border-gray-200/60 p-3.5 hidden lg:block">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900 text-sm leading-tight">Instant Alert</div>
+                                <div class="text-xs text-gray-600">Real-time Notify</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </div>
-</div>
+</section>
 
-<!-- Features Section -->
-<section id="features" class="py-20">
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-24 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 class="text-4xl md:text-5xl font-black text-indigo mb-4">
                 How It Works
             </h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Simple QR codes on your vehicle let others reach you instantly while keeping your phone number private.
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Three simple steps to protect your privacy while staying reachable
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <!-- Feature 1 -->
-            <div class="text-center">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                    </svg>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="icon-minimal bg-indigo text-white text-2xl">
+                    📱
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Place QR Code</h3>
-                <p class="text-gray-600">
-                    Stick a unique QR code on your car's windshield or bumper. Anyone can scan it to reach you without seeing your number.
+                <h3 class="text-2xl font-bold text-indigo mb-3">Order Your QR Code</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Get your unique QR code sticker delivered. Place it on your vehicle's windshield or bumper in minutes.
                 </p>
             </div>
 
-            <!-- Feature 2 -->
-            <div class="text-center">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                    </svg>
+            <!-- Step 2 -->
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="icon-minimal bg-yellow text-indigo text-2xl">
+                    📲
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Instant Messaging</h3>
-                <p class="text-gray-600">
-                    Receive messages via SMS, WhatsApp, or email. Choose your preferred channel and get notified immediately about your vehicle.
+                <h3 class="text-2xl font-bold text-indigo mb-3">Anyone Can Scan</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Others scan your QR code with their phone camera and send you a message instantly. No app needed.
                 </p>
             </div>
 
-            <!-- Feature 3 -->
-            <div class="text-center">
-                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
+            <!-- Step 3 -->
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="icon-minimal bg-indigo text-white text-2xl">
+                    🔒
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Stay Private</h3>
-                <p class="text-gray-600">
-                    Your phone number stays hidden. Control who can reach you, set quiet hours, and block spam automatically.
+                <h3 class="text-2xl font-bold text-indigo mb-3">Stay Private</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Receive notifications via SMS, WhatsApp, or email. Your phone number stays completely hidden.
                 </p>
-            </div>
-        </div>
-
-        <!-- Use Cases -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-lg card-shadow">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
-                </div>
-                <h4 class="font-semibold text-gray-900 mb-2">Parking Issues</h4>
-                <p class="text-sm text-gray-600">Someone needs you to move your car? They can message you instantly without knowing your number.</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg card-shadow">
-                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                    </svg>
-                </div>
-                <h4 class="font-semibold text-gray-900 mb-2">Lights Left On</h4>
-                <p class="text-sm text-gray-600">Get notified if someone spots your headlights on or door open before your battery dies.</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg card-shadow">
-                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                </div>
-                <h4 class="font-semibold text-gray-900 mb-2">Accidents & Damage</h4>
-                <p class="text-sm text-gray-600">If someone hits your parked car, they can reach you immediately to exchange information.</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg card-shadow">
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                </div>
-                <h4 class="font-semibold text-gray-900 mb-2">Fleet & Commercial</h4>
-                <p class="text-sm text-gray-600">Perfect for delivery trucks, taxis, buses, and commercial vehicles to receive feedback safely.</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="bg-gray-900 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-            Protect Your Vehicle & Privacy
+<!-- Features Section -->
+<section class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black text-indigo mb-4">
+                Built For Your Peace of Mind
+            </h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Enterprise-grade security meets simple, everyday convenience
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="feature-card text-center">
+                <div class="icon-minimal bg-green-100 text-green-600 text-2xl mx-auto">
+                    🔒
+                </div>
+                <h4 class="text-lg font-bold text-indigo mb-2">Complete Privacy</h4>
+                <p class="text-gray-600 text-sm">
+                    Your number stays hidden. No spam, no unwanted calls.
+                </p>
+            </div>
+
+            <div class="feature-card text-center">
+                <div class="icon-minimal bg-blue-100 text-blue-600 text-2xl mx-auto">
+                    ⚡
+                </div>
+                <h4 class="text-lg font-bold text-indigo mb-2">Instant Alerts</h4>
+                <p class="text-gray-600 text-sm">
+                    Get notified immediately via your preferred channel.
+                </p>
+            </div>
+
+            <div class="feature-card text-center">
+                <div class="icon-minimal bg-purple-100 text-purple-600 text-2xl mx-auto">
+                    📱
+                </div>
+                <h4 class="text-lg font-bold text-indigo mb-2">No App Required</h4>
+                <p class="text-gray-600 text-sm">
+                    Works with any smartphone camera. Simple for everyone.
+                </p>
+            </div>
+
+            <div class="feature-card text-center">
+                <div class="icon-minimal bg-yellow text-indigo text-2xl mx-auto">
+                    🚗
+                </div>
+                <h4 class="text-lg font-bold text-indigo mb-2">Multi-Vehicle</h4>
+                <p class="text-gray-600 text-sm">
+                    Manage multiple vehicles from one dashboard.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Privacy & Security Section -->
+<section class="py-24 bg-indigo">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <!-- Left Content -->
+            <div class="text-white">
+                <h2 class="text-4xl md:text-5xl font-black mb-6">
+                    Your Privacy is Our Priority
+                </h2>
+                <p class="text-xl text-indigo-100 mb-8 leading-relaxed">
+                    Built with enterprise-grade security and privacy-first design. Your personal information stays protected at all times.
+                </p>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-yellow rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-indigo" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">End-to-End Encryption</h4>
+                            <p class="text-indigo-100">All messages are encrypted and securely transmitted.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-yellow rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-indigo" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">No Data Selling</h4>
+                            <p class="text-indigo-100">We never sell or share your personal information.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-yellow rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-indigo" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Full Control</h4>
+                            <p class="text-indigo-100">Manage who can contact you and when. Block unwanted messages anytime.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right - Trust Badges -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-indigo mb-2">256-bit</div>
+                    <div class="text-gray-600 font-medium">SSL Encryption</div>
+                </div>
+                <div class="bg-white rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-indigo mb-2">100%</div>
+                    <div class="text-gray-600 font-medium">GDPR Compliant</div>
+                </div>
+                <div class="bg-white rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-indigo mb-2">24/7</div>
+                    <div class="text-gray-600 font-medium">Security Monitoring</div>
+                </div>
+                <div class="bg-white rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-indigo mb-2">5000+</div>
+                    <div class="text-gray-600 font-medium">Trusted Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl md:text-5xl font-black text-indigo mb-6">
+            Ready to Protect Your Privacy?
         </h2>
-        <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Get your QR code today and let others reach you about your car, bike, or any vehicle—without sharing your number.
+        <p class="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+            Join thousands of vehicle owners who trust Scan2Talk for secure, private communication.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{% url 'core:order_tag' %}" class="bg-blue-600 text-white hover:bg-blue-700 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
-                Get Your Vehicle QR Code
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <a href="{% url 'core:order_tag' %}" class="cta-primary text-center">
+                Get Your QR Code Now →
             </a>
-            <a href="#features" class="border-2 border-gray-300 text-gray-300 hover:bg-gray-300 hover:text-gray-900 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
-                See How It Works
+            <a href="{% url 'core:contact' %}" class="cta-secondary text-center">
+                Contact Sales
             </a>
         </div>
         
+        <div class="flex flex-wrap justify-center gap-8 text-sm text-gray-600">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="font-medium">No credit card required</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="font-medium">Cancel anytime</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="font-medium">30-day money-back guarantee</span>
+            </div>
+        </div>
+        
         <!-- Affiliation Notice -->
-        <div class="mt-12 pt-8 border-t border-gray-700">
-            <p class="text-gray-400 text-sm">
+        <div class="mt-16 pt-8 border-t border-gray-200">
+            <p class="text-gray-600">
                 Scan2Talk is an affiliated sub-product of 
-                <a href="https://scan2food.com" target="_blank" class="text-blue-400 hover:text-blue-300 font-medium underline">
+                <a href="https://scan2food.com" target="_blank" class="text-indigo font-semibold hover:underline">
                     Scan2Food.com
                 </a>
             </p>
         </div>
-    </div>
-</section>
 
 {% endblock %}

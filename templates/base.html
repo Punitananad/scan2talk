@@ -4,227 +4,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Scan2Talk - Smart Vehicle Contact Management{% endblock %}</title>
-    
+    <title>{% block title %}Scan2Talk – Secure Vehicle Contact{% endblock %}</title>
+
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/logo.png' %}?v=3">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/logo.png' %}?v=3">
-    <link rel="shortcut icon" href="{% static 'favicon/logo.png' %}?v=3">
-    <link rel="apple-touch-icon" href="{% static 'favicon/logo.png' %}?v=3">
-    
-    <!-- Tailwind CSS -->
+    <link rel="icon" href="{% static 'favicon/logo.png' %}">
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    
-    <!-- Custom CSS -->
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card-shadow {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-    
+
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="{% url 'core:home' %}" class="flex items-center">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <span class="text-xl font-bold text-gray-900 block leading-tight">Scan2Talk</span>
-                            <span class="text-xs text-gray-500">Vehicle Contact Manager</span>
-                        </div>
-                    </a>
-                </div>
-                
-                <div class="flex items-center space-x-4">
-                    {% if user.is_authenticated %}
-                        {% if user.is_staff and request.path|slice:":7" == "/admin/" or request.path|slice:":10" == "/accounts/" and "admin" in request.path or request.path|slice:":10" == "/gateways/" and "qr" in request.path or request.path|slice:":10" == "/gateways/" and "registrations" in request.path %}
-                        <!-- Admin Navigation -->
-                        <a href="{% url 'accounts:admin_super_dashboard' %}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                            Dashboard
-                        </a>
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                                Admin Tools
-                                <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="{% url 'gateways:qr_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📱 QR Dashboard</a>
-                                <a href="{% url 'accounts:admin_manage_categories' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📂 Categories</a>
-                                <a href="{% url 'accounts:admin_manage_plans' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">💳 Plans</a>
-                                <a href="{% url 'accounts:admin_manage_qr_wallets' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">👛 QR Wallets</a>
-                                <a href="{% url 'accounts:admin_user_management' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">👥 Users</a>
-                                <a href="{% url 'gateways:registrations' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📋 Registrations</a>
-                            </div>
-                        </div>
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                                {% if user.first_name %}
-                                    {{ user.first_name }}
-                                {% elif user.get_full_name %}
-                                    {{ user.get_full_name }}
-                                {% else %}
-                                    {{ user.email }}
-                                {% endif %}
-                                <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="{% url 'core:home' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🏠 User View</a>
-                                <a href="{% url 'accounts:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🚪 Logout</a>
-                            </div>
-                        </div>
-                        {% else %}
-                        <!-- User Navigation -->
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                                Profile
-                                <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">👤 My Profile</a>
-                                <a href="{% url 'accounts:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📊 Dashboard</a>
-                                <a href="{% url 'core:contact' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">❓ Help</a>
-                            </div>
-                        </div>
-                        <a href="{% url 'accounts:wallet_dashboard' %}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            Wallet
-                        </a>
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                                {% if user.first_name %}
-                                    {{ user.first_name }}
-                                {% elif user.get_full_name %}
-                                    {{ user.get_full_name }}
-                                {% else %}
-                                    {{ user.email }}
-                                {% endif %}
-                                <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                {% if user.is_staff %}
-                                <a href="{% url 'accounts:admin_super_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">⚙️ Admin Panel</a>
-                                <div class="border-t border-gray-200 my-1"></div>
-                                {% endif %}
-                                <a href="{% url 'accounts:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🚪 Logout</a>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% else %}
-                        <a href="{% url 'accounts:phone_login' %}" class="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-md text-sm font-medium">
-                            Login
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Messages -->
-    {% if messages %}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} bg-{% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% else %}blue{% endif %}-100 border border-{% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% else %}blue{% endif %}-400 text-{% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% else %}blue{% endif %}-700 px-4 py-3 rounded mb-4">
-                    {{ message }}
+<body class="bg-slate-50 text-slate-900 antialiased">
+
+<!-- ================= NAVBAR ================= -->
+<header class="bg-white/80 backdrop-blur-md border-b border-gray-200/60 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex items-center justify-between h-14">
+
+            <!-- Logo -->
+            <a href="{% url 'core:home' %}" class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-sm">
+                    S
                 </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <span class="text-lg font-bold text-gray-900 block leading-tight">Scan2Talk</span>
-                            <span class="text-xs text-gray-600">Vehicle Contact Manager</span>
+                    <p class="text-sm font-semibold leading-none text-gray-900">Scan2Talk</p>
+                    <p class="text-[10px] text-gray-500 leading-none">Vehicle Contact</p>
+                </div>
+            </a>
+
+            <!-- Right -->
+            <div class="flex items-center gap-3">
+
+                {% if user.is_authenticated %}
+
+                    <!-- Wallet -->
+                    <a href="{% url 'accounts:wallet_dashboard' %}"
+                       class="inline-flex items-center px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 text-sm font-medium hover:bg-amber-100 transition-colors">
+                        Wallet
+                    </a>
+
+                    <!-- Profile -->
+                    <div x-data="{open:false}" class="relative">
+                        <button @click="open = !open"
+                                class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 text-sm hover:bg-gray-50 transition-colors">
+                            <div class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
+                                {{ user.first_name|default:user.email|first|upper }}
+                            </div>
+                            <span class="hidden sm:block text-sm font-medium text-gray-700">
+                                {{ user.first_name|default:user.email }}
+                            </span>
+                        </button>
+
+                        <div x-show="open" @click.outside="open=false"
+                             class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                            <a href="{% url 'accounts:profile' %}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">My Profile</a>
+                            <a href="{% url 'accounts:dashboard' %}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Dashboard</a>
+
+                            {% if user.is_staff %}
+                            <a href="{% url 'accounts:admin_super_dashboard' %}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Admin Panel</a>
+                            {% endif %}
+
+                            <div class="border-t border-gray-200"></div>
+                            <a href="{% url 'accounts:logout' %}" class="block px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                Logout
+                            </a>
                         </div>
                     </div>
-                    <p class="text-gray-600 text-sm">
-                        Smart QR-based vehicle contact management. Connect with vehicle owners for parking issues, emergencies, and more—without sharing personal numbers.
-                    </p>
-                </div>
-                
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Features</h3>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="{% url 'core:home' %}" class="hover:text-blue-600">🏠 Home</a></li>
-                        <li><a href="#" class="hover:text-blue-600">🚗 Vehicle QR Codes</a></li>
-                        <li><a href="#" class="hover:text-blue-600">🅿️ Parking Management</a></li>
-                        <li><a href="#" class="hover:text-blue-600">📱 Contact Solutions</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Legal</h3>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="{% url 'core:privacy' %}" class="hover:text-blue-600">Privacy Policy</a></li>
-                        <li><a href="{% url 'core:terms' %}" class="hover:text-blue-600">Terms & Conditions</a></li>
-                        <li><a href="{% url 'core:refund' %}" class="hover:text-blue-600">Refund Policy</a></li>
-                        <li><a href="#" class="hover:text-blue-600">Security</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Support</h3>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="#" class="hover:text-blue-600">Help Center</a></li>
-                        <li><a href="{% url 'core:contact' %}" class="hover:text-blue-600">Contact Support</a></li>
-                        <li><a href="#" class="hover:text-blue-600">API Reference</a></li>
-                        <li><a href="#" class="hover:text-blue-600">Status Page</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="border-t border-gray-200 mt-8 pt-8 text-center">
-                <p class="text-sm text-gray-600 mb-2">
-                    © 2026 Scan2Talk. All rights reserved. Smart vehicle contact management with privacy protection.
-                </p>
-                <p class="text-xs text-gray-500">
-                    Scan2Talk is an affiliated sub-product of <a href="https://scan2food.com" target="_blank" class="text-blue-600 hover:text-blue-700 font-medium">Scan2Food.com</a>
-                </p>
+
+                {% else %}
+                    <a href="{% url 'accounts:phone_login' %}"
+                       class="px-4 py-1.5 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors">
+                        Login
+                    </a>
+                {% endif %}
+
             </div>
         </div>
-    </footer>
+    </div>
+</header>
 
-    {% block extra_js %}{% endblock %}
+<!-- ================= FLASH MESSAGES ================= -->
+{% if messages %}
+<div class="max-w-7xl mx-auto px-6 mt-4">
+    {% for message in messages %}
+        <div class="mb-3 px-4 py-3 rounded-lg text-sm
+            {% if message.tags == 'success' %}bg-green-100 text-green-700
+            {% elif message.tags == 'error' %}bg-red-100 text-red-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ================= MAIN ================= -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-white border-t mt-20">
+    <div class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8 text-sm">
+
+        <div>
+            <p class="font-semibold mb-2">Scan2Talk</p>
+            <p class="text-slate-600">
+                Secure QR-based vehicle contact solution.
+                Connect without exposing personal numbers.
+            </p>
+        </div>
+
+        <div>
+            <p class="font-semibold mb-2">Product</p>
+            <ul class="space-y-1 text-slate-600">
+                <li><a href="{% url 'core:home' %}" class="hover:text-indigo-600">Home</a></li>
+                <li><a href="#" class="hover:text-indigo-600">QR Codes</a></li>
+                <li><a href="#" class="hover:text-indigo-600">Pricing</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="font-semibold mb-2">Legal</p>
+            <ul class="space-y-1 text-slate-600">
+                <li><a href="{% url 'core:privacy' %}" class="hover:text-indigo-600">Privacy</a></li>
+                <li><a href="{% url 'core:terms' %}" class="hover:text-indigo-600">Terms</a></li>
+                <li><a href="{% url 'core:refund' %}" class="hover:text-indigo-600">Refund</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="font-semibold mb-2">Support</p>
+            <ul class="space-y-1 text-slate-600">
+                <li><a href="{% url 'core:contact' %}" class="hover:text-indigo-600">Contact</a></li>
+                <li><a href="#" class="hover:text-indigo-600">Help Center</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="border-t text-center py-4 text-xs text-slate-500">
+        © 2026 Scan2Talk · A product of
+        <a href="https://scan2food.com" class="text-indigo-600 font-medium" target="_blank">Scan2Food</a>
+    </div>
+</footer>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>
