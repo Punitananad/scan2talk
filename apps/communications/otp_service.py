@@ -18,16 +18,16 @@ logger = logging.getLogger(__name__)
 class SMSCountryOTPService:
     """
     SMSCountry OTP service using REST API with AuthKey authentication.
-    NO Account SID - uses only AuthKey + AuthToken for Basic Auth.
+    Uses account-scoped endpoint: /Accounts/{AuthKey}/SMSes/
     """
     
-    # Fixed configuration as per SMSCountry specs
-    API_ENDPOINT = "https://restapi.smscountry.com/v0.1/SMSes/"
+    # Configuration as per SMSCountry specs
     SENDER_ID = "SCNTLK"
     DLT_TEMPLATE_ID = "1707176830112398745"
     TOOL = "API"
     
-    # DLT-approved message template (MUST NOT BE MODIFIED)
+    # DLT-approved message template (COPY-PASTED FROM DLT PORTAL - DO NOT MODIFY)
+    # Variable placeholder: {otp} must match DLT registration exactly
     MESSAGE_TEMPLATE = "Your OTP for Scan2Talk website registration is {otp}. Do not share it with anyone. - Scan2Talk"
     
     # OTP configuration
@@ -39,6 +39,12 @@ class SMSCountryOTPService:
         """Initialize with credentials from environment."""
         self.auth_key = getattr(settings, 'SMSCOUNTRY_AUTH_KEY', None)
         self.auth_token = getattr(settings, 'SMSCOUNTRY_AUTH_TOKEN', None)
+        
+        # CRITICAL: Account-scoped endpoint (includes AuthKey in URL)
+        if self.auth_key:
+            self.api_endpoint = f"https://restapi.smscountry.com/v0.1/Accounts/{self.auth_key}/SMSes/"
+        else:
+            self.api_endpoint = None
         
         if not self.auth_key or not self.auth_token:
             logger.warning("SMSCountry credentials not configured. OTP sending will fail.")
@@ -111,44 +117,85 @@ class SMSCountryOTPService:
         
         try:
             logger.info(f"Sending OTP to {phone_number} via SMSCountry")
+            logger.info(f"Using endpoint: {self.api_endpoint}")
             
             response = requests.post(
-                self.API_ENDPOINT,
+                self.api_endpoint,
                 json=payload,
                 headers=headers,
                 timeout=10
             )
             
-            # Log response
-            logger.info(f"SMSCountry Response: {response.status_code} - {response.text}")
+            # Log full response for debugging
+            logger.info(f"SMSCountry Response: {response.status_code}")
+            logger.info(f"Response Body: {response.text}")
             
-            if response.status_code in [200, 201, 202]:
-                logger.info(f"OTP sent successfully to {phone_number}")
-                return True, otp, "OTP sent successfully"
-            else:
-                logger.error(f"SMSCountry API error: {response.status_code} - {response.text}")
-                # In dev mode, still return success for testing
+            # CRITICAL: Don't trust HTTP 200 blindly - check response body
+            try:
+                response_data = response.json()
+            except ValueError:
+                logger.error(f"Invalid JSON response: {response.text}")
                 if settings.DEBUG:
-                    logger.warning(f"DEV MODE: Ignoring API error, OTP {otp} for {phone_number}")
+                    logger.warning(f"DEV MODE: Invalid JSON, OTP {otp} for {phone_number}")
                     print(f"\n{'='*50}")
                     print(f"📱 OTP for {phone_number}: {otp}")
+                    print(f"⚠️  API returned invalid JSON")
+                    print(f"{'='*50}\n")
+                    return True, otp, "OTP generated (dev mode - invalid JSON)"
+                return False, None, "Invalid response from SMS service"
+            
+            # Check both HTTP status AND Success field in response
+            if response.status_code in [200, 201, 202] and response_data.get("Success") is True:
+                message_id = response_data.get("MessageUUID") or response_data.get("MessageId")
+                logger.info(f"✅ OTP sent successfully to {phone_number}, MessageID: {message_id}")
+                
+                # Store message ID for delivery tracking
+                cache_key = f"otp_message_id_{phone_number}"
+                cache.set(cache_key, message_id, self.OTP_EXPIRY_MINUTES * 60)
+                
+                return True, otp, "OTP sent successfully"
+            else:
+                # API returned 200 but Success=False (DLT rejection, invalid sender, etc.)
+                error_msg = response_data.get("Message") or response_data.get("Error") or response.text
+                logger.error(f"❌ SMSCountry API rejected: {error_msg}")
+                logger.error(f"Full response: {response_data}")
+                
+                # In dev mode, still return success for testing
+                if settings.DEBUG:
+                    logger.warning(f"DEV MODE: Ignoring API rejection, OTP {otp} for {phone_number}")
+                    print(f"\n{'='*50}")
+                    print(f"📱 OTP for {phone_number}: {otp}")
+                    print(f"⚠️  API Error: {error_msg}")
                     print(f"{'='*50}\n")
                     return True, otp, "OTP generated (dev mode - API error ignored)"
-                return False, None, f"Failed to send OTP: {response.text}"
+                
+                return False, None, f"SMS delivery failed: {error_msg}"
                 
         except requests.exceptions.Timeout:
-            logger.error("SMSCountry API timeout")
+            logger.error("⏱️  SMSCountry API timeout")
             if settings.DEBUG:
+                print(f"\n{'='*50}")
+                print(f"📱 OTP for {phone_number}: {otp}")
+                print(f"⚠️  API Timeout")
+                print(f"{'='*50}\n")
                 return True, otp, "OTP generated (dev mode - timeout ignored)"
             return False, None, "SMS service timeout. Please try again."
         except requests.exceptions.RequestException as e:
-            logger.error(f"SMSCountry API request failed: {str(e)}")
+            logger.error(f"🔌 SMSCountry API request failed: {str(e)}")
             if settings.DEBUG:
+                print(f"\n{'='*50}")
+                print(f"📱 OTP for {phone_number}: {otp}")
+                print(f"⚠️  Request Error: {str(e)}")
+                print(f"{'='*50}\n")
                 return True, otp, "OTP generated (dev mode - request error ignored)"
             return False, None, "Failed to send OTP. Please try again."
         except Exception as e:
-            logger.error(f"Unexpected error sending OTP: {str(e)}")
+            logger.error(f"💥 Unexpected error sending OTP: {str(e)}", exc_info=True)
             if settings.DEBUG:
+                print(f"\n{'='*50}")
+                print(f"📱 OTP for {phone_number}: {otp}")
+                print(f"⚠️  Error: {str(e)}")
+                print(f"{'='*50}\n")
                 return True, otp, "OTP generated (dev mode - error ignored)"
             return False, None, "An error occurred. Please try again."
     
@@ -219,6 +266,41 @@ class SMSCountryOTPService:
         cache_key = f"otp_{phone_number}"
         cache.delete(cache_key)
         logger.info(f"OTP invalidated for {phone_number}")
+    
+    def check_delivery_status(self, phone_number):
+        """
+        Check SMS delivery status using SMSCountry Reports API.
+        
+        Returns:
+            dict: Delivery status information or None
+        """
+        cache_key = f"otp_message_id_{phone_number}"
+        message_id = cache.get(cache_key)
+        
+        if not message_id or not self.auth_key:
+            return None
+        
+        try:
+            # SMSCountry Reports API endpoint
+            reports_url = f"https://restapi.smscountry.com/v0.1/Accounts/{self.auth_key}/SMSes/{message_id}"
+            
+            headers = {
+                "Authorization": self._get_auth_header()
+            }
+            
+            response = requests.get(reports_url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                logger.info(f"📊 Delivery status for {phone_number}: {data}")
+                return data
+            else:
+                logger.warning(f"Failed to get delivery status: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error checking delivery status: {str(e)}")
+            return None
     
     def resend_otp(self, phone_number):
         """
