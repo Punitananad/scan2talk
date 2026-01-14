@@ -269,6 +269,10 @@ SPARKTG_PASSWORD = env('SPARKTG_PASSWORD', default='')
 SPARKTG_DID_NUMBER = env('SPARKTG_DID_NUMBER', default='01205019042')
 SPARKTG_SID = env('SPARKTG_SID', default='')
 
+# SMSCountry OTP Settings (AuthKey-based, NO SID)
+SMSCOUNTRY_AUTH_KEY = env('SMSCOUNTRY_AUTH_KEY', default='')
+SMSCOUNTRY_AUTH_TOKEN = env('SMSCOUNTRY_AUTH_TOKEN', default='')
+
 # Platform Settings
 PLATFORM_NAME = 'Gateway Platform'
 PLATFORM_DOMAIN = env('PLATFORM_DOMAIN', default='localhost:8000')

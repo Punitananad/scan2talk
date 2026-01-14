@@ -1,5 +1,6 @@
 """
 Phone-based authentication for QR activation.
+Uses SMSCountry OTP service for mobile verification.
 """
 import random
 from django.core.cache import cache
@@ -7,49 +8,52 @@ from django.utils import timezone as django_timezone
 from .models import User
 
 
-def generate_otp():
-    """Generate a 6-digit OTP."""
-    # For development/testing, always return 1234
-    return "1234"
-    # For production, use random OTP:
-    # return str(random.randint(100000, 999999))
-
-
 def send_otp(phone_number):
     """
-    Generate and send OTP to phone number.
-    For development, just store in cache and print to console.
+    Generate and send OTP to phone number using SMSCountry.
+    
+    Returns:
+        tuple: (success: bool, message: str)
     """
-    otp = generate_otp()
+    from apps.communications.otp_service import get_otp_service
     
-    # Store OTP in cache for 5 minutes
-    cache_key = f"otp_{phone_number}"
-    cache.set(cache_key, otp, 300)  # 5 minutes
+    otp_service = get_otp_service()
     
-    # In development, print to console
-    print(f"\n{'='*50}")
-    print(f"OTP for {phone_number}: {otp}")
-    print(f"{'='*50}\n")
+    # Send OTP
+    success, otp, message = otp_service.send_otp(phone_number)
     
-    # TODO: In production, integrate with Twilio/SMS service
-    # from apps.communications.adapters.sms_adapter import SMSAdapter
-    # sms = SMSAdapter()
-    # sms.send(phone_number, f"Your OTP is: {otp}")
-    
-    return True
+    if success:
+        # Store OTP securely
+        otp_service.store_otp(phone_number, otp)
+        return True, "OTP sent successfully"
+    else:
+        return False, message
 
 
 def verify_otp(phone_number, otp):
-    """Verify OTP for phone number."""
-    cache_key = f"otp_{phone_number}"
-    stored_otp = cache.get(cache_key)
+    """
+    Verify OTP for phone number.
     
-    if stored_otp and stored_otp == otp:
-        # Clear OTP after successful verification
-        cache.delete(cache_key)
-        return True
+    Returns:
+        tuple: (success: bool, message: str)
+    """
+    from apps.communications.otp_service import get_otp_service
     
-    return False
+    otp_service = get_otp_service()
+    return otp_service.verify_otp(phone_number, otp)
+
+
+def resend_otp(phone_number):
+    """
+    Resend OTP to phone number.
+    
+    Returns:
+        tuple: (success: bool, message: str)
+    """
+    from apps.communications.otp_service import get_otp_service
+    
+    otp_service = get_otp_service()
+    return otp_service.resend_otp(phone_number)
 
 
 def get_or_create_user_by_phone(phone_number, name=None):

@@ -30,6 +30,7 @@ urlpatterns = [
     
     # QR Code Activation (User)
     path('activate/<str:qr_code>/', qr_views.activate_qr_code, name='activate_qr'),
+    path('activate/<str:qr_code>/resend-otp/', qr_views.resend_otp_view, name='resend_otp'),
     
     # Public QR Access
     path('g/<str:qr_code>/', qr_views.public_qr_access, name='public_qr_access'),
