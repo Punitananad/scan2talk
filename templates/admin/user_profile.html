@@ -571,7 +571,7 @@ function unlockUserAccount() {
 function showSendNotificationModal() {
     const message = prompt('Enter notification message to send to user:');
     if (message && message.trim()) {
-        if (confirm(`Send notification to ${profile_user.email}?`)) {
+        if (confirm('Send notification to {{ profile_user.email }}?')) {
             alert('Notification feature coming soon!');
             // TODO: Implement notification sending
         }
