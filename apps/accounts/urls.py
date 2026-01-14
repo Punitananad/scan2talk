@@ -44,6 +44,9 @@ urlpatterns = [
     path('admin/users/', admin_views.admin_user_management, name='admin_user_management'),
     path('admin/users/<uuid:user_id>/', admin_views.admin_user_profile, name='admin_user_profile'),
     path('admin/users/<uuid:user_id>/assign-category/', admin_views.admin_assign_user_category, name='admin_assign_user_category'),
+    path('admin/users/<uuid:user_id>/add-balance/', admin_views.admin_add_user_balance, name='admin_add_user_balance'),
+    path('admin/users/<uuid:user_id>/lock/', admin_views.admin_lock_user, name='admin_lock_user'),
+    path('admin/users/<uuid:user_id>/unlock/', admin_views.admin_unlock_user, name='admin_unlock_user'),
     path('admin/orders/', admin_views.manage_tag_orders, name='manage_tag_orders'),
     path('admin/orders/<str:order_id>/update/', admin_views.update_order_status, name='update_order_status'),
     

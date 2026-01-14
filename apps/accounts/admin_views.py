@@ -558,6 +558,69 @@ def admin_assign_user_category(request, user_id):
     return redirect('accounts:admin_user_profile', user_id=user_id)
 
 
+@staff_member_required
+@require_http_methods(["POST"])
+def admin_add_user_balance(request, user_id):
+    """Add balance to user's wallet"""
+    user = get_object_or_404(User, id=user_id)
+    amount = float(request.POST.get('amount', 0))
+    
+    if amount > 0:
+        try:
+            wallet = user.wallet
+        except:
+            from .wallet_models import Wallet
+            wallet = Wallet.objects.create(user=user, balance=0)
+        
+        # Add balance
+        wallet.balance += amount
+        wallet.save()
+        
+        # Create transaction record
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type='credit',
+            amount=amount,
+            balance_after=wallet.balance,
+            description=f'Admin credit by {request.user.email}',
+            reference_id=f'ADMIN-{timezone.now().timestamp()}'
+        )
+        
+        messages.success(request, f'Added ₹{amount} to {user.email}\'s wallet. New balance: ₹{wallet.balance}')
+    else:
+        messages.error(request, 'Invalid amount')
+    
+    return redirect('accounts:admin_user_profile', user_id=user_id)
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def admin_lock_user(request, user_id):
+    """Lock user account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    user.is_active = False
+    user.save()
+    
+    messages.success(request, f'User account {user.email} has been locked')
+    return redirect('accounts:admin_user_profile', user_id=user_id)
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def admin_unlock_user(request, user_id):
+    """Unlock user account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    user.is_active = True
+    user.failed_login_attempts = 0
+    user.account_locked_until = None
+    user.save()
+    
+    messages.success(request, f'User account {user.email} has been unlocked')
+    return redirect('accounts:admin_user_profile', user_id=user_id)
+
+
 
 @staff_member_required
 def manage_tag_orders(request):
