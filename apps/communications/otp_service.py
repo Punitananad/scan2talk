@@ -93,8 +93,8 @@ class SMSCountryOTPService:
                 return True, otp, "OTP generated (dev mode - not sent)"
             return False, None, "SMS service not configured"
         
-        # Prepare message
-        message_text = f"Your OTP is {otp}. Valid for 5 minutes. - Scan2Talk"
+        # Prepare message - EXACT format from working Postman request
+        message_text = f"Your OTP for Scan2Talk website registration is {otp}. Do not share it with anyone. – Scan2Talk"
         
         headers = {
             "Content-Type": "application/json",
@@ -105,6 +105,8 @@ class SMSCountryOTPService:
             "Text": message_text,
             "Number": f"91{phone_number}",
             "SenderId": self.SENDER_ID,
+            "DRNotifyUrl": "https://www.scan2talk.in/notifyurl",
+            "DRNotifyHttpMethod": "POST",
             "Tool": self.TOOL
         }
         
