@@ -25,8 +25,10 @@ def send_otp(phone_number):
     if success:
         # Store OTP securely
         otp_service.store_otp(phone_number, otp)
+        print(f"📤 OTP sent and stored for {phone_number}: {otp}")
         return True, "OTP sent successfully"
     else:
+        print(f"❌ Failed to send OTP for {phone_number}: {message}")
         return False, message
 
 
@@ -40,7 +42,10 @@ def verify_otp(phone_number, otp):
     from apps.communications.otp_service import get_otp_service
     
     otp_service = get_otp_service()
-    return otp_service.verify_otp(phone_number, otp)
+    print(f"🔐 Verifying OTP for {phone_number}: {otp}")
+    result = otp_service.verify_otp(phone_number, otp)
+    print(f"🔐 Verification result: {result}")
+    return result
 
 
 def resend_otp(phone_number):
