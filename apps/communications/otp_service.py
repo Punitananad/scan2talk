@@ -21,14 +21,9 @@ class SMSCountryOTPService:
     Uses account-scoped endpoint: /Accounts/{AuthKey}/SMSes/
     """
     
-    # Configuration as per SMSCountry specs
+    # Configuration
     SENDER_ID = "SCNTLK"
-    DLT_TEMPLATE_ID = "1707176830112398745"
     TOOL = "API"
-    
-    # DLT-approved message template (COPY-PASTED FROM DLT PORTAL - DO NOT MODIFY)
-    # Variable placeholder: {otp} must match DLT registration exactly
-    MESSAGE_TEMPLATE = "Your OTP for Scan2Talk website registration is {otp}. Do not share it with anyone. - Scan2Talk"
     
     # OTP configuration
     OTP_LENGTH = 6
@@ -98,10 +93,9 @@ class SMSCountryOTPService:
                 return True, otp, "OTP generated (dev mode - not sent)"
             return False, None, "SMS service not configured"
         
-        # Prepare message with OTP
-        message_text = self.MESSAGE_TEMPLATE.format(otp=otp)
+        # Prepare message
+        message_text = f"Your OTP is {otp}. Valid for 5 minutes. - Scan2Talk"
         
-        # Prepare request
         headers = {
             "Content-Type": "application/json",
             "Authorization": self._get_auth_header()
@@ -109,9 +103,8 @@ class SMSCountryOTPService:
         
         payload = {
             "Text": message_text,
-            "Number": f"91{phone_number}",  # Add India country code
+            "Number": f"91{phone_number}",
             "SenderId": self.SENDER_ID,
-            "DLTTemplateId": self.DLT_TEMPLATE_ID,
             "Tool": self.TOOL
         }
         

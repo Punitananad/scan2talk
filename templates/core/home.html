@@ -193,7 +193,7 @@
                     
                     <!-- Image Card -->
                     <div class="relative bg-white p-5 rounded-2xl shadow-xl border border-gray-200/60 transform group-hover:scale-[1.01] transition-transform duration-300">
-                        <img src="{% static 'tag/final-poster.jpeg' %}" 
+                        <img src="{% static 'tag/final-logo.jpeg' %}" 
                              alt="Scan2Talk QR Code - Contact Vehicle Owners Privately" 
                              class="w-full h-auto rounded-xl"
                              style="filter: brightness(1.05) contrast(1.03) saturate(1.08);">
@@ -283,6 +283,89 @@
                     Receive notifications via SMS, WhatsApp, or email. Your phone number stays completely hidden.
                 </p>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product Showcase Section -->
+<section class="py-24 bg-gradient-to-br from-indigo via-indigo-900 to-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black text-white mb-4">
+                Premium QR Code Tags
+            </h2>
+            <p class="text-xl text-indigo-100 max-w-2xl mx-auto">
+                Durable, weather-resistant tags designed for your vehicle
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <!-- Tag Image 1 -->
+            <div class="group">
+                <div class="relative bg-white p-6 rounded-3xl shadow-2xl transform group-hover:scale-[1.02] transition-all duration-300">
+                    <div class="absolute -top-4 -right-4 bg-yellow text-indigo px-6 py-2 rounded-full font-bold text-sm shadow-lg">
+                        Premium Quality
+                    </div>
+                    <img src="{% static 'tag/final-logo.jpeg' %}" 
+                         alt="Scan2Talk Premium QR Tag" 
+                         class="w-full h-auto rounded-2xl shadow-lg">
+                    <div class="mt-6 text-center">
+                        <h3 class="text-2xl font-bold text-indigo mb-2">Official Scan2Talk Tag</h3>
+                        <p class="text-gray-600">Waterproof • UV Resistant • 3+ Years Durability</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tag Image 2 -->
+            <div class="group">
+                <div class="relative bg-white p-6 rounded-3xl shadow-2xl transform group-hover:scale-[1.02] transition-all duration-300">
+                    <div class="absolute -top-4 -right-4 bg-amber-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg">
+                        Best Seller
+                    </div>
+                    <img src="{% static 'tag/tg.jpeg' %}" 
+                         alt="Scan2Talk Vehicle QR Tag" 
+                         class="w-full h-auto rounded-2xl shadow-lg">
+                    <div class="mt-6 text-center">
+                        <h3 class="text-2xl font-bold text-indigo mb-2">Vehicle Contact Tag</h3>
+                        <p class="text-gray-600">Easy Install • Strong Adhesive • All Weather</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16">
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
+                <div class="text-4xl mb-3">🌧️</div>
+                <h4 class="text-white font-bold mb-1">Waterproof</h4>
+                <p class="text-indigo-200 text-sm">Rain & wash safe</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
+                <div class="text-4xl mb-3">☀️</div>
+                <h4 class="text-white font-bold mb-1">UV Protected</h4>
+                <p class="text-indigo-200 text-sm">No fading</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
+                <div class="text-4xl mb-3">💪</div>
+                <h4 class="text-white font-bold mb-1">Strong Adhesive</h4>
+                <p class="text-indigo-200 text-sm">Won't peel off</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
+                <div class="text-4xl mb-3">⚡</div>
+                <h4 class="text-white font-bold mb-1">Quick Scan</h4>
+                <p class="text-indigo-200 text-sm">Works instantly</p>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="text-center mt-12">
+            <a href="{% url 'core:order_tag' %}" 
+               class="inline-flex items-center gap-3 bg-yellow hover:bg-amber-400 text-indigo px-10 py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-200">
+                <span>Order Your Tag Now</span>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+            </a>
         </div>
     </div>
 </section>

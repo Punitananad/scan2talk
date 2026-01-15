@@ -57,6 +57,9 @@ class ProfileView(TemplateView):
         
         # Get user's QR codes with categories
         from apps.gateways.qr_models import PreGeneratedQR
+        from apps.accounts.recharge_models import QRWallet
+        from django.db.models import Sum
+        
         user_qr_codes = PreGeneratedQR.objects.filter(
             owner=user,
             status='activated'
@@ -68,8 +71,15 @@ class ProfileView(TemplateView):
             if qr.category:
                 categories.add(qr.category)
         
+        # Calculate total wallet balance across all QR codes
+        total_balance = QRWallet.objects.filter(
+            qr_code__owner=user,
+            is_active=True
+        ).aggregate(total=Sum('balance'))['total'] or 0
+        
         context['user_qr_codes'] = user_qr_codes
         context['user_categories'] = list(categories)
+        context['wallet_balance'] = total_balance
         
         return context
 
