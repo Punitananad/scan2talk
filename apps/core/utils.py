@@ -18,25 +18,25 @@ def generate_short_code(length=8):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 def generate_qr_code(data):
-    """Generate QR code image and return as ContentFile"""
-    # Create QR code instance
+    """Generate HIGH QUALITY QR code image and return as ContentFile"""
+    # Create QR code instance with HIGH quality settings
     qr = qrcode.QRCode(
         version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,  # Highest error correction
+        box_size=20,  # Increased from 10 for higher resolution
+        border=2,     # Reduced border for more QR space
     )
     
     # Add data to QR code
     qr.add_data(data)
     qr.make(fit=True)
     
-    # Create image
+    # Create HIGH RESOLUTION image
     img = qr.make_image(fill_color="black", back_color="white")
     
-    # Save to BytesIO
+    # Save to BytesIO with maximum quality
     buffer = BytesIO()
-    img.save(buffer, format='PNG')
+    img.save(buffer, format='PNG', optimize=False)
     buffer.seek(0)
     
     # Return as ContentFile

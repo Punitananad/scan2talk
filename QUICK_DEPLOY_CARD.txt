@@ -1,0 +1,110 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          QUICK DEPLOYMENT CARD                               ║
+║                         Scan2Talk - Bug Fixes                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ WHAT WAS FIXED                                                               │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ ✅ OTP verification loop (session persistence)                              │
+│ ✅ PDF template overlay (QR on template image)                              │
+│ ✅ Missing dependencies (numpy, reportlab)                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DEPLOY NOW (3 COMMANDS)                                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   $ git pull origin main                                                     │
+│   $ pip install -r requirements.txt                                          │
+│   $ sudo systemctl restart gunicorn                                          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ TEST IT (2 COMMANDS)                                                         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   $ python test_otp_verification_fix.py                                      │
+│   $ python test_template_overlay.py                                          │
+│                                                                              │
+│   Then check: test_tag_output.png                                           │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ VERIFY IT WORKS                                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   OTP Flow:                                                                  │
+│   1. Visit: /gateways/activate/<QR_CODE>/                                   │
+│   2. Enter phone → Get OTP                                                   │
+│   3. Enter OTP → Should go to step 3 (NOT loop back)                        │
+│   4. Fill details → Activate successfully                                    │
+│                                                                              │
+│   PDF Generation:                                                            │
+│   1. Go to: /gqr/                                                            │
+│   2. Generate batch                                                          │
+│   3. Download PDF                                                            │
+│   4. Open PDF → Should see template with QR overlay                         │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ CHECK LOGS                                                                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   $ sudo journalctl -u gunicorn -f                                           │
+│                                                                              │
+│   Look for:                                                                  │
+│   ✅ "OTP verified, session updated"                                        │
+│   ✅ "Using template: .../pqr-tg.jpeg"                                      │
+│   ✅ "Successfully created tag"                                             │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ TROUBLESHOOTING                                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   OTP still loops?                                                           │
+│   → Check: sudo journalctl -u gunicorn -f | grep OTP                         │
+│   → Clear sessions: python manage.py clearsessions                           │
+│                                                                              │
+│   PDF still plain QR?                                                        │
+│   → Check: ls static/tag/pqr-tg.jpeg                                         │
+│   → Run: python test_template_overlay.py                                     │
+│   → Check logs for "Template not found"                                      │
+│                                                                              │
+│   Dependencies missing?                                                      │
+│   → Run: pip install -r requirements.txt                                     │
+│   → Check: pip list | grep -E "numpy|reportlab"                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ FILES CHANGED                                                                │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   apps/gateways/qr_views.py          → OTP session fix                      │
+│   apps/gateways/qr_download_views.py → PDF template overlay                 │
+│   requirements.txt                    → Added numpy, reportlab              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DOCUMENTATION                                                                │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   📄 FIXES_APPLIED_SUMMARY.md     → Complete summary                        │
+│   📄 OTP_VERIFICATION_FIX.md      → OTP fix details                         │
+│   📄 PDF_TEMPLATE_FIX.md          → PDF fix details                         │
+│   📄 QUICK_FIX_SUMMARY.md         → Quick reference                         │
+│   📄 TEMPLATE_OVERLAY_GUIDE.txt   → Visual guide                            │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              STATUS: READY ✅                                ║
+║                         Deploy and test immediately!                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝

@@ -87,9 +87,9 @@ def generate_qr_codes(request):
             
             # Check if user wants to download PDF immediately
             if action == 'generate_and_download_pdf':
-                # Redirect to PDF download
-                messages.success(request, f'Generated {quantity} QR codes in batch {batch_number}. Downloading PDF...')
-                return redirect('gateways:download_batch_pdf', batch_number=batch_number)
+                # Redirect to preview page first
+                messages.success(request, f'Generated {quantity} QR codes in batch {batch_number}')
+                return redirect('gateways:batch_preview_page', batch_number=batch_number)
             else:
                 # Just show success message and redirect to dashboard
                 messages.success(request, f'Successfully generated {quantity} QR codes in batch {batch_number}' + 
@@ -111,6 +111,22 @@ def generate_qr_codes(request):
         'categories': categories,
     }
     return render(request, 'gateways/generate_qr.html', context)
+
+
+@staff_member_required
+def batch_preview_page(request, batch_number):
+    """
+    Preview page showing sample QR and download options.
+    """
+    batch = get_object_or_404(QRBatch, batch_number=batch_number)
+    qr_count = PreGeneratedQR.objects.filter(batch_number=batch_number).count()
+    
+    context = {
+        'batch': batch,
+        'batch_number': batch_number,
+        'qr_count': qr_count,
+    }
+    return render(request, 'gateways/batch_preview.html', context)
 
 
 @staff_member_required
@@ -516,6 +532,10 @@ def activate_qr_code(request, qr_code):
                 mark_phone_verified(phone)
                 request.session['phone_verified'] = True
                 request.session['verified_phone'] = phone
+                request.session.modified = True  # Force session save
+                
+                print(f"✅ OTP verified, session updated: phone_verified=True, verified_phone={phone}")
+                
                 messages.success(request, 'Mobile number verified successfully')
                 return redirect(f'/gateways/activate/{qr_code}/?step=3')
             else:
@@ -529,6 +549,7 @@ def activate_qr_code(request, qr_code):
     elif step == '3':
         phone = request.session.get('activation_phone')
         if not phone:
+            messages.error(request, 'Session expired. Please start again.')
             return redirect(f'/gateways/activate/{qr_code}/?step=1')
         
         # Check verification in session first, then cache
@@ -538,9 +559,19 @@ def activate_qr_code(request, qr_code):
         from apps.accounts.phone_auth import is_phone_verified
         cache_verified = is_phone_verified(phone)
         
+        print(f"🔍 Step 3 verification check:")
+        print(f"   - Phone: {phone}")
+        print(f"   - Session verified: {session_verified}")
+        print(f"   - Verified phone in session: {verified_phone}")
+        print(f"   - Cache verified: {cache_verified}")
+        
+        # Accept if EITHER session OR cache shows verified
         if not (session_verified and verified_phone == phone) and not cache_verified:
+            print(f"❌ Verification failed - redirecting to step 2")
             messages.error(request, 'Please verify your mobile number first')
             return redirect(f'/gateways/activate/{qr_code}/?step=2')
+        
+        print(f"✅ Verification passed - proceeding with activation")
         
         if request.method == 'POST':
             try:

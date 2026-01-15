@@ -13,6 +13,7 @@ urlpatterns = [
     # QR Code Management (Admin)
     path('gqr/', qr_views.generate_qr_codes, name='generate_qr'),
     path('qr/dashboard/', qr_views.qr_dashboard, name='qr_dashboard'),
+    path('qr/batch/<str:batch_number>/preview-page/', qr_views.batch_preview_page, name='batch_preview_page'),
     path('qr/category/<uuid:category_id>/', qr_views.category_users_view, name='category_users'),
     path('qr/registrations/', qr_views.registrations_page, name='registrations'),
     path('qr/<uuid:qr_id>/details/', qr_views.qr_detail, name='qr_detail'),
@@ -25,6 +26,7 @@ urlpatterns = [
     # QR Code Downloads (Admin)
     path('qr/<uuid:qr_id>/download/', qr_download_views.download_qr_image, name='download_qr_image'),
     path('qr/<uuid:qr_id>/view/', qr_download_views.view_qr_image, name='view_qr_image'),
+    path('qr/batch/<str:batch_number>/preview/', qr_download_views.preview_batch_sample, name='preview_batch_sample'),
     path('qr/batch/<str:batch_number>/download-pdf/', qr_download_views.download_batch_pdf, name='download_batch_pdf'),
     path('qr/batch/<str:batch_number>/download-zip/', qr_download_views.download_qr_zip, name='download_batch_zip'),
     
