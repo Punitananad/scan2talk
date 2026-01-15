@@ -91,10 +91,13 @@ def get_or_create_user_by_phone(phone_number, name=None):
 def mark_phone_verified(phone_number):
     """Mark phone as verified in session."""
     cache_key = f"phone_verified_{phone_number}"
-    cache.set(cache_key, True, 600)  # 10 minutes
+    cache.set(cache_key, True, 1800)  # 30 minutes
+    print(f"✅ Marked phone {phone_number} as verified in cache")
 
 
 def is_phone_verified(phone_number):
     """Check if phone is verified in session."""
     cache_key = f"phone_verified_{phone_number}"
-    return cache.get(cache_key, False)
+    is_verified = cache.get(cache_key, False)
+    print(f"🔍 Checking verification for {phone_number}: {is_verified}")
+    return is_verified

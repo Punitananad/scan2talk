@@ -512,8 +512,10 @@ def activate_qr_code(request, qr_code):
             success, message = verify_otp(phone, otp)
             
             if success:
-                # Mark phone as verified
+                # Mark phone as verified in both cache AND session
                 mark_phone_verified(phone)
+                request.session['phone_verified'] = True
+                request.session['verified_phone'] = phone
                 messages.success(request, 'Mobile number verified successfully')
                 return redirect(f'/gateways/activate/{qr_code}/?step=3')
             else:
@@ -529,9 +531,14 @@ def activate_qr_code(request, qr_code):
         if not phone:
             return redirect(f'/gateways/activate/{qr_code}/?step=1')
         
-        # Verify phone is verified via OTP
+        # Check verification in session first, then cache
+        session_verified = request.session.get('phone_verified', False)
+        verified_phone = request.session.get('verified_phone')
+        
         from apps.accounts.phone_auth import is_phone_verified
-        if not is_phone_verified(phone):
+        cache_verified = is_phone_verified(phone)
+        
+        if not (session_verified and verified_phone == phone) and not cache_verified:
             messages.error(request, 'Please verify your mobile number first')
             return redirect(f'/gateways/activate/{qr_code}/?step=2')
         
