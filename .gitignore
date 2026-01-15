@@ -33,6 +33,12 @@ db.sqlite3-journal
 /media
 /staticfiles
 
+# Static files (but keep tag templates)
+/static/*
+!/static/.gitkeep
+!/static/tag/
+!/static/favicon/
+
 # Environment variables
 .env
 .env.local
@@ -61,17 +67,10 @@ Thumbs.db
 logs/*.log
 media/qr_codes/*.png
 media/qr_codes/*.jpg
-static/
-staticfiles/
 
 # Keep directory structure
 !logs/.gitkeep
 !media/qr_codes/.gitkeep
-!static/.gitkeep
-!static/tag/
-!static/tag/*.jpeg
-!static/tag/*.jpg
-!static/tag/*.png
 
 # Testing
 .coverage
