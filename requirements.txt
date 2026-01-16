@@ -15,6 +15,6 @@ shortuuid==1.0.11
 phonenumbers==8.13.25
 twilio==8.10.0
 requests==2.31.0
-numpy==1.24.3
+numpy>=1.26.4
 reportlab==4.0.7
 xhtml2pdf==0.2.13
