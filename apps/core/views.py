@@ -17,7 +17,7 @@ from apps.interactions.services import InteractionService
 
 class HomeView(TemplateView):
     """Homepage view."""
-    template_name = 'core/home.html'
+    template_name = 'core/home_new.html'
 
 
 class PrivacyPolicyView(TemplateView):

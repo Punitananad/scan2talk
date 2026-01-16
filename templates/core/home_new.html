@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Scan2Talk - Connect Without Sharing Numbers{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<link rel="stylesheet" href="{% static 'trippi/css/style.css' %}">
+
+<style>
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #FFFFFE;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-5">
+    <!-- Hero Section -->
+    <section data-aos="fade-up" data-aos-duration="1000" class="grid grid-cols-6 lg:grid-cols-12 mb-20 mt-8">
+      <div class="col-span-6 text-center lg:text-left">
+        <span class="inline-block px-3 py-1.5 mb-4 bg-[#3DA9FC] bg-opacity-10 text-[#3DA9FC] font-semibold tracking-wide rounded-full">• Privacy-First Vehicle Contact</span>
+        <h1 class="text-5xl sm:text-6xl md:text-7xl mb-4 font-extrabold text-[#094067] leading-tight">Connect Without <span class="text-[#3DA9FC]">Sharing</span> Your Number</h1>
+        <p class="mb-6 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] pr-0 md:pr-4 xl:pr-32">Scan2Talk helps you stay reachable for parking, emergencies & more—without revealing your phone number. Smart QR codes for modern vehicle owners.</p>
+        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 justify-center lg:justify-start">
+          <a href="{% url 'core:order_tag' %}" class="w-full md:w-fit px-9 py-5 bg-[#3DA9FC] flex items-center justify-center md:justify-start text-white font-semibold rounded-md shadow-[0_6px_30px_rgba(61,169,252,0.6)] hover:bg-[#3498E4] group transition-colors duration-300">
+            <span>Order Your QR Code</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-narrow-right group-hover:translate-x-1.5 transition duration-300" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <line x1="15" y1="16" x2="19" y2="12"></line>
+              <line x1="15" y1="8" x2="19" y2="12"></line>
+            </svg>
+          </a>
+          <a href="#how-it-works" class="w-fit px-9 py-5 flex items-center justify-center md:justify-start text-[#3DA9FC] font-semibold space-x-4 hover:scale-105 transition duration-300">
+            <div class="p-4 rounded-full border border-[#3DA9FC]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                 <rect width="24" height="24" fill="#FFFFFE"/>
+                 <path d="M7 4V20L20 12L7 4Z" fill="#3DA9FC"/>
+               </svg>          
+            </div>
+            <span>See How It Works</span>
+          </a>
+        </div>
+      </div>
+      <div class="col-span-6 pl-24 hidden lg:block">
+        <img src="{% static 'tag/final-logo.jpeg' %}" alt="Scan2Talk QR Code" class="rounded-2xl shadow-2xl">
+      </div>
+    </section>
+
+    <!-- Trust Indicators Section -->
+    <section data-aos="fade-right" data-aos-delay="500" data-aos-duration="700" class="w-full flex flex-col lg:flex-row items-center justify-center space-y-11 lg:space-y-0 lg:space-x-11 py-12 mb-24">
+      <div class="flex items-center gap-3 text-[#094067]">
+        <svg class="w-8 h-8 text-[#3DA9FC]" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="font-semibold">No App Needed</span>
+      </div>
+      <div class="flex items-center gap-3 text-[#094067]">
+        <svg class="w-8 h-8 text-[#3DA9FC]" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="font-semibold">2-Minute Setup</span>
+      </div>
+      <div class="flex items-center gap-3 text-[#094067]">
+        <svg class="w-8 h-8 text-[#3DA9FC]" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="font-semibold">5,000+ Users</span>
+      </div>
+      <div class="flex items-center gap-3 text-[#094067]">
+        <svg class="w-8 h-8 text-[#3DA9FC]" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="font-semibold">100% Secure</span>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" data-aos="zoom-in" data-aos-duration="1000" class="py-2 mb-16 text-center lg:text-left">
+      <span class="text-[#3DA9FC] inline-block font-semibold leading-tight mb-4">How It Works</span>
+      <div class="flex items-center justify-between mb-8 lg:mb-5">
+        <h3 class="text-4xl text-[#094067] font-extrabold leading-tight w-full lg:w-fit">Three Simple Steps to Privacy</h3>
+      </div>
+      <div class="grid grid-cols-4 lg:grid-cols-12 gap-y-12 lg:gap-y-0 lg:gap-x-12 mb-8">
+        <div class="col-span-4 flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
+          <div class="w-full h-64 bg-gradient-to-br from-[#3DA9FC] to-[#3498E4] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center text-white text-6xl font-bold">
+            1
+          </div>
+          <h5 class="text-xl text-[#094067] font-bold mb-3.5">Order Your QR Code</h5>
+          <p class="text-sm text-[#5F6C7B] font-medium px-4">Get your unique QR code sticker delivered. Place it on your vehicle in minutes.</p>
+        </div>
+        <div class="col-span-4 flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
+          <div class="w-full h-64 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center text-white text-6xl font-bold">
+            2
+          </div>
+          <h5 class="text-xl text-[#094067] font-bold mb-3.5">Anyone Can Scan</h5>
+          <p class="text-sm text-[#5F6C7B] font-medium px-4">Others scan your QR code and send you a message instantly. No app needed.</p>
+        </div>
+        <div class="col-span-4 flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
+          <div class="w-full h-64 bg-gradient-to-br from-[#10b981] to-[#059669] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center text-white text-6xl font-bold">
+            3
+          </div>
+          <h5 class="text-xl text-[#094067] font-bold mb-3.5">Stay Private</h5>
+          <p class="text-sm text-[#5F6C7B] font-medium px-4">Receive notifications via SMS, WhatsApp, or email. Your number stays hidden.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Showcase Section -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 pt-16 pb-8 lg:pb-56">
+      <div data-aos="fade-right" data-aos-duration="700" class="pt-12 text-center lg:text-left">
+        <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Premium Quality Tags</span>
+        <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight pr-0 xl:pr-8">Durable, Weather-Resistant QR Tags 🏷️</h2>
+        <p class="mb-8 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] pr-0 xl:pr-24">Our premium QR code tags are designed to withstand all weather conditions. Waterproof, UV-resistant, and built to last 3+ years on your vehicle.</p>
+        <a href="{% url 'core:order_tag' %}" class="w-full lg:w-fit px-9 py-5 bg-[#3DA9FC] flex items-center justify-center text-white font-semibold rounded-md shadow-[0_6px_30px_rgba(61,169,252,0.6)] space-x-2.5 hover:bg-[#3498E4] transition-colors duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-shopping-cart" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <circle cx="6" cy="19" r="2"></circle>
+            <circle cx="17" cy="19" r="2"></circle>
+            <path d="M17 17h-11v-14h-2"></path>
+            <path d="M6 5l14 1l-1 7h-13"></path>
+          </svg>
+          <span>Order Now</span>
+        </a>
+      </div>
+      <div data-aos="fade-left" data-aos-duration="700" class="relative">
+        <img src="{% static 'tag/tg.jpeg' %}" class="relative lg:absolute top-0 lg:-top-40 -left-32 md:-left-16 lg:-left-40 xl:-left-12 min-w-[620px] sm:min-w-[810px] rounded-2xl shadow-2xl" alt="Scan2Talk QR Tag">
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section data-aos="fade-up" data-aos-duration="1000" class="w-full flex flex-col items-center justify-center py-4 mb-40 text-center lg:text-left">
+      <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Built For Your Peace of Mind</span>
+      <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight">Why Choose Scan2Talk?</h2>
+      <p class="mb-8 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] text-center px-0 lg:px-64">Enterprise-grade security meets simple, everyday convenience. Your privacy is our priority.</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full mb-8">
+        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+          <div class="text-5xl mb-4">🔒</div>
+          <h4 class="text-xl text-[#094067] font-bold mb-3">Complete Privacy</h4>
+          <p class="text-[#5F6C7B]">Your number stays hidden. No spam, no unwanted calls.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+          <div class="text-5xl mb-4">⚡</div>
+          <h4 class="text-xl text-[#094067] font-bold mb-3">Instant Alerts</h4>
+          <p class="text-[#5F6C7B]">Get notified immediately via your preferred channel.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+          <div class="text-5xl mb-4">📱</div>
+          <h4 class="text-xl text-[#094067] font-bold mb-3">No App Required</h4>
+          <p class="text-[#5F6C7B]">Works with any smartphone camera. Simple for everyone.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+          <div class="text-5xl mb-4">🚗</div>
+          <h4 class="text-xl text-[#094067] font-bold mb-3">Multi-Vehicle</h4>
+          <p class="text-[#5F6C7B]">Manage multiple vehicles from one dashboard.</p>
+        </div>
+      </div>
+      
+      <a href="{% url 'core:order_tag' %}" class="px-9 py-5 bg-[#3DA9FC] flex items-center text-white font-semibold rounded-md shadow-[0_6px_30px_rgba(61,169,252,0.6)] hover:bg-[#3498E4] group transition-all duration-300">
+        <span>Get Started Now</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-narrow-right group-hover:translate-x-1.5 transition duration-300" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <line x1="15" y1="16" x2="19" y2="12"></line>
+          <line x1="15" y1="8" x2="19" y2="12"></line>
+        </svg>
+      </a>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section data-aos="fade-down" data-aos-delay="100" data-aos-duration="700" class="relative w-[95%] mx-auto min-h-[742px] py-24 flex flex-col items-center bg-[#D8EEFE] bg-opacity-75 rounded-xl mb-24">
+      <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Testimonials</span>
+      <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight text-center lg:text-left">What Our Users Say</h2>
+      <p class="mb-8 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] text-center px-2 lg:px-56">Join thousands of vehicle owners who trust Scan2Talk for secure, private communication.</p>
+      <div class="relative w-full">
+        <div class="absolute top-0 left-[-3%] w-[106%]">
+          <div class="swiper comment-slider px-5 h-[340px]">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide w-full max-h-[240px] md:max-h-[215px] xl:max-h-[260px] p-8 sm:px-12 sm:py-8 md:p-6 xl:p-8 rounded-xl shadow-lg bg-white flex flex-col justify-between">
+                <p class="text-sm sm:text-lg md:text-sm xl:text-base text-[#5F6C7B] leading-relaxed">"Scan2Talk is a game-changer! No more worrying about giving out my number to strangers. The QR code works perfectly and I get instant notifications."</p>
+                <div class="flex items-center space-x-4">
+                  <div class="w-10 xl:w-12 h-10 xl:h-12 rounded-full bg-[#3DA9FC] text-white flex items-center justify-center font-bold">
+                    RS
+                  </div>
+                  <div class="flex flex-col justify-between">
+                    <h6 class="text-[#094067] font-medium">Rajesh Sharma</h6>
+                    <p class="text-sm text-[#5F6C7B]">Business Owner</p>
+                  </div>
+                </div>
+              </div>
+              <div class="swiper-slide w-full max-h-[240px] md:max-h-[215px] xl:max-h-[260px] px-12 py-8 md:p-6 xl:p-8 rounded-xl shadow-lg bg-white flex flex-col justify-between">
+                <p class="text-sm sm:text-lg md:text-sm xl:text-base text-[#5F6C7B] leading-relaxed">"Finally, a solution that protects my privacy! The setup was super easy and the tag looks professional on my car. Highly recommend!"</p>
+                <div class="flex items-center space-x-4">
+                  <div class="w-10 xl:w-12 h-10 xl:h-12 rounded-full bg-[#fbbf24] text-white flex items-center justify-center font-bold">
+                    PK
+                  </div>
+                  <div class="flex flex-col justify-between">
+                    <h6 class="text-[#094067] font-medium">Priya Kapoor</h6>
+                    <p class="text-sm text-[#5F6C7B]">Software Engineer</p>
+                  </div>
+                </div>
+              </div>
+              <div class="swiper-slide w-full max-h-[240px] md:max-h-[215px] xl:max-h-[260px] px-12 py-8 md:p-6 xl:p-8 rounded-xl shadow-lg bg-white flex flex-col justify-between">
+                <p class="text-sm sm:text-lg md:text-sm xl:text-base text-[#5F6C7B] leading-relaxed">"Best investment for my vehicle! I've received several parking notifications and it's so convenient. No more missed calls or spam."</p>
+                <div class="flex items-center space-x-4">
+                  <div class="w-10 xl:w-12 h-10 xl:h-12 rounded-full bg-[#10b981] text-white flex items-center justify-center font-bold">
+                    AM
+                  </div>
+                  <div class="flex flex-col justify-between">
+                    <h6 class="text-[#094067] font-medium">Amit Mehta</h6>
+                    <p class="text-sm text-[#5F6C7B]">Marketing Manager</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section data-aos="fade-up" data-aos-delay="50" data-aos-duration="500" class="w-full py-12 flex flex-col items-center mb-24 overflow-x-hidden">
+      <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Frequently Asked Questions</span>
+      <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight text-center lg:text-left">Got Questions? We've Got Answers</h2>
+      <p class="mb-12 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] text-center px-0 lg:px-52">Everything you need to know about Scan2Talk and how it protects your privacy.</p>
+      <div class="w-full max-w-2xl text-sm sm:text-base">
+        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+          <span class="w-full font-medium text-base sm:text-lg">How does Scan2Talk protect my privacy?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <polyline points="6 9 12 15 18 9"></polyline>
+         </svg>
+        </div>
+        <div class="w-full border-b border-[rgba(144,180,206,0.25)] divide-y divide-[rgba(255, 255, 255, 0.1)] text-white bg-[#3DA9FC] rounded-md shadow-[0_30px_60px_rgba(9,64,103,0.25)]">
+          <div class="px-7 py-5 flex items-center justify-between">
+            <span class="w-full font-medium text-base sm:text-lg">Is there a mobile app required?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="rotate-180 icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="px-7 py-5">
+            <p>No app required! Anyone can scan your QR code using their phone's camera. You'll receive notifications via SMS, WhatsApp, or email—whatever you prefer.</p>
+          </div>
+        </div>
+        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+          <span class="w-full font-medium text-base sm:text-lg">How long does the QR code tag last?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <polyline points="6 9 12 15 18 9"></polyline>
+         </svg>
+        </div>
+        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+          <span class="w-full font-medium text-base sm:text-lg">Can I use it for multiple vehicles?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <polyline points="6 9 12 15 18 9"></polyline>
+         </svg>
+        </div>
+        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+          <span class="w-full font-medium text-base sm:text-lg">What if someone misuses the QR code?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <polyline points="6 9 12 15 18 9"></polyline>
+         </svg>
+        </div>
+        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+          <span class="w-full font-medium text-base sm:text-lg">How much does it cost?</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <polyline points="6 9 12 15 18 9"></polyline>
+         </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section data-aos="zoom-in" data-aos-delay="50" data-aos-duration="500" class="relative w-full bg-[#D8EEFE] py-12 rounded-xl shadow-[0_6px_30px_rgba(9,64,103,0.13)] mb-24 overflow-hidden">
+      <div class="relative z-10 flex flex-col items-center px-4 sm:px-8">
+        <h3 class="text-2xl sm:text-3xl lg:text-4xl text-[#094067] text-center font-bold leading-tight px-0 lg:px-24 xl:px-48 mb-9">Ready to Protect Your Privacy? Get Your QR Code Today!</h3>
+        <div class="w-full flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+          <a href="{% url 'core:order_tag' %}" class="w-full sm:w-fit bg-[#3DA9FC] px-8 py-4 text-white font-bold shadow-md shadow-[rgba(61,169,252,0.25)] rounded-md hover:bg-[#3498E4] transition-colors duration-300">
+            Order Your QR Code
+          </a>
+          <a href="{% url 'core:contact' %}" class="w-full sm:w-fit bg-white px-8 py-4 text-[#094067] font-bold shadow-md rounded-md hover:bg-gray-50 transition-colors duration-300">
+            Contact Us
+          </a>
+        </div>
+      </div>
+      <div class="absolute top-[-140%] left-[-27%] w-[500px] h-[680px] border-8 border-[rgba(255,255,255,0.75)] rounded-full"></div>
+      <div class="absolute bottom-[-190%] left-[-25%] w-[500px] h-[680px] rotate-45 border-8 border-[rgba(255,255,255,0.75)] rounded-full"></div>
+      <div class="absolute top-[-140%] right-[-27%] w-[500px] h-[680px] border-8 border-[rgba(255,255,255,0.75)] rounded-full"></div>
+      <div class="absolute bottom-[-190%] right-[-16%] w-[500px] h-[680px] rotate-45 border-8 border-[rgba(255,255,255,0.75)] rounded-full"></div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+  AOS.init();
+  const swiper = new Swiper('.comment-slider', {
+    loop: true,
+    slidesPerView: 1,
+    spaceBetween: 30,
+    breakpoints: {
+      768: {
+        slidesPerView: 2,
+      },
+      1024: {
+        slidesPerView: 3,
+      },
+    },
+    pagination: {
+      el: '.swiper-pagination',
+    },
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+  });
+</script>
+{% endblock %}

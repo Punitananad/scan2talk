@@ -739,6 +739,7 @@ def manage_tag_orders(request):
 
 
 @staff_member_required
+@staff_member_required
 @require_http_methods(["POST"])
 def update_order_status(request, order_id):
     """
@@ -775,3 +776,19 @@ def update_order_status(request, order_id):
     
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+@staff_member_required
+def order_detail_view(request, order_id):
+    """
+    View detailed information about a specific order.
+    Shows customer details, order items, payment info, delivery status, etc.
+    """
+    order = get_object_or_404(TagOrder, order_id=order_id)
+    
+    context = {
+        'order': order,
+        'status_choices': TagOrder.STATUS_CHOICES,
+    }
+    
+    return render(request, 'admin/order_detail.html', context)

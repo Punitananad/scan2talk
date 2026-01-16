@@ -130,6 +130,21 @@ def batch_preview_page(request, batch_number):
 
 
 @staff_member_required
+def tag_clean_view(request):
+    """
+    Display the clean tag design page.
+    """
+    return render(request, 'gateways/tag_clean.html')
+
+
+def tag_print_design(request):
+    """
+    Display the print-ready tag design (HTML/CSS only, no images).
+    """
+    return render(request, 'gateways/tag_print_design.html')
+
+
+@staff_member_required
 def qr_dashboard(request):
     """
     Dashboard to view and manage all QR codes.

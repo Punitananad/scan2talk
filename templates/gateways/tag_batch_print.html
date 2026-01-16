@@ -1,0 +1,305 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scan 2 Talk – Batch Print</title>
+
+<style>
+@page {
+  size: A4;
+  margin: 5mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ================= GRID LAYOUT ================= */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 5mm;
+  page-break-after: avoid;
+  page-break-inside: avoid;
+}
+
+.page:not(:last-child) {
+  page-break-after: always;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 5mm;
+  width: 100%;
+  height: 100%;
+}
+
+/* ================= TAG ================= */
+.tag {
+  width: 100mm;
+  height: 70mm;
+  padding: 0;
+  border: 0.5mm solid #000;
+  border-radius: 0;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+
+.tag-content {
+  flex: 1;
+  padding: 3mm 4mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4mm;
+}
+
+/* ================= LEFT ================= */
+.left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.logo-box {
+  width: 35mm;
+}
+
+.logo-box img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* HEADINGS */
+.heading-en {
+  font-size: 5.5mm;
+  font-weight: 800;
+  color: #000;
+  margin-top: 0.5mm;
+  line-height: 1.15;
+}
+
+.heading-hi {
+  font-size: 4mm;
+  font-weight: 800;
+  color: #000;
+  margin-top: 1mm;
+  line-height: 1.2;
+}
+
+/* HIGHLIGHT LINE */
+.highlight {
+  width: 42mm;
+  height: 1.5mm;
+  background: #f5c400;
+  margin: 1.5mm 0;
+}
+
+/* ================= RIGHT ================= */
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* QR ZONE */
+.qr-box {
+  width: 38mm;
+  height: 38mm;
+  padding: 1.5mm;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    #000 0 1.5mm,
+    #f5c400 1.5mm 3mm
+  );
+}
+
+.qr-inner {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5mm;
+  font-weight: 800;
+  text-align: center;
+  color: #000;
+}
+
+.qr-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  font-size: 2.2mm;
+  font-weight: 700;
+  margin-top: 1.5mm;
+  line-height: 1.3;
+  color: #333;
+}
+
+.footer-instruction {
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 2.5mm;
+  line-height: 1.2;
+  letter-spacing: 0.1px;
+  font-family: "Segoe UI", "Roboto", sans-serif;
+}
+
+.footer strong {
+  font-weight: 900;
+  color: #000;
+  font-size: 3mm;
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, #f5c400 0%, #ffd700 100%);
+  padding: 0.8mm 2mm;
+  border-radius: 1.5mm;
+  border: 0.5mm solid #000;
+  display: inline-block;
+  margin-top: 0.8mm;
+}
+
+/* ================= BOTTOM FOOTER BAR ================= */
+.bottom-bar {
+  width: 100%;
+  height: 5mm;
+  background: #111111;
+  display: flex;
+  align-items: center;
+  padding: 0 3mm;
+  gap: 2mm;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.icon-row {
+  display: flex;
+  gap: 1.5mm;
+  align-items: center;
+}
+
+.icon {
+  font-size: 2.8mm;
+  line-height: 1;
+}
+
+.bottom-text {
+  font-size: 1.8mm;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.2px;
+  flex: 1;
+}
+
+.bottom-text strong {
+  font-weight: 800;
+  color: #f5c400;
+}
+
+/* ================= PRINT ================= */
+@media print {
+  .tag {
+    box-shadow: none;
+  }
+  
+  .page {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .page:not(:last-child) {
+    page-break-after: always;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+{% for page_qrs in qr_pages %}
+<div class="page">
+  <div class="grid">
+    {% for qr in page_qrs %}
+    <div class="tag">
+      <div class="tag-content">
+        <!-- LEFT -->
+        <div class="left">
+          <div class="logo-box">
+            <img src="{% static 'tag/header.jpeg' %}" alt="Scan2Talk Logo">
+          </div>
+
+          <div>
+            <div class="heading-en">
+              Scan the code to contact the vehicle owner
+            </div>
+
+            <div class="highlight"></div>
+
+            <div class="heading-hi">
+              कोड स्कैन करें और वाहन मालिक से संपर्क करें
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+          <div class="qr-box">
+            <div class="qr-inner">
+              <img src="data:image/png;base64,{{ qr.qr_code_data }}" alt="QR Code">
+            </div>
+          </div>
+
+          <div class="footer">
+            <div class="footer-instruction">Scan using phone camera, Google Lens or any QR scanner app</div>
+            <strong>SCAN2TALK.IN</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM FOOTER BAR -->
+      <div class="bottom-bar">
+        <div class="icon-row">
+          <span class="icon">🔔</span>
+          <span class="icon">🅿️</span>
+          <span class="icon">⚠️</span>
+          <span class="icon">📞</span>
+        </div>
+        <div class="bottom-text">
+          <strong>Wrong Parking Emergency Contact:</strong> Any issue with the vehicle? Scan the QR.
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+</body>
+</html>

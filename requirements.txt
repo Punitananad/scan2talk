@@ -17,3 +17,4 @@ twilio==8.10.0
 requests==2.31.0
 numpy==1.24.3
 reportlab==4.0.7
+xhtml2pdf==0.2.13

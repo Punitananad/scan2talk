@@ -128,7 +128,9 @@
                         {% for order in orders %}
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="font-mono text-sm font-semibold text-blue-600">{{ order.order_id }}</span>
+                                <a href="{% url 'accounts:order_detail' order.order_id %}" class="font-mono text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ order.order_id }}
+                                </a>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900">{{ order.name }}</div>
@@ -267,12 +269,9 @@ document.getElementById('updateForm').addEventListener('submit', async function(
     const formData = new FormData(this);
     
     try {
-        const response = await fetch(`/api/v1/auth/admin/orders/${orderId}/update/`, {
+        const response = await fetch(`/accounts/admin/orders/${orderId}/update/`, {
             method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            }
+            body: formData
         });
         
         const data = await response.json();
@@ -284,6 +283,7 @@ document.getElementById('updateForm').addEventListener('submit', async function(
             alert('Error: ' + data.error);
         }
     } catch (error) {
+        console.error('Error:', error);
         alert('Network error: ' + error.message);
     }
 });

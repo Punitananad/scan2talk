@@ -48,6 +48,7 @@ urlpatterns = [
     path('admin/users/<uuid:user_id>/lock/', admin_views.admin_lock_user, name='admin_lock_user'),
     path('admin/users/<uuid:user_id>/unlock/', admin_views.admin_unlock_user, name='admin_unlock_user'),
     path('admin/orders/', admin_views.manage_tag_orders, name='manage_tag_orders'),
+    path('admin/orders/<str:order_id>/', admin_views.order_detail_view, name='order_detail'),
     path('admin/orders/<str:order_id>/update/', admin_views.update_order_status, name='update_order_status'),
     
     # ===== API ENDPOINTS =====
