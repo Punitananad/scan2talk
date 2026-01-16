@@ -173,12 +173,8 @@
                 <button 
                    onclick="window.open('{% url 'gateways:preview_batch_sample' batch_filter %}', '_blank', 'width=800,height=600')"
                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm">
-                    👁️ Preview Sample
+                    👁️ Preview & Print
                 </button>
-                <a href="{% url 'gateways:download_batch_pdf' batch_filter %}" 
-                   class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm">
-                    📄 Download as PDF
-                </a>
                 <a href="{% url 'gateways:download_batch_zip' batch_filter %}" 
                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">
                     📦 Download as ZIP

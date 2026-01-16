@@ -60,59 +60,7 @@ def preview_batch_sample(request, batch_number):
     return render(request, 'gateways/tag_batch_print.html', context)
 
 
-@staff_member_required
-@require_http_methods(["GET"])
-def download_batch_pdf(request, batch_number):
-    """
-    Download all QR codes as printable A4 sheets using HTML template.
-    Layout: 2 columns x 4 rows = 8 tags per A4 page.
-    Uses xhtml2pdf for HTML to PDF conversion (Windows compatible).
-    """
-    try:
-        from xhtml2pdf import pisa
-    except ImportError:
-        return HttpResponse(
-            "xhtml2pdf is not installed. Please install it: pip install xhtml2pdf",
-            status=500
-        )
-    
-    batch = get_object_or_404(QRBatch, batch_number=batch_number)
-    qr_codes = list(PreGeneratedQR.objects.filter(batch_number=batch_number))
-    
-    if not qr_codes:
-        return HttpResponse("No QR codes in this batch", status=404)
-    
-    # Generate QR codes with base64 data
-    qr_data_list = []
-    for qr in qr_codes:
-        qr_data_list.append({
-            'qr_code': qr.qr_code,
-            'qr_code_data': generate_qr_base64(qr.qr_code)
-        })
-    
-    # Split into pages (8 tags per page: 2 cols x 4 rows)
-    tags_per_page = 8
-    qr_pages = [qr_data_list[i:i + tags_per_page] for i in range(0, len(qr_data_list), tags_per_page)]
-    
-    # Render HTML template
-    context = {
-        'qr_pages': qr_pages,
-        'batch_number': batch_number,
-    }
-    
-    html_string = render_to_string('gateways/tag_batch_print.html', context, request=request)
-    
-    # Convert HTML to PDF using xhtml2pdf
-    result = io.BytesIO()
-    pdf = pisa.pisaDocument(io.BytesIO(html_string.encode("UTF-8")), result)
-    
-    if pdf.err:
-        return HttpResponse(f"Error generating PDF: {pdf.err}", status=500)
-    
-    # Return PDF
-    response = HttpResponse(result.getvalue(), content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="PrintReady_Batch_{batch_number}.pdf"'
-    return response
+# PDF download functionality removed - use preview_batch_sample instead
 
 
 @staff_member_required

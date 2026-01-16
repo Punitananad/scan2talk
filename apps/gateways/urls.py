@@ -29,7 +29,7 @@ urlpatterns = [
     path('qr/<uuid:qr_id>/download/', qr_download_views.download_qr_image, name='download_qr_image'),
     path('qr/<uuid:qr_id>/view/', qr_download_views.view_qr_image, name='view_qr_image'),
     path('qr/batch/<str:batch_number>/preview/', qr_download_views.preview_batch_sample, name='preview_batch_sample'),
-    path('qr/batch/<str:batch_number>/download-pdf/', qr_download_views.download_batch_pdf, name='download_batch_pdf'),
+    # PDF download removed - use preview and browser print instead
     path('qr/batch/<str:batch_number>/download-zip/', qr_download_views.download_qr_zip, name='download_batch_zip'),
     
     # QR Code Activation (User)
