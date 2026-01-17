@@ -29,7 +29,15 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS') + ['192.168.1.75']
+ALLOWED_HOSTS = env('ALLOWED_HOSTS') + ['192.168.1.75', 'scan2talk.in', 'www.scan2talk.in', '68.183.91.15']
+
+# CSRF Trusted Origins (for production domain)
+CSRF_TRUSTED_ORIGINS = [
+    'https://scan2talk.in',
+    'http://scan2talk.in',
+    'https://www.scan2talk.in',
+    'http://www.scan2talk.in',
+]
 
 # Application definition
 DJANGO_APPS = [
