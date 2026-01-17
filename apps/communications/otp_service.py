@@ -29,6 +29,9 @@ class SMSCountryOTPService:
     OTP_LENGTH = 6
     OTP_EXPIRY_MINUTES = 5
     MAX_VERIFICATION_ATTEMPTS = 3
+    RESEND_COOLDOWN_SECONDS = 30  # 30 seconds between resends
+    LOCKOUT_DURATION_HOURS = 2  # 2 hours lockout after max failed attempts
+    MAX_FAILED_ATTEMPTS = 3  # Max failed verification attempts before lockout
     
     def __init__(self):
         """Initialize with credentials from environment."""
@@ -63,7 +66,7 @@ class SMSCountryOTPService:
     
     def send_otp(self, phone_number, otp=None):
         """
-        Send OTP via SMSCountry REST API.
+        Send OTP via SMSCountry REST API with rate limiting.
         
         Args:
             phone_number: 10-digit mobile number (without country code)
@@ -72,6 +75,20 @@ class SMSCountryOTPService:
         Returns:
             tuple: (success: bool, otp: str, message: str)
         """
+        # Check if phone is locked out
+        lockout_key = f"otp_lockout_{phone_number}"
+        if cache.get(lockout_key):
+            lockout_until = cache.get(f"otp_lockout_until_{phone_number}")
+            return False, None, f"Too many failed attempts. Please try again after {lockout_until}."
+        
+        # Check resend cooldown
+        cooldown_key = f"otp_resend_cooldown_{phone_number}"
+        last_sent = cache.get(cooldown_key)
+        if last_sent:
+            remaining = self.RESEND_COOLDOWN_SECONDS - (timezone.now() - last_sent).seconds
+            if remaining > 0:
+                return False, None, f"Please wait {remaining} seconds before requesting a new OTP."
+        
         # Generate OTP if not provided
         if not otp:
             otp = self.generate_otp()
@@ -90,6 +107,8 @@ class SMSCountryOTPService:
                 print(f"\n{'='*50}")
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"{'='*50}\n")
+                # Set cooldown even in dev mode
+                cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - not sent)"
             return False, None, "SMS service not configured"
         
@@ -136,6 +155,7 @@ class SMSCountryOTPService:
                     print(f"📱 OTP for {phone_number}: {otp}")
                     print(f"⚠️  API returned invalid JSON")
                     print(f"{'='*50}\n")
+                    cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                     return True, otp, "OTP generated (dev mode - invalid JSON)"
                 return False, None, "Invalid response from SMS service"
             
@@ -147,6 +167,9 @@ class SMSCountryOTPService:
                 # Store message ID for delivery tracking
                 cache_key = f"otp_message_id_{phone_number}"
                 cache.set(cache_key, message_id, self.OTP_EXPIRY_MINUTES * 60)
+                
+                # Set resend cooldown
+                cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 
                 return True, otp, "OTP sent successfully"
             else:
@@ -162,6 +185,7 @@ class SMSCountryOTPService:
                     print(f"📱 OTP for {phone_number}: {otp}")
                     print(f"⚠️  API Error: {error_msg}")
                     print(f"{'='*50}\n")
+                    cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                     return True, otp, "OTP generated (dev mode - API error ignored)"
                 
                 return False, None, f"SMS delivery failed: {error_msg}"
@@ -173,6 +197,7 @@ class SMSCountryOTPService:
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"⚠️  API Timeout")
                 print(f"{'='*50}\n")
+                cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - timeout ignored)"
             return False, None, "SMS service timeout. Please try again."
         except requests.exceptions.RequestException as e:
@@ -182,6 +207,7 @@ class SMSCountryOTPService:
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"⚠️  Request Error: {str(e)}")
                 print(f"{'='*50}\n")
+                cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - request error ignored)"
             return False, None, "Failed to send OTP. Please try again."
         except Exception as e:
@@ -191,6 +217,7 @@ class SMSCountryOTPService:
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"⚠️  Error: {str(e)}")
                 print(f"{'='*50}\n")
+                cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - error ignored)"
             return False, None, "An error occurred. Please try again."
     
@@ -221,11 +248,17 @@ class SMSCountryOTPService:
     
     def verify_otp(self, phone_number, otp):
         """
-        Verify OTP for phone number.
+        Verify OTP for phone number with lockout protection.
         
         Returns:
             tuple: (success: bool, message: str)
         """
+        # Check if phone is locked out
+        lockout_key = f"otp_lockout_{phone_number}"
+        if cache.get(lockout_key):
+            lockout_until = cache.get(f"otp_lockout_until_{phone_number}")
+            return False, f"Too many failed attempts. Please try again after {lockout_until}."
+        
         cache_key = f"otp_{phone_number}"
         cache_data = cache.get(cache_key)
         
@@ -240,8 +273,9 @@ class SMSCountryOTPService:
         # Verify OTP
         otp_hash = self.hash_otp(otp)
         if otp_hash == cache_data['otp_hash']:
-            # Success - delete OTP
+            # Success - delete OTP and clear any failed attempt tracking
             cache.delete(cache_key)
+            cache.delete(f"otp_failed_attempts_{phone_number}")
             logger.info(f"OTP verified successfully for {phone_number}")
             return True, "OTP verified successfully"
         else:
@@ -249,12 +283,35 @@ class SMSCountryOTPService:
             cache_data['attempts'] -= 1
             remaining = cache_data['attempts']
             
+            # Track total failed attempts for lockout
+            failed_attempts_key = f"otp_failed_attempts_{phone_number}"
+            failed_attempts = cache.get(failed_attempts_key, 0) + 1
+            cache.set(failed_attempts_key, failed_attempts, 3600)  # Track for 1 hour
+            
             if remaining > 0:
                 cache.set(cache_key, cache_data, self.OTP_EXPIRY_MINUTES * 60)
+                
+                # Check if we should trigger lockout
+                if failed_attempts >= self.MAX_FAILED_ATTEMPTS:
+                    # Lockout for 2 hours
+                    lockout_seconds = self.LOCKOUT_DURATION_HOURS * 3600
+                    cache.set(lockout_key, True, lockout_seconds)
+                    
+                    # Calculate lockout end time
+                    from datetime import datetime, timedelta
+                    lockout_until = (timezone.now() + timedelta(hours=self.LOCKOUT_DURATION_HOURS)).strftime('%I:%M %p')
+                    cache.set(f"otp_lockout_until_{phone_number}", lockout_until, lockout_seconds)
+                    
+                    # Clear OTP data
+                    cache.delete(cache_key)
+                    
+                    logger.warning(f"Phone {phone_number} locked out after {failed_attempts} failed attempts")
+                    return False, f"Too many failed attempts. Account locked until {lockout_until}. Please try again later."
+                
                 return False, f"Invalid OTP. {remaining} attempt(s) remaining."
             else:
                 cache.delete(cache_key)
-                return False, "Invalid OTP. Maximum attempts exceeded."
+                return False, "Invalid OTP. Maximum attempts exceeded. Please request a new OTP."
     
     def invalidate_otp(self, phone_number):
         """Invalidate/delete OTP for phone number."""
@@ -300,10 +357,26 @@ class SMSCountryOTPService:
     def resend_otp(self, phone_number):
         """
         Resend OTP (generates new OTP and invalidates old one).
+        Enforces 30-second cooldown between resends.
         
         Returns:
             tuple: (success: bool, message: str)
         """
+        # Check if phone is locked out
+        lockout_key = f"otp_lockout_{phone_number}"
+        if cache.get(lockout_key):
+            lockout_until = cache.get(f"otp_lockout_until_{phone_number}")
+            return False, f"Too many failed attempts. Please try again after {lockout_until}."
+        
+        # Check resend cooldown
+        cooldown_key = f"otp_resend_cooldown_{phone_number}"
+        last_sent = cache.get(cooldown_key)
+        if last_sent:
+            elapsed = (timezone.now() - last_sent).seconds
+            remaining = self.RESEND_COOLDOWN_SECONDS - elapsed
+            if remaining > 0:
+                return False, f"Please wait {remaining} seconds before requesting a new OTP."
+        
         # Invalidate old OTP
         self.invalidate_otp(phone_number)
         

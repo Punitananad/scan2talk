@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Demo QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .qr-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .qr-box {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            padding: 10px;
+            background: repeating-linear-gradient(
+                45deg,
+                #000 0 5px,
+                #f5c400 5px 10px
+            );
+            border-radius: 10px;
+        }
+        .qr-inner {
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        h1 {
+            color: #094067;
+        }
+        .instructions {
+            background: #D8EEFE;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .phone {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3DA9FC;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎉 Demo QR Code Test</h1>
+    
+    <div class="instructions">
+        <p><strong>Scan this QR code with your phone camera</strong></p>
+        <p class="phone">📞 +91 7988269874</p>
+        <p>It should prompt you to call the number directly!</p>
+    </div>
+
+    <div class="qr-container">
+        <div class="qr-box">
+            <div class="qr-inner">
+                <img src="static/tag/demo_qr.png" alt="Scan to Call +91 7988269874">
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>✨ Features:</h3>
+        <ul style="text-align: left; display: inline-block;">
+            <li>Rounded corners for modern look</li>
+            <li>Yellow phone icon in center</li>
+            <li>High error correction</li>
+            <li>Print-ready quality</li>
+            <li>Direct tel: URI scheme</li>
+        </ul>
+    </div>
+
+    <p style="color: #5F6C7B; margin-top: 30px;">
+        <strong>Note:</strong> This QR code is now embedded in the home page slider!
+    </p>
+</body>
+</html>

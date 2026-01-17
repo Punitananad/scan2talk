@@ -3,110 +3,123 @@
 
 {% block title %}Order Your QR Tag - Scan2Talk{% endblock %}
 
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #FFFFFE;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">Order Your QR Tag</h1>
-            <p class="text-xl text-gray-600">Get a premium physical tag delivered to your doorstep</p>
+<div class="min-h-screen bg-[#FFFFFE] py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="inline-block px-3 py-1.5 mb-4 bg-[#3DA9FC] bg-opacity-10 text-[#3DA9FC] font-semibold tracking-wide rounded-full">• Premium QR Tags</span>
+            <h1 class="text-5xl font-extrabold text-[#094067] mb-4">Order Your QR Tag</h1>
+            <p class="text-xl text-[#5F6C7B] font-medium">Get a premium physical tag delivered to your doorstep</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Order Form -->
-            <div class="bg-white rounded-2xl shadow-xl p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Delivery Details</h2>
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <h2 class="text-2xl font-bold text-[#094067] mb-6">Delivery Details</h2>
                 
                 <form method="post" x-data="orderForm()">
                     {% csrf_token %}
                     
                     <!-- Name -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[#094067] mb-2">Full Name *</label>
                         <input 
                             type="text" 
                             name="name" 
                             x-model="name"
                             required
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
                             placeholder="Enter your full name"
                         >
                     </div>
 
                     <!-- Phone -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[#094067] mb-2">Phone Number *</label>
                         <input 
                             type="tel" 
                             name="phone" 
                             x-model="phone"
                             required
                             pattern="[0-9]{10}"
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
                             placeholder="10-digit mobile number"
                         >
                     </div>
 
                     <!-- Email -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[#094067] mb-2">Email Address *</label>
                         <input 
                             type="email" 
                             name="email" 
                             x-model="email"
                             required
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
                             placeholder="your@email.com"
                         >
                     </div>
 
                     <!-- Address -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[#094067] mb-2">Street Address *</label>
                         <textarea 
                             name="address" 
                             x-model="address"
                             required
                             rows="3"
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
                             placeholder="House/Flat No., Street, Locality"
                         ></textarea>
                     </div>
 
                     <!-- City -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[#094067] mb-2">City *</label>
                         <input 
                             type="text" 
                             name="city" 
                             x-model="city"
                             required
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
                             placeholder="Enter city"
                         >
                     </div>
 
                     <!-- State & PIN -->
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                            <label class="block text-sm font-semibold text-[#094067] mb-2">State *</label>
                             <input 
                                 type="text" 
                                 name="state" 
                                 x-model="state"
                                 required
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
                                 placeholder="State"
                             >
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">PIN Code *</label>
+                            <label class="block text-sm font-semibold text-[#094067] mb-2">PIN Code *</label>
                             <input 
                                 type="text" 
                                 name="pincode" 
                                 x-model="pincode"
                                 required
                                 pattern="[0-9]{6}"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
                                 placeholder="6-digit PIN"
                             >
                         </div>
@@ -114,34 +127,56 @@
 
                     <!-- Quantity -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                        <select 
-                            name="quantity" 
-                            x-model="quantity"
-                            @change="updateTotal()"
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="1">1 Tag - ₹299</option>
-                            <option value="2">2 Tags - ₹549 (Save ₹49)</option>
-                            <option value="3">3 Tags - ₹799 (Save ₹98)</option>
-                            <option value="5">5 Tags - ₹1,299 (Save ₹196)</option>
-                        </select>
+                        <label class="block text-sm font-semibold text-[#094067] mb-2">Quantity</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <select 
+                                name="quantity" 
+                                x-model="quantity"
+                                @change="updateTotal()"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all font-medium text-[#094067]"
+                            >
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                            <input 
+                                type="number" 
+                                x-model="customQuantity"
+                                @input="handleCustomQuantity()"
+                                x-show="quantity === 'custom'"
+                                min="1"
+                                max="1000"
+                                placeholder="Enter quantity"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all font-medium text-[#094067]"
+                            >
+                        </div>
+                        <p x-show="quantity === 'custom'" class="text-xs text-[#5F6C7B] mt-2 font-medium">
+                            💡 For bulk orders (50+), contact us for special pricing
+                        </p>
                     </div>
 
                     <!-- Price Summary -->
-                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                    <div class="bg-gradient-to-br from-[#D8EEFE] to-[#3DA9FC]/10 border-2 border-[#3DA9FC]/30 rounded-xl p-6 mb-6">
                         <div class="flex justify-between items-center mb-3">
-                            <span class="text-gray-700">Subtotal</span>
-                            <span class="text-gray-900 font-semibold" x-text="`₹${subtotal}`"></span>
+                            <span class="text-[#5F6C7B] font-medium">Subtotal</span>
+                            <span class="text-[#094067] font-bold text-lg" x-text="`₹${subtotal}`"></span>
                         </div>
                         <div class="flex justify-between items-center mb-3">
-                            <span class="text-gray-700">Shipping</span>
-                            <span class="text-green-600 font-semibold">FREE</span>
+                            <span class="text-[#5F6C7B] font-medium">Shipping</span>
+                            <span class="text-[#10b981] font-bold">FREE</span>
                         </div>
-                        <div class="border-t-2 border-blue-300 pt-3 mt-3">
+                        <div class="border-t-2 border-[#3DA9FC]/30 pt-3 mt-3">
                             <div class="flex justify-between items-center">
-                                <span class="text-lg font-bold text-gray-900">Total</span>
-                                <span class="text-2xl font-bold text-blue-600" x-text="`₹${total}`"></span>
+                                <span class="text-lg font-bold text-[#094067]">Total</span>
+                                <span class="text-3xl font-extrabold text-[#3DA9FC]" x-text="`₹${total}`"></span>
                             </div>
                         </div>
                     </div>
@@ -149,84 +184,84 @@
                     <!-- Submit Button -->
                     <button 
                         type="submit"
-                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg"
+                        class="w-full bg-[#3DA9FC] hover:bg-[#3498E4] text-white py-4 px-6 rounded-lg font-bold text-lg transition-all shadow-[0_6px_30px_rgba(61,169,252,0.6)] hover:shadow-[0_8px_40px_rgba(61,169,252,0.8)] transform hover:scale-[1.02]"
                     >
-                        Proceed to Payment
+                        Proceed to Payment →
                     </button>
 
-                    <p class="text-sm text-gray-500 text-center mt-4">
+                    <p class="text-sm text-[#5F6C7B] text-center mt-4 font-medium">
                         🔒 Secure payment • 📦 Free shipping • ✅ 7-day delivery
                     </p>
                 </form>
             </div>
 
             <!-- Tag Preview -->
-            <div class="bg-white rounded-2xl shadow-xl p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">What You'll Get</h2>
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <h2 class="text-2xl font-bold text-[#094067] mb-6">What You'll Get</h2>
                 
-                <!-- Tag Image -->
-                <div class="mb-6">
-                    <img 
-                        src="{% static 'tag/final-poster.jpeg' %}" 
-                        alt="QR Tag Preview" 
-                        class="w-full rounded-xl shadow-lg"
-                    >
+                <!-- Demo Tag Preview -->
+                <div class="mb-6 bg-gray-50 p-6 rounded-xl">
+                    <div class="flex justify-center">
+                        <div style="transform: scale(0.75); transform-origin: center;">
+                            {% include 'gateways/tag_print_design.html' with qr_code_data=None %}
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Features -->
-                <div class="space-y-4">
+                <div class="space-y-4 mb-6">
                     <div class="flex items-start">
-                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-[#10b981] mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                         <div>
-                            <h3 class="font-semibold text-gray-900">Premium Quality</h3>
-                            <p class="text-sm text-gray-600">Waterproof, UV-resistant, durable material</p>
+                            <h3 class="font-bold text-[#094067]">Premium Quality</h3>
+                            <p class="text-sm text-[#5F6C7B] font-medium">Waterproof, UV-resistant, durable material</p>
                         </div>
                     </div>
 
                     <div class="flex items-start">
-                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-[#10b981] mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                         <div>
-                            <h3 class="font-semibold text-gray-900">Easy Installation</h3>
-                            <p class="text-sm text-gray-600">Self-adhesive backing, sticks to any surface</p>
+                            <h3 class="font-bold text-[#094067]">Easy Installation</h3>
+                            <p class="text-sm text-[#5F6C7B] font-medium">Self-adhesive backing, sticks to any surface</p>
                         </div>
                     </div>
 
                     <div class="flex items-start">
-                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-[#10b981] mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                         <div>
-                            <h3 class="font-semibold text-gray-900">Unique QR Code</h3>
-                            <p class="text-sm text-gray-600">Pre-activated and ready to use</p>
+                            <h3 class="font-bold text-[#094067]">Unique QR Code</h3>
+                            <p class="text-sm text-[#5F6C7B] font-medium">Pre-activated and ready to use</p>
                         </div>
                     </div>
 
                     <div class="flex items-start">
-                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-[#10b981] mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                         <div>
-                            <h3 class="font-semibold text-gray-900">Lifetime Service</h3>
-                            <p class="text-sm text-gray-600">No subscription, works forever</p>
+                            <h3 class="font-bold text-[#094067]">Lifetime Service</h3>
+                            <p class="text-sm text-[#5F6C7B] font-medium">No subscription, works forever</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Testimonial -->
-                <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
+                <div class="bg-gradient-to-br from-[#D8EEFE] to-[#3DA9FC]/10 border-2 border-[#3DA9FC]/30 rounded-xl p-6">
                     <div class="flex items-center mb-3">
-                        <div class="flex text-yellow-400">
+                        <div class="flex text-[#fbbf24] text-xl">
                             ⭐⭐⭐⭐⭐
                         </div>
                     </div>
-                    <p class="text-gray-700 italic mb-3">
+                    <p class="text-[#094067] italic mb-3 font-medium">
                         "Best investment for my car! Someone messaged me about my headlights being on. Saved my battery!"
                     </p>
-                    <p class="text-sm text-gray-600 font-semibold">- Rahul S., Delhi</p>
+                    <p class="text-sm text-[#5F6C7B] font-bold">- Rahul S., Delhi</p>
                 </div>
             </div>
         </div>
@@ -244,19 +279,29 @@ function orderForm() {
         state: '',
         pincode: '',
         quantity: 1,
+        customQuantity: '',
         subtotal: 299,
         total: 299,
-        
-        prices: {
-            1: 299,
-            2: 549,
-            3: 799,
-            5: 1299
-        },
+        basePrice: 299,
         
         updateTotal() {
-            this.subtotal = this.prices[this.quantity];
+            if (this.quantity === 'custom') {
+                return; // Don't update if custom is selected but no value entered yet
+            }
+            const qty = parseInt(this.quantity);
+            this.subtotal = this.basePrice * qty;
             this.total = this.subtotal;
+        },
+        
+        handleCustomQuantity() {
+            const qty = parseInt(this.customQuantity);
+            if (qty && qty > 0) {
+                this.subtotal = this.basePrice * qty;
+                this.total = this.subtotal;
+            } else {
+                this.subtotal = 0;
+                this.total = 0;
+            }
         }
     }
 }

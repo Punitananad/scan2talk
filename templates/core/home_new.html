@@ -16,17 +16,37 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: #FFFFFE;
 }
+
+/* Tag zoom effect on hover */
+.tag-zoom-container:hover {
+  transform: scale(1.05) !important;
+  cursor: pointer;
+}
+
+/* Pulse animation for QR code */
+@keyframes pulse-qr {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(61, 169, 252, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(61, 169, 252, 0);
+  }
+}
+
+.tag-zoom-container:hover .qr-box {
+  animation: pulse-qr 2s infinite;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <main class="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-5">
     <!-- Hero Section -->
-    <section data-aos="fade-up" data-aos-duration="1000" class="grid grid-cols-6 lg:grid-cols-12 mb-20 mt-8">
-      <div class="col-span-6 text-center lg:text-left">
+    <section data-aos="fade-up" data-aos-duration="1000" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20 mt-8">
+      <div class="lg:col-span-6 text-center lg:text-left">
         <span class="inline-block px-3 py-1.5 mb-4 bg-[#3DA9FC] bg-opacity-10 text-[#3DA9FC] font-semibold tracking-wide rounded-full">• Privacy-First Vehicle Contact</span>
-        <h1 class="text-5xl sm:text-6xl md:text-7xl mb-4 font-extrabold text-[#094067] leading-tight">Connect Without <span class="text-[#3DA9FC]">Sharing</span> Your Number</h1>
-        <p class="mb-6 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] pr-0 md:pr-4 xl:pr-32">Scan2Talk helps you stay reachable for parking, emergencies & more—without revealing your phone number. Smart QR codes for modern vehicle owners.</p>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 font-extrabold text-[#094067] leading-tight">Connect Without <span class="text-[#3DA9FC]">Sharing</span> Your Number</h1>
+        <p class="mb-6 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B]">Scan2Talk helps you stay reachable for parking, emergencies & more—without revealing your phone number. Smart QR codes for modern vehicle owners.</p>
         <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 justify-center lg:justify-start">
           <a href="{% url 'core:order_tag' %}" class="w-full md:w-fit px-9 py-5 bg-[#3DA9FC] flex items-center justify-center md:justify-start text-white font-semibold rounded-md shadow-[0_6px_30px_rgba(61,169,252,0.6)] hover:bg-[#3498E4] group transition-colors duration-300">
             <span>Order Your QR Code</span>
@@ -48,8 +68,94 @@ body {
           </a>
         </div>
       </div>
-      <div class="col-span-6 pl-24 hidden lg:block">
-        <img src="{% static 'tag/final-logo.jpeg' %}" alt="Scan2Talk QR Code" class="rounded-2xl shadow-2xl">
+      <div class="lg:col-span-6 mt-8 lg:mt-0">
+        <!-- Auto-Sliding Hero Carousel -->
+        <div class="swiper hero-slider rounded-2xl shadow-2xl overflow-hidden">
+          <div class="swiper-wrapper">
+            <!-- Slide 1: Live Tag Design -->
+            <div class="swiper-slide">
+              <div class="relative bg-white p-6 rounded-2xl border-4 border-[#3DA9FC]/20">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg z-10">
+                  ⭐ Actual Tag Design
+                </div>
+                
+                <!-- Embedded Tag Design -->
+                <div class="mt-2 bg-gray-50 p-4 rounded-xl">
+                  <div class="flex justify-center">
+                    <div class="tag-zoom-container" style="transform: scale(0.95); transform-origin: center; transition: transform 0.3s ease;">
+                      {% include 'gateways/tag_print_design.html' with qr_code_data=None %}
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- CTA for QR Code -->
+                <div class="mt-4 text-center bg-gradient-to-r from-[#3DA9FC] to-[#3498E4] text-white px-4 py-3 rounded-lg">
+                  <div class="flex items-center justify-center gap-2">
+                    <img src="{% static 'tag/scan.png' %}" alt="Scan" class="w-8 h-8 animate-bounce">
+                    <p class="text-sm font-bold">Scan this QR code to know more and talk to our executive!</p>
+                  </div>
+                </div>
+                
+                <div class="mt-6 text-center">
+                  <h3 class="text-lg font-bold text-[#094067] mb-2">Professional Print-Ready Design</h3>
+                  <div class="flex flex-wrap justify-center gap-2 text-xs">
+                    <span class="bg-[#3DA9FC]/10 text-[#3DA9FC] px-3 py-1.5 rounded-full font-semibold">✓ Print-Optimized</span>
+                    <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full font-semibold">✓ Waterproof</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 2: Scan to Connect -->
+            <div class="swiper-slide">
+              <div class="relative bg-white p-6 rounded-2xl border-4 border-[#fbbf24]/20">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg z-10">
+                  📱 Scan to Connect
+                </div>
+                
+                <div class="mt-2 rounded-xl overflow-hidden h-[300px] sm:h-[350px] md:h-[400px] flex items-center justify-center bg-gradient-to-br from-[#fbbf24]/10 to-[#f59e0b]/10">
+                  <img src="{% static 'tag/scan.png' %}" alt="Scan QR Code" class="w-full h-full object-contain">
+                </div>
+                
+                <div class="mt-6 text-center">
+                  <h3 class="text-lg font-bold text-[#094067] mb-2">Anyone Can Scan</h3>
+                  <div class="flex flex-wrap justify-center gap-2 text-xs">
+                    <span class="bg-[#fbbf24]/10 text-[#f59e0b] px-3 py-1.5 rounded-full font-semibold">✓ No App Needed</span>
+                    <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full font-semibold">✓ Instant Contact</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 3: Real-World Usage -->
+            <div class="swiper-slide">
+              <div class="relative bg-white p-6 rounded-2xl border-4 border-[#10b981]/20">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#10b981] to-[#059669] text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg z-10">
+                  🚗 Real-World Usage
+                </div>
+                
+                <div class="mt-2 rounded-xl overflow-hidden">
+                  <img src="{% static 'tag/NEW_BNDA.png' %}" alt="Scan2Talk in Action" class="w-full h-auto">
+                </div>
+                
+                <div class="mt-6 text-center">
+                  <h3 class="text-lg font-bold text-[#094067] mb-2">See It In Action</h3>
+                  <div class="flex flex-wrap justify-center gap-2 text-xs">
+                    <span class="bg-[#3DA9FC]/10 text-[#3DA9FC] px-3 py-1.5 rounded-full font-semibold">✓ Easy Install</span>
+                    <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full font-semibold">✓ Works Instantly</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="swiper-pagination hero-pagination"></div>
+          
+          <!-- Navigation Arrows -->
+          <div class="swiper-button-prev hero-prev"></div>
+          <div class="swiper-button-next hero-next"></div>
+        </div>
       </div>
     </section>
 
@@ -87,37 +193,37 @@ body {
       <div class="flex items-center justify-between mb-8 lg:mb-5">
         <h3 class="text-4xl text-[#094067] font-extrabold leading-tight w-full lg:w-fit">Three Simple Steps to Privacy</h3>
       </div>
-      <div class="grid grid-cols-4 lg:grid-cols-12 gap-y-12 lg:gap-y-0 lg:gap-x-12 mb-8">
-        <div class="col-span-4 flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
-          <div class="w-full h-64 bg-gradient-to-br from-[#3DA9FC] to-[#3498E4] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center text-white text-6xl font-bold">
-            1
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-y-12 lg:gap-y-0 lg:gap-x-12 mb-8">
+        <div class="flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
+          <div class="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-br from-[#3DA9FC] to-[#3498E4] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center overflow-hidden">
+            <img src="https://finicalholdings.com/wp-content/uploads/2021/12/women-doing-online-shopping-at-home.jpg" alt="Order QR Code" class="w-full h-full object-cover">
           </div>
           <h5 class="text-xl text-[#094067] font-bold mb-3.5">Order Your QR Code</h5>
-          <p class="text-sm text-[#5F6C7B] font-medium px-4">Get your unique QR code sticker delivered. Place it on your vehicle in minutes.</p>
+          <p class="text-sm text-[#5F6C7B] font-medium px-4 text-center">Get your unique QR code sticker delivered. Place it on your vehicle in minutes.</p>
         </div>
-        <div class="col-span-4 flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
-          <div class="w-full h-64 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center text-white text-6xl font-bold">
-            2
+        <div class="flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
+          <div class="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center overflow-hidden">
+            <img src="https://tse2.mm.bing.net/th/id/OIP.FWwho7xlg5eCl7vd-la6hAHaEK?pid=Api&P=0&h=180" alt="Scan QR Code" class="w-full h-full object-cover">
           </div>
           <h5 class="text-xl text-[#094067] font-bold mb-3.5">Anyone Can Scan</h5>
-          <p class="text-sm text-[#5F6C7B] font-medium px-4">Others scan your QR code and send you a message instantly. No app needed.</p>
+          <p class="text-sm text-[#5F6C7B] font-medium px-4 text-center">Others scan your QR code and send you a message instantly. No app needed.</p>
         </div>
-        <div class="col-span-4 flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
-          <div class="w-full h-64 bg-gradient-to-br from-[#10b981] to-[#059669] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center text-white text-6xl font-bold">
-            3
+        <div class="flex flex-col items-center justify-center rounded-xl hover:scale-105 transition duration-300 cursor-pointer">
+          <div class="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-br from-[#10b981] to-[#059669] mb-4 rounded-xl shadow-[0_9px_40px_rgba(9,64,103,0.20)] flex items-center justify-center overflow-hidden">
+            <img src="https://www.teamtreysta.com/wp-content/uploads/2023/09/Ways-to-Keep-Your-Phone-Safe-scaled.jpg" alt="Stay Private" class="w-full h-full object-cover">
           </div>
           <h5 class="text-xl text-[#094067] font-bold mb-3.5">Stay Private</h5>
-          <p class="text-sm text-[#5F6C7B] font-medium px-4">Receive notifications via SMS, WhatsApp, or email. Your number stays hidden.</p>
+          <p class="text-sm text-[#5F6C7B] font-medium px-4 text-center">Receive notifications via SMS, WhatsApp, or email. Your number stays hidden.</p>
         </div>
       </div>
     </section>
 
     <!-- Product Showcase Section -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 pt-16 pb-8 lg:pb-56">
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-16 pb-8 lg:pb-56">
       <div data-aos="fade-right" data-aos-duration="700" class="pt-12 text-center lg:text-left">
         <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Premium Quality Tags</span>
-        <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight pr-0 xl:pr-8">Durable, Weather-Resistant QR Tags 🏷️</h2>
-        <p class="mb-8 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] pr-0 xl:pr-24">Our premium QR code tags are designed to withstand all weather conditions. Waterproof, UV-resistant, and built to last 3+ years on your vehicle.</p>
+        <h2 class="mb-4 text-3xl md:text-4xl lg:text-5xl text-[#094067] font-extrabold leading-tight">Durable, Weather-Resistant QR Tags 🏷️</h2>
+        <p class="mb-8 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B]">Our premium QR code tags are designed to withstand all weather conditions. Waterproof, UV-resistant, and built to last 3+ years on your vehicle.</p>
         <a href="{% url 'core:order_tag' %}" class="w-full lg:w-fit px-9 py-5 bg-[#3DA9FC] flex items-center justify-center text-white font-semibold rounded-md shadow-[0_6px_30px_rgba(61,169,252,0.6)] space-x-2.5 hover:bg-[#3498E4] transition-colors duration-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-shopping-cart" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -129,8 +235,56 @@ body {
           <span>Order Now</span>
         </a>
       </div>
-      <div data-aos="fade-left" data-aos-duration="700" class="relative">
-        <img src="{% static 'tag/tg.jpeg' %}" class="relative lg:absolute top-0 lg:-top-40 -left-32 md:-left-16 lg:-left-40 xl:-left-12 min-w-[620px] sm:min-w-[810px] rounded-2xl shadow-2xl" alt="Scan2Talk QR Tag">
+      <div data-aos="fade-left" data-aos-duration="700" class="relative flex items-center justify-center mt-8 lg:mt-0">
+        <!-- Beautiful Highlighted Card -->
+        <div class="relative group">
+          <!-- Animated Glow Background -->
+          <div class="absolute -inset-1 bg-gradient-to-r from-[#3DA9FC] via-[#fbbf24] to-[#10b981] rounded-3xl blur-lg opacity-75 group-hover:opacity-100 animate-pulse"></div>
+          
+          <!-- Main Card -->
+          <div class="relative bg-white p-8 rounded-2xl shadow-2xl border-4 border-[#3DA9FC]/30 hover:border-[#3DA9FC] transition-all duration-300 transform hover:scale-105">
+            
+            <!-- Badge at Top -->
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+              <div class="bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2">
+                <span class="text-xl">📞</span>
+                <span>Talk to Our Executive</span>
+                <span class="text-xl">💬</span>
+              </div>
+            </div>
+            
+            <!-- Tag Design -->
+            <div class="mt-4 flex justify-center items-center">
+              <div style="transform: scale(0.85); transform-origin: center;">
+                {% include 'gateways/tag_print_design.html' with qr_code_data=None %}
+              </div>
+            </div>
+            
+            <!-- Call to Action Below -->
+            <div class="mt-6 text-center">
+              <div class="bg-gradient-to-r from-[#3DA9FC] to-[#3498E4] text-white px-6 py-4 rounded-xl shadow-lg">
+                <div class="flex items-center justify-center gap-3 mb-2">
+                  <img src="{% static 'tag/scan.png' %}" alt="Scan Icon" class="w-12 h-12 animate-bounce">
+                  <p class="text-lg font-bold">Have Questions?</p>
+                </div>
+                <p class="text-sm">Scan to call our executive for any query</p>
+              </div>
+            </div>
+            
+            <!-- Feature Badges -->
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+              <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold border-2 border-[#10b981]/30">
+                ✓ Instant Support
+              </span>
+              <span class="bg-[#fbbf24]/10 text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold border-2 border-[#fbbf24]/30">
+                ✓ Expert Help
+              </span>
+              <span class="bg-[#3DA9FC]/10 text-[#3DA9FC] px-3 py-1.5 rounded-full text-xs font-bold border-2 border-[#3DA9FC]/30">
+                ✓ Free Consultation
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -234,52 +388,88 @@ body {
       <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight text-center lg:text-left">Got Questions? We've Got Answers</h2>
       <p class="mb-12 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] text-center px-0 lg:px-52">Everything you need to know about Scan2Talk and how it protects your privacy.</p>
       <div class="w-full max-w-2xl text-sm sm:text-base">
-        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
-          <span class="w-full font-medium text-base sm:text-lg">How does Scan2Talk protect my privacy?</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <polyline points="6 9 12 15 18 9"></polyline>
-         </svg>
-        </div>
-        <div class="w-full border-b border-[rgba(144,180,206,0.25)] divide-y divide-[rgba(255, 255, 255, 0.1)] text-white bg-[#3DA9FC] rounded-md shadow-[0_30px_60px_rgba(9,64,103,0.25)]">
-          <div class="px-7 py-5 flex items-center justify-between">
-            <span class="w-full font-medium text-base sm:text-lg">Is there a mobile app required?</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="rotate-180 icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <!-- FAQ Item 1 -->
+        <div class="faq-item w-full border-b border-[rgba(144,180,206,0.25)] overflow-hidden transition-all duration-300">
+          <div class="faq-question px-7 py-5 flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+            <span class="w-full font-medium text-base sm:text-lg">How does Scan2Talk protect my privacy?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6 transition-transform duration-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </div>
-          <div class="px-7 py-5">
-            <p>No app required! Anyone can scan your QR code using their phone's camera. You'll receive notifications via SMS, WhatsApp, or email—whatever you prefer.</p>
+          <div class="faq-answer overflow-hidden transition-all duration-300 text-[#5F6C7B]" style="max-height: 0; padding: 0 1.75rem;">
+            <p class="pb-5">Your phone number is never displayed on the QR code. When someone scans it, they can send you a message through our secure platform, and you'll receive it via your preferred channel (SMS, WhatsApp, or email) without revealing your actual number.</p>
           </div>
         </div>
-        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
-          <span class="w-full font-medium text-base sm:text-lg">How long does the QR code tag last?</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <polyline points="6 9 12 15 18 9"></polyline>
-         </svg>
+
+        <!-- FAQ Item 2 -->
+        <div class="faq-item w-full border-b border-[rgba(144,180,206,0.25)] overflow-hidden transition-all duration-300">
+          <div class="faq-question px-7 py-5 flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+            <span class="w-full font-medium text-base sm:text-lg">Is there a mobile app required?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6 transition-transform duration-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="faq-answer overflow-hidden transition-all duration-300 text-[#5F6C7B]" style="max-height: 0; padding: 0 1.75rem;">
+            <p class="pb-5">No app required! Anyone can scan your QR code using their phone's camera. You'll receive notifications via SMS, WhatsApp, or email—whatever you prefer. It's that simple!</p>
+          </div>
         </div>
-        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
-          <span class="w-full font-medium text-base sm:text-lg">Can I use it for multiple vehicles?</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <polyline points="6 9 12 15 18 9"></polyline>
-         </svg>
+
+        <!-- FAQ Item 3 -->
+        <div class="faq-item w-full border-b border-[rgba(144,180,206,0.25)] overflow-hidden transition-all duration-300">
+          <div class="faq-question px-7 py-5 flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+            <span class="w-full font-medium text-base sm:text-lg">How long does the QR code tag last?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6 transition-transform duration-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="faq-answer overflow-hidden transition-all duration-300 text-[#5F6C7B]" style="max-height: 0; padding: 0 1.75rem;">
+            <p class="pb-5">Our premium QR code tags are built to last 3+ years. They're waterproof, UV-resistant, and designed to withstand all weather conditions. The adhesive is strong enough to stay in place but can be removed without leaving residue.</p>
+          </div>
         </div>
-        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
-          <span class="w-full font-medium text-base sm:text-lg">What if someone misuses the QR code?</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <polyline points="6 9 12 15 18 9"></polyline>
-         </svg>
+
+        <!-- FAQ Item 4 -->
+        <div class="faq-item w-full border-b border-[rgba(144,180,206,0.25)] overflow-hidden transition-all duration-300">
+          <div class="faq-question px-7 py-5 flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+            <span class="w-full font-medium text-base sm:text-lg">Can I use it for multiple vehicles?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6 transition-transform duration-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="faq-answer overflow-hidden transition-all duration-300 text-[#5F6C7B]" style="max-height: 0; padding: 0 1.75rem;">
+            <p class="pb-5">Absolutely! You can manage multiple vehicles from a single dashboard. Each vehicle gets its own unique QR code, and you can track all interactions in one place. Perfect for families or businesses with multiple vehicles.</p>
+          </div>
         </div>
-        <div class="w-full px-7 py-5 border-b border-[rgba(144,180,206,0.25)] flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
-          <span class="w-full font-medium text-base sm:text-lg">How much does it cost?</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <polyline points="6 9 12 15 18 9"></polyline>
-         </svg>
+
+        <!-- FAQ Item 5 -->
+        <div class="faq-item w-full border-b border-[rgba(144,180,206,0.25)] overflow-hidden transition-all duration-300">
+          <div class="faq-question px-7 py-5 flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+            <span class="w-full font-medium text-base sm:text-lg">What if someone misuses the QR code?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6 transition-transform duration-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="faq-answer overflow-hidden transition-all duration-300 text-[#5F6C7B]" style="max-height: 0; padding: 0 1.75rem;">
+            <p class="pb-5">You have full control! You can block specific users, disable your QR code temporarily, or deactivate it completely from your dashboard. We also have rate limiting and spam protection built in to prevent abuse.</p>
+          </div>
+        </div>
+
+        <!-- FAQ Item 6 -->
+        <div class="faq-item w-full border-b border-[rgba(144,180,206,0.25)] overflow-hidden transition-all duration-300">
+          <div class="faq-question px-7 py-5 flex items-center justify-between text-[#094067] cursor-pointer hover:bg-gray-50 transition-colors">
+            <span class="w-full font-medium text-base sm:text-lg">How much does it cost?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron icon icon-tabler icon-tabler-chevron-down w-5 sm:w-6 h-5 sm:h-6 transition-transform duration-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="faq-answer overflow-hidden transition-all duration-300 text-[#5F6C7B]" style="max-height: 0; padding: 0 1.75rem;">
+            <p class="pb-5">We offer flexible pricing plans starting from just ₹299 for a single QR code tag with lifetime validity. No hidden fees, no subscriptions. You can also choose prepaid or pay-per-use options based on your needs.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -308,7 +498,32 @@ body {
 <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
   AOS.init();
-  const swiper = new Swiper('.comment-slider', {
+  
+  // Hero Slider (Auto-sliding at top)
+  const heroSwiper = new Swiper('.hero-slider', {
+    loop: true,
+    slidesPerView: 1,
+    spaceBetween: 30,
+    autoplay: {
+      delay: 3500,
+      disableOnInteraction: false,
+    },
+    effect: 'fade',
+    fadeEffect: {
+      crossFade: true
+    },
+    pagination: {
+      el: '.hero-pagination',
+      clickable: true,
+    },
+    navigation: {
+      nextEl: '.hero-next',
+      prevEl: '.hero-prev',
+    },
+  });
+  
+  // Testimonial Slider
+  const commentSwiper = new Swiper('.comment-slider', {
     loop: true,
     slidesPerView: 1,
     spaceBetween: 30,
@@ -327,6 +542,47 @@ body {
       nextEl: '.swiper-button-next',
       prevEl: '.swiper-button-prev',
     },
+  });
+  
+  // FAQ Accordion Functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+      const question = item.querySelector('.faq-question');
+      const answer = item.querySelector('.faq-answer');
+      const chevron = item.querySelector('.faq-chevron');
+      
+      question.addEventListener('click', function() {
+        const isOpen = item.classList.contains('faq-open');
+        
+        // Close all FAQ items
+        faqItems.forEach(otherItem => {
+          otherItem.classList.remove('faq-open');
+          const otherAnswer = otherItem.querySelector('.faq-answer');
+          const otherChevron = otherItem.querySelector('.faq-chevron');
+          if (otherAnswer) {
+            otherAnswer.style.maxHeight = '0';
+            otherAnswer.style.padding = '0 1.75rem';
+          }
+          if (otherChevron) {
+            otherChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+        
+        // Toggle current item
+        if (!isOpen) {
+          item.classList.add('faq-open');
+          if (answer) {
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+            answer.style.padding = '1.25rem 1.75rem';
+          }
+          if (chevron) {
+            chevron.style.transform = 'rotate(180deg)';
+          }
+        }
+      });
+    });
   });
 </script>
 {% endblock %}

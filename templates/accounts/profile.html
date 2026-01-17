@@ -1,178 +1,201 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}My Profile - Scan2Talk{% endblock %}
 
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Page Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
-        <p class="text-gray-600 mt-2">Manage your account and vehicle contact settings</p>
-    </div>
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #FFFFFE;
+}
+</style>
+{% endblock %}
 
-    <!-- Profile Card -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <!-- Profile Header -->
-        <div class="gradient-bg px-6 py-8">
-            <div class="flex items-center">
-                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center text-3xl font-bold text-blue-600 shadow-lg">
-                    {% if user.first_name %}
-                        {{ user.first_name|first|upper }}
-                    {% else %}
-                        {{ user.email|first|upper }}
-                    {% endif %}
-                </div>
-                <div class="ml-6 text-white">
-                    <h2 class="text-2xl font-bold">
-                        {% if user.first_name %}
-                            {{ user.first_name }} {% if user.last_name %}{{ user.last_name }}{% endif %}
-                        {% else %}
-                            {{ user.email }}
-                        {% endif %}
-                    </h2>
-                    <p class="text-blue-100">Member since {{ user.date_joined|date:"M Y" }}</p>
-                </div>
-            </div>
+{% block content %}
+<div class="min-h-screen bg-[#FFFFFE] py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-extrabold text-[#094067]">My Profile</h1>
+            <p class="text-[#5F6C7B] mt-2 text-lg font-medium">Manage your account and vehicle contact settings</p>
         </div>
 
-        <!-- Profile Information -->
-        <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
-            
-            <div class="space-y-4">
-                <!-- Email -->
-                <div class="flex items-center justify-between py-3 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        <div>
-                            <p class="text-sm text-gray-500">Email</p>
-                            <p class="text-gray-900 font-medium">{{ user.email }}</p>
-                        </div>
+        <!-- Profile Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+            <!-- Profile Header -->
+            <div class="bg-gradient-to-br from-[#3DA9FC] to-[#3498E4] px-8 py-10">
+                <div class="flex items-center">
+                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-extrabold text-[#3DA9FC] shadow-lg">
+                        {% if user.first_name %}
+                            {{ user.first_name|first|upper }}
+                        {% else %}
+                            {{ user.email|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="ml-6 text-white">
+                        <h2 class="text-3xl font-extrabold">
+                            {% if user.first_name %}
+                                {{ user.first_name }} {% if user.last_name %}{{ user.last_name }}{% endif %}
+                            {% else %}
+                                {{ user.email }}
+                            {% endif %}
+                        </h2>
+                        <p class="text-white/90 font-medium mt-1">Member since {{ user.date_joined|date:"M Y" }}</p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Phone -->
-                {% if user.phone_number %}
-                <div class="flex items-center justify-between py-3 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                        </svg>
-                        <div>
-                            <p class="text-sm text-gray-500">Phone Number</p>
-                            <p class="text-gray-900 font-medium">{{ user.phone_number }}</p>
+            <!-- Profile Information -->
+            <div class="p-8">
+                <h3 class="text-xl font-bold text-[#094067] mb-6">Account Information</h3>
+                
+                <div class="space-y-4">
+                    <!-- Email -->
+                    <div class="flex items-center justify-between py-4 border-b-2 border-gray-100">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-[#3DA9FC]/10 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-5 h-5 text-[#3DA9FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-[#5F6C7B] font-medium">Email</p>
+                                <p class="text-[#094067] font-bold">{{ user.email }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                {% endif %}
 
-                <!-- Account Status -->
-                <div class="flex items-center justify-between py-3 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
-                        <div>
-                            <p class="text-sm text-gray-500">Account Status</p>
-                            <p class="text-green-600 font-medium">Active</p>
+                    <!-- Phone -->
+                    {% if user.phone_number %}
+                    <div class="flex items-center justify-between py-4 border-b-2 border-gray-100">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-[#10b981]/10 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-5 h-5 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-[#5F6C7B] font-medium">Phone Number</p>
+                                <p class="text-[#094067] font-bold">{{ user.phone_number }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    {% endif %}
 
-                <!-- Wallet Balance -->
-                <div class="flex items-center justify-between py-3 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Account Status -->
+                    <div class="flex items-center justify-between py-4 border-b-2 border-gray-100">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-[#10b981]/10 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-5 h-5 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-[#5F6C7B] font-medium">Account Status</p>
+                                <p class="text-[#10b981] font-bold">Active</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wallet Balance -->
+                    <div class="flex items-center justify-between py-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-[#fbbf24]/10 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-5 h-5 text-[#fbbf24]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-[#5F6C7B] font-medium">Wallet Balance</p>
+                                <p class="text-[#094067] font-extrabold text-2xl">₹{{ wallet_balance|floatformat:2 }}</p>
+                                <p class="text-xs text-[#5F6C7B] font-medium">Available for calls & services</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'accounts:recharge_wallet' %}" class="bg-[#3DA9FC] text-white px-6 py-3 rounded-lg hover:bg-[#3498E4] font-bold transition-all shadow-[0_6px_30px_rgba(61,169,252,0.6)]">
+                            Recharge
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Categories Section -->
+            {% if user_categories %}
+            <div class="border-t-2 border-gray-100 p-8">
+                <h3 class="text-xl font-bold text-[#094067] mb-6">My QR Categories</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for category in user_categories %}
+                    <div class="border-2 rounded-xl p-5 hover:shadow-lg transition-all" style="border-color: {{ category.color }};">
+                        <div class="flex items-center mb-3">
+                            <span class="text-3xl mr-3">{{ category.icon }}</span>
+                            <div>
+                                <h4 class="font-bold text-[#094067]">{{ category.name }}</h4>
+                                <p class="text-xs text-[#5F6C7B] font-medium">{{ category.get_category_type_display }}</p>
+                            </div>
+                        </div>
+                        <div class="text-sm font-medium mt-2">
+                            {% if category.category_type == 'free' %}
+                                <p class="text-[#10b981] font-bold">✓ Free unlimited usage</p>
+                            {% elif category.category_type == 'trial' %}
+                                <p class="text-[#3DA9FC] font-bold">{{ category.free_calls_limit }} free calls</p>
+                            {% elif category.category_type == 'prepaid' %}
+                                <p class="text-[#fbbf24] font-bold">₹{{ category.call_cost_per_minute }}/min</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{% url 'accounts:dashboard' %}" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border-2 border-transparent hover:border-[#3DA9FC] group">
+                <div class="flex items-center">
+                    <div class="w-14 h-14 bg-[#3DA9FC]/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-[#3DA9FC] transition-all">
+                        <svg class="w-7 h-7 text-[#3DA9FC] group-hover:text-white transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-[#094067]">Dashboard</h3>
+                        <p class="text-sm text-[#5F6C7B] font-medium">View QR codes & activity</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'accounts:wallet_dashboard' %}" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border-2 border-transparent hover:border-[#fbbf24] group">
+                <div class="flex items-center">
+                    <div class="w-14 h-14 bg-[#fbbf24]/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-[#fbbf24] transition-all">
+                        <svg class="w-7 h-7 text-[#fbbf24] group-hover:text-white transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
-                        <div>
-                            <p class="text-sm text-gray-500">Wallet Balance</p>
-                            <p class="text-gray-900 font-medium text-xl">₹{{ wallet_balance|floatformat:2 }}</p>
-                            <p class="text-xs text-gray-400">Available for calls & services</p>
-                        </div>
                     </div>
-                    <a href="{% url 'accounts:recharge_wallet' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
-                        Recharge
-                    </a>
+                    <div>
+                        <h3 class="font-bold text-[#094067]">Wallet</h3>
+                        <p class="text-sm text-[#5F6C7B] font-medium">Recharge & transactions</p>
+                    </div>
                 </div>
-            </div>
+            </a>
+
+            <a href="{% url 'core:contact' %}" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border-2 border-transparent hover:border-[#10b981] group">
+                <div class="flex items-center">
+                    <div class="w-14 h-14 bg-[#10b981]/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-[#10b981] transition-all">
+                        <svg class="w-7 h-7 text-[#10b981] group-hover:text-white transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-[#094067]">Help & Support</h3>
+                        <p class="text-sm text-[#5F6C7B] font-medium">Get assistance</p>
+                    </div>
+                </div>
+            </a>
         </div>
-
-        <!-- QR Categories Section -->
-        {% if user_categories %}
-        <div class="border-t border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">My QR Categories</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {% for category in user_categories %}
-                <div class="border-2 rounded-lg p-4" style="border-color: {{ category.color }};">
-                    <div class="flex items-center mb-2">
-                        <span class="text-2xl mr-2">{{ category.icon }}</span>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">{{ category.name }}</h4>
-                            <p class="text-xs text-gray-600">{{ category.get_category_type_display }}</p>
-                        </div>
-                    </div>
-                    <div class="text-sm text-gray-600 mt-2">
-                        {% if category.category_type == 'free' %}
-                            <p class="text-green-600 font-medium">✓ Free unlimited usage</p>
-                        {% elif category.category_type == 'trial' %}
-                            <p class="text-blue-600">{{ category.free_calls_limit }} free calls</p>
-                        {% elif category.category_type == 'prepaid' %}
-                            <p class="text-purple-600">₹{{ category.call_cost_per_minute }}/min</p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        <a href="{% url 'accounts:dashboard' %}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all border-2 border-transparent hover:border-blue-500">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-900">Dashboard</h3>
-                    <p class="text-sm text-gray-600">View QR codes & activity</p>
-                </div>
-            </div>
-        </a>
-
-        <a href="{% url 'accounts:wallet_dashboard' %}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all border-2 border-transparent hover:border-purple-500">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-900">Wallet</h3>
-                    <p class="text-sm text-gray-600">Recharge & transactions</p>
-                </div>
-            </div>
-        </a>
-
-        <a href="{% url 'core:contact' %}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all border-2 border-transparent hover:border-green-500">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-900">Help & Support</h3>
-                    <p class="text-sm text-gray-600">Get assistance</p>
-                </div>
-            </div>
-        </a>
     </div>
 </div>
 {% endblock %}
