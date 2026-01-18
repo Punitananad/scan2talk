@@ -484,6 +484,17 @@ def activate_qr_code(request, qr_code):
     if qr.status == 'activated':
         return redirect('core:gateway_access', identifier=qr.qr_code)
     
+    # CRITICAL: Check if category is assigned
+    # QR codes without category CANNOT be activated
+    if not qr.category:
+        context = {
+            'qr_code': qr.qr_code,
+            'error_title': 'Category Not Assigned',
+            'error_message': 'This QR code cannot be activated yet. The administrator needs to assign a category first.',
+            'support_message': 'Please contact support or wait for the administrator to complete the setup.'
+        }
+        return render(request, 'gateways/activation_blocked.html', context)
+    
     # Check if available
     if qr.status != 'available':
         messages.error(request, f'This QR code is {qr.status} and cannot be activated')
@@ -693,6 +704,17 @@ def public_qr_access(request, qr_code):
         
         # Increment access count
         qr.increment_access_count()
+        
+        # CRITICAL: Check if category is assigned
+        if not qr.category:
+            logger.warning(f"QR {qr.qr_code} has no category assigned")
+            context = {
+                'qr_code': qr.qr_code,
+                'error_title': 'Category Not Assigned',
+                'error_message': 'This QR code is not ready for use yet. The administrator needs to assign a category first.',
+                'support_message': 'Please contact support or wait for the administrator to complete the setup.'
+            }
+            return render(request, 'gateways/activation_blocked.html', context)
         
         # If not activated, redirect to activation page
         if qr.status != 'activated':

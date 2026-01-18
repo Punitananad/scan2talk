@@ -6,6 +6,7 @@ from . import views
 from . import qr_views
 from . import qr_download_views
 from . import call_masking_views
+from . import batch_management_views
 
 app_name = 'gateways'
 
@@ -24,6 +25,12 @@ urlpatterns = [
     path('qr/<uuid:qr_id>/delete/', qr_views.delete_qr, name='delete_qr'),
     path('qr/delete-all/', qr_views.delete_all_qr, name='delete_all_qr'),
     path('qr/batch/<str:batch_number>/delete/', qr_views.delete_batch, name='delete_batch'),
+    
+    # Batch Management (Admin)
+    path('batch/management/', batch_management_views.batch_management, name='batch_management'),
+    path('batch/<uuid:batch_id>/detail/', batch_management_views.batch_detail, name='batch_detail'),
+    path('batch/<uuid:batch_id>/update-status/', batch_management_views.update_batch_status, name='update_batch_status'),
+    path('batch/bulk-update/', batch_management_views.bulk_update_batch_status, name='bulk_update_batch_status'),
     
     # QR Code Downloads (Admin)
     path('qr/<uuid:qr_id>/download/', qr_download_views.download_qr_image, name='download_qr_image'),

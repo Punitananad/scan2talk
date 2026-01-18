@@ -622,15 +622,17 @@ def admin_assign_user_category(request, user_id):
 def admin_add_user_balance(request, user_id):
     """Add balance to user's wallet"""
     try:
+        from decimal import Decimal
+        
         user = get_object_or_404(User, id=user_id)
-        amount = float(request.POST.get('amount', 0))
+        amount = Decimal(str(request.POST.get('amount', 0)))
         
         if amount > 0:
             try:
                 wallet = user.wallet
             except:
                 from .wallet_models import Wallet
-                wallet = Wallet.objects.create(user=user, balance=0)
+                wallet = Wallet.objects.create(user=user, balance=Decimal('0'))
             
             # Add balance
             wallet.balance += amount
@@ -657,6 +659,7 @@ def admin_add_user_balance(request, user_id):
         messages.error(request, f'Error adding balance: {str(e)}')
     
     return redirect('accounts:admin_user_profile', user_id=user_id)
+
 
 
 @staff_member_required

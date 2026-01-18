@@ -102,6 +102,7 @@ body {
                     </div>
 
                     <!-- Wallet Balance -->
+                    {% if show_wallet %}
                     <div class="flex items-center justify-between py-4">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-[#fbbf24]/10 rounded-lg flex items-center justify-center mr-4">
@@ -119,6 +120,22 @@ body {
                             Recharge
                         </a>
                     </div>
+                    {% else %}
+                    <!-- Free Category Message -->
+                    <div class="flex items-center justify-between py-4 bg-blue-50 rounded-lg px-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-blue-700 font-bold">Free Service Active</p>
+                                <p class="text-xs text-blue-600 font-medium">Your QR codes are on free plan - no wallet needed</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -153,7 +170,7 @@ body {
         </div>
 
         <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-{% if show_wallet %}3{% else %}2{% endif %} gap-6">
             <a href="{% url 'accounts:dashboard' %}" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border-2 border-transparent hover:border-[#3DA9FC] group">
                 <div class="flex items-center">
                     <div class="w-14 h-14 bg-[#3DA9FC]/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-[#3DA9FC] transition-all">
@@ -168,6 +185,7 @@ body {
                 </div>
             </a>
 
+            {% if show_wallet %}
             <a href="{% url 'accounts:wallet_dashboard' %}" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border-2 border-transparent hover:border-[#fbbf24] group">
                 <div class="flex items-center">
                     <div class="w-14 h-14 bg-[#fbbf24]/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-[#fbbf24] transition-all">
@@ -181,6 +199,7 @@ body {
                     </div>
                 </div>
             </a>
+            {% endif %}
 
             <a href="{% url 'core:contact' %}" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border-2 border-transparent hover:border-[#10b981] group">
                 <div class="flex items-center">

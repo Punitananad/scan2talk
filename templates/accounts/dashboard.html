@@ -36,6 +36,7 @@
             <p class="text-xs text-gray-500 mt-1">People reached you</p>
         </div>
 
+        {% if show_wallet %}
         <div class="bg-white rounded-lg card-shadow p-6">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-sm font-medium text-gray-600">Wallet Balance</h3>
@@ -46,6 +47,7 @@
             <p class="text-3xl font-bold text-gray-900">₹{{ user.wallet.balance|default:0 }}</p>
             <p class="text-xs text-gray-500 mt-1">{{ user.wallet.call_credits|default:0 }} call credits</p>
         </div>
+        {% endif %}
 
         <div class="bg-white rounded-lg card-shadow p-6">
             <div class="flex items-center justify-between mb-2">
@@ -133,7 +135,8 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-{% if show_wallet %}3{% else %}2{% endif %} gap-6">
+        {% if show_wallet %}
         <a href="{% url 'accounts:wallet_dashboard' %}" class="bg-white rounded-lg card-shadow p-6 hover:shadow-lg transition-all border-2 border-transparent hover:border-purple-500">
             <div class="flex items-center">
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
@@ -147,6 +150,7 @@
                 </div>
             </div>
         </a>
+        {% endif %}
 
         <a href="{% url 'accounts:profile' %}" class="bg-white rounded-lg card-shadow p-6 hover:shadow-lg transition-all border-2 border-transparent hover:border-blue-500">
             <div class="flex items-center">

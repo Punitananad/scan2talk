@@ -21,6 +21,15 @@
             <div class="text-sm text-blue-100">Total QR Codes</div>
         </a>
 
+        <!-- Batch Management - NEW -->
+        <a href="{% url 'gateways:batch_management' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <div class="text-5xl mb-4">📦</div>
+            <h2 class="text-2xl font-bold mb-2">Batch Management</h2>
+            <p class="text-indigo-100 mb-4">Track printing status and batch history</p>
+            <div class="text-3xl font-bold">{{ total_qr_codes }}</div>
+            <div class="text-sm text-indigo-100">Manage Batches</div>
+        </a>
+
         <!-- Generate QR Codes -->
         <a href="{% url 'gateways:generate_qr' %}" class="bg-green-600 hover:bg-green-700 text-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
             <div class="text-5xl mb-4">➕</div>
@@ -37,15 +46,6 @@
             <p class="text-purple-100 mb-4">View and manage all users</p>
             <div class="text-3xl font-bold">{{ total_users }}</div>
             <div class="text-sm text-purple-100">Total Users</div>
-        </a>
-
-        <!-- Tag Orders - NEW -->
-        <a href="{% url 'accounts:manage_tag_orders' %}" class="bg-orange-600 hover:bg-orange-700 text-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
-            <div class="text-5xl mb-4">📦</div>
-            <h2 class="text-2xl font-bold mb-2">Tag Orders</h2>
-            <p class="text-orange-100 mb-4">Manage customer orders and deliveries</p>
-            <div class="text-3xl font-bold">{{ total_tag_orders|default:0 }}</div>
-            <div class="text-sm text-orange-100">Total Orders</div>
         </a>
     </div>
 

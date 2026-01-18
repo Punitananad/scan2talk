@@ -218,11 +218,32 @@ class QRBatch(models.Model):
     """
     Batch of pre-generated QR codes for tracking and management.
     """
+    STATUS_CHOICES = [
+        ('generated', 'Generated'),
+        ('sent_for_print', 'Sent for Print'),
+        ('printing', 'Printing'),
+        ('printed', 'Printed'),
+        ('delivered', 'Delivered'),
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     batch_number = models.CharField(max_length=50, unique=True, db_index=True)
     quantity = models.PositiveIntegerField()
     purpose = models.CharField(max_length=200, blank=True)
     notes = models.TextField(blank=True)
+    
+    # Print Status Tracking
+    print_status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='generated',
+        help_text='Current status of batch printing'
+    )
+    sent_for_print_at = models.DateTimeField(null=True, blank=True)
+    printing_started_at = models.DateTimeField(null=True, blank=True)
+    printed_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    print_notes = models.TextField(blank=True, help_text='Notes about printing process')
     
     # Category assignment
     category = models.ForeignKey(
@@ -263,3 +284,15 @@ class QRBatch(models.Model):
         self.reserved_count = qr_codes.filter(status='reserved').count()
         self.available_count = qr_codes.filter(status='available').count()
         self.save(update_fields=['activated_count', 'reserved_count', 'available_count'])
+    
+    def get_status_display_color(self):
+        """Get color for status badge."""
+        colors = {
+            'generated': 'blue',
+            'sent_for_print': 'yellow',
+            'printing': 'orange',
+            'printed': 'green',
+            'delivered': 'purple',
+        }
+        return colors.get(self.print_status, 'gray')
+

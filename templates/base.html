@@ -39,14 +39,11 @@
 
 <!-- ================= NAVBAR ================= -->
 <header class="max-w-screen-xl mx-auto mb-8">
-  <nav class="px-4 sm:px-5 py-12 flex items-center justify-between">
+  <nav class="px-4 sm:px-5 pt-6 pb-0 flex items-center justify-between">
 
-    <!-- Logo -->
-    <a href="{% url 'core:home' %}" class="flex items-center space-x-2">
-      <div class="w-8 h-8 rounded-lg bg-[#3DA9FC] text-white flex items-center justify-center font-bold text-sm">
-        S
-      </div>
-      <h5 class="text-xl font-bold text-[#094067]">Scan2Talk</h5>
+    <!-- Logo - Larger and Properly Aligned -->
+    <a href="{% url 'core:home' %}" class="flex items-center">
+      <img src="{% static 'tag/logo-sky.png' %}" alt="Scan2Talk Logo" class="h-12 sm:h-14 md:h-16 lg:h-20 w-auto object-contain">
     </a>
 
     <!-- Right Side -->

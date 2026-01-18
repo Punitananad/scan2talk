@@ -33,11 +33,25 @@ class DashboardView(TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
+        # Check if user has any paid categories (prepaid or postpaid)
+        from apps.gateways.qr_models import PreGeneratedQR
+        user_qr_codes = PreGeneratedQR.objects.filter(
+            owner=user,
+            status='activated'
+        ).select_related('category')
+        
+        show_wallet = False
+        for qr in user_qr_codes:
+            if qr.category and qr.category.category_type in ['prepaid', 'postpaid']:
+                show_wallet = True
+                break
+        
         context.update({
             'gateway_usage': user.get_gateway_usage(),
             'recent_gateways': user.gateways.filter(is_active=True)[:5],
             'recent_interactions': user.gateways.filter(is_active=True)
                 .prefetch_related('interactions')[:10],
+            'show_wallet': show_wallet,
         })
         
         return context
@@ -71,6 +85,14 @@ class ProfileView(TemplateView):
             if qr.category:
                 categories.add(qr.category)
         
+        # Check if user has any paid categories (prepaid or postpaid)
+        # Only show wallet if user has prepaid or postpaid categories
+        show_wallet = False
+        for category in categories:
+            if category.category_type in ['prepaid', 'postpaid']:
+                show_wallet = True
+                break
+        
         # Calculate total wallet balance across all QR codes
         total_balance = QRWallet.objects.filter(
             qr_code__owner=user,
@@ -80,6 +102,7 @@ class ProfileView(TemplateView):
         context['user_qr_codes'] = user_qr_codes
         context['user_categories'] = list(categories)
         context['wallet_balance'] = total_balance
+        context['show_wallet'] = show_wallet
         
         return context
 
