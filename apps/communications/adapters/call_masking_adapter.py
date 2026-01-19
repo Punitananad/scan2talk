@@ -17,13 +17,13 @@ class CallMaskingAdapter:
     Handles PIN generation and mapping to owner phone numbers.
     """
     
-    DID_NUMBER = "01205019042"
     API_ENDPOINT = "https://telephonycloud.co.in/api/v1/mask"
     PIN_EXPIRY_MINUTES = 10
     
     def __init__(self):
         self.username = getattr(settings, 'SPARKTG_USERNAME', None)
         self.password = getattr(settings, 'SPARKTG_PASSWORD', None)
+        self.did_number = getattr(settings, 'SPARKTG_DID_NUMBER', '01205018960')
         
         if not self.username or not self.password:
             logger.warning("SparkTG credentials not configured in settings")
@@ -79,7 +79,7 @@ class CallMaskingAdapter:
                 }, self.PIN_EXPIRY_MINUTES * 60)
                 
                 # Generate call URL
-                call_url = f"tel:{self.DID_NUMBER},{pin}#"
+                call_url = f"tel:{self.did_number},{pin}#"
                 
                 logger.info(f"Call mask created: PIN={pin}, QR={qr_id}, Phone={owner_phone_number[-4:]}")
                 
@@ -88,7 +88,7 @@ class CallMaskingAdapter:
                     'pin': pin,
                     'call_url': call_url,
                     'expires_in_minutes': self.PIN_EXPIRY_MINUTES,
-                    'did_number': self.DID_NUMBER
+                    'did_number': self.did_number
                 }
             else:
                 error_msg = f"API returned status {response.status_code}"

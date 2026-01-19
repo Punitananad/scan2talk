@@ -49,6 +49,7 @@ urlpatterns = [
     # Call Masking
     path('call/<str:qr_code>/', call_masking_views.generate_masked_call_url, name='generate_masked_call'),
     path('call/<str:qr_code>/info/', call_masking_views.get_call_info, name='get_call_info'),
+    path('test-call/', call_masking_views.test_call_masking, name='test_call_masking'),
     
     # QR API Endpoints
     path('api/qr/generate/', qr_views.api_generate_qr_batch, name='api_generate_qr'),

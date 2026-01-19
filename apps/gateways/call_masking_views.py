@@ -147,3 +147,62 @@ def get_call_info(request, qr_code):
             'success': False,
             'error': 'QR code not found or not activated'
         }, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@ratelimit(key='user', rate='5/h', method='POST')
+def test_call_masking(request):
+    """
+    Test call masking feature for logged-in users.
+    Uses user's own phone number for testing.
+    
+    Route: POST /gateways/test-call/
+    
+    Returns:
+        JSON: {
+            'success': bool,
+            'call_url': str,
+            'pin': str,
+            'did_number': str,
+            'expires_in_minutes': int
+        }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'Authentication required'
+        }, status=401)
+    
+    try:
+        from apps.communications.adapters.call_masking_adapter import CallMaskingAdapter
+        
+        # Get user's phone number
+        user_phone = request.user.get_decrypted_phone() if hasattr(request.user, 'get_decrypted_phone') else None
+        
+        if not user_phone:
+            return JsonResponse({
+                'success': False,
+                'error': 'No phone number found. Please update your profile.'
+            }, status=400)
+        
+        # Generate test call
+        adapter = CallMaskingAdapter()
+        result = adapter.create_masked_call(
+            owner_phone_number=user_phone,
+            qr_id=f"TEST-{request.user.id}"
+        )
+        
+        if result['success']:
+            logger.info(f"Test call generated for user {request.user.email}, PIN: {result['pin']}")
+            return JsonResponse(result)
+        else:
+            logger.error(f"Failed to generate test call for user {request.user.email}: {result.get('error')}")
+            return JsonResponse(result, status=500)
+            
+    except Exception as e:
+        logger.error(f"Error generating test call for user {request.user.email}: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Internal server error'
+        }, status=500)
