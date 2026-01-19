@@ -57,7 +57,7 @@ def preview_batch_sample(request, batch_number):
         'is_preview': True,  # Flag to indicate this is preview mode
     }
     
-    return render(request, 'gateways/tag_batch_print.html', context)
+    return render(request, 'gateways/tag_print_design.html', context)
 
 
 # PDF download functionality removed - use preview_batch_sample instead

@@ -3,268 +3,288 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Scan 2 Talk – Print Tag</title>
+<title>Scan 2 Talk – Professional Edition</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans+Devanagari:wght@600;800&display=swap');
+
 @page {
   size: A4;
-  margin: 5mm;
+  margin: 0;
 }
 
 * {
   box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #ffffff;
-  font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
-/* ================= TAG ================= */
-.tag {
-  width: 100mm;
-  height: 70mm;
+body {
+  margin: 0;
   padding: 0;
-  border: 0.5mm solid #000;
-  border-radius: 0;
+  background: #f1f5f9;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ================= GRID LAYOUT ================= */
+.page {
+  width: 210mm;
+  height: 297mm;
+  padding: 10mm;
+  margin: 0 auto;
+  background: white;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 5mm;
+  page-break-after: always;
+}
+
+/* ================= TAG CONTAINER ================= */
+.tag {
+  width: 95mm;
+  height: 65mm;
   background: #ffffff;
   display: flex;
   flex-direction: column;
+  position: relative;
   overflow: hidden;
-  page-break-inside: avoid;
+  border-radius: 0; /* Square corners */
+  border: 0.3mm solid #cbd5e1;
+  box-shadow: 0 4mm 6mm -2mm rgba(0, 0, 0, 0.05);
 }
 
-.tag-content {
-  flex: 1;
-  padding: 3mm 4mm;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4mm;
-}
-
-/* ================= DIVIDER ================= */
-.divider {
-  display: none;
-}
-
-/* ================= LEFT ================= */
-.left {
+/* ================= HEADER ================= */
+.header-bar {
+  height: 12mm;
+  background: #0f172a;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
+  padding: 0 5mm;
 }
 
-.logo-box {
-  width: 35mm;
+.logo-wrapper {
+  height: 8mm;
+  display: flex;
+  align-items: center;
 }
 
-.logo-box img {
-  width: 100%;
-  height: auto;
+.brand-logo {
+  height: 100%;
+  width: auto;
   object-fit: contain;
 }
 
-/* HEADINGS */
-.heading-en {
-  font-size: 5.5mm;
-  font-weight: 800;
-  color: #000;
-  margin-top: 0.5mm;
-  line-height: 1.15;
+.header-badge {
+  color: #f8fafc;
+  font-size: 2.2mm;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.8;
 }
 
-.heading-hi {
-  font-size: 4mm;
-  font-weight: 800;
-  color: #000;
-  margin-top: 1mm;
-  line-height: 1.2;
+/* ================= BODY ================= */
+.main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 38mm;
+  padding: 4mm 5mm;
+  gap: 3mm;
+  align-items: center;
 }
 
-/* HIGHLIGHT LINE */
-.highlight {
-  width: 42mm;
-  height: 1.5mm;
-  background: #f5c400;
-  margin: 1.5mm 0;
+/* TEXT SECTION */
+.text-zone {
+  display: flex;
+  flex-direction: column;
 }
 
-/* ================= RIGHT ================= */
-.right {
+.title-en {
+  font-size: 6mm; /* Increased Font Size for English */
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.05;
+  letter-spacing: -0.3px;
+  margin-bottom: 2mm;
+}
+
+.divider {
+  width: 12mm;
+  height: 1.2mm;
+  background: #f59e0b; /* Amber divider */
+  margin: 1mm 0 2mm 0;
+}
+
+.title-hi {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-size: 4.2mm; /* Kept standard size to save space */
+  font-weight: 700;
+  color: #475569;
+  line-height: 1.25;
+}
+
+/* QR SECTION */
+.qr-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
 }
 
-/* QR ZONE */
-.qr-box {
-  width: 38mm;
-  height: 38mm;
-  padding: 1.5mm;
+.qr-frame {
+  width: 36mm;
+  height: 36mm;
+  padding: 1mm;
+  border: 0.8mm solid #0f172a;
   border-radius: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    #000 0 1.5mm,
-    #f5c400 1.5mm 3mm
-  );
+  background: white;
 }
 
-.qr-inner {
+.qr-code-img {
   width: 100%;
   height: 100%;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5mm;
-  font-weight: 800;
-  text-align: center;
-  color: #000;
+  object-fit: contain;
 }
 
-/* FOOTER */
-.footer {
-  text-align: center;
-  font-size: 2.2mm;
-  font-weight: 700;
+.scan-label {
   margin-top: 1.5mm;
-  line-height: 1.3;
-  color: #333;
-}
-
-.footer-instruction {
-  color: #1a1a1a;
+  font-size: 2mm;
   font-weight: 700;
-  font-size: 2.5mm;
-  line-height: 1.2;
-  letter-spacing: 0.1px;
-  font-family: "Segoe UI", "Roboto", sans-serif;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.footer strong {
-  font-weight: 900;
-  color: #000;
-  font-size: 3mm;
-  letter-spacing: 0.3px;
-  background: linear-gradient(135deg, #f5c400 0%, #ffd700 100%);
-  padding: 0.8mm 2mm;
-  border-radius: 1.5mm;
-  border: 0.5mm solid #000;
-  display: inline-block;
-  margin-top: 0.8mm;
-}
-
-/* ================= BOTTOM FOOTER BAR ================= */
-.bottom-bar {
-  width: 100%;
-  height: 5mm;
-  background: #111111;
+/* ================= FOOTER ================= */
+.footer-lean {
+  height: 9mm;
+  background: #f8fafc;
+  border-top: 0.3mm solid #e2e8f0;
   display: flex;
   align-items: center;
-  padding: 0 3mm;
+  justify-content: space-between;
+  padding: 0 5mm;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
   gap: 2mm;
-  margin-top: 0;
-  flex-shrink: 0;
 }
 
-.icon-row {
+.shield-icon {
+  font-size: 3.5mm;
+  color: #0f172a;
+}
+
+.footer-label {
+  font-size: 2.2mm;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Colorful Icon Styles */
+.footer-right {
   display: flex;
-  gap: 1.5mm;
   align-items: center;
+  gap: 3mm;
 }
 
-.icon {
+.icon-badge {
+  display: flex;
+  align-items: center;
+  gap: 1mm;
+  background: white;
+  padding: 0.5mm 1.5mm;
+  border-radius: 1mm;
+  border: 0.2mm solid #e2e8f0;
+}
+
+.ib-icon {
   font-size: 2.8mm;
   line-height: 1;
 }
 
-.bottom-text {
+.ib-text {
   font-size: 1.8mm;
   font-weight: 700;
-  color: #ffffff;
-  letter-spacing: 0.2px;
-  flex: 1;
+  text-transform: uppercase;
+  color: #334155;
 }
 
-.bottom-text strong {
-  font-weight: 800;
-  color: #f5c400;
-}
+/* Specific colors for icons */
+.warn { color: #f59e0b; }
+.park { color: #2563eb; }
+.call { color: #16a34a; }
 
-/* ================= PRINT ================= */
+/* Print Specifics */
 @media print {
-  .tag {
-    box-shadow: none;
-  }
+  body { background: none; }
+  .page { margin: 0; border: none; }
+  .tag { break-inside: avoid; border: 0.2mm solid #ccc; box-shadow: none; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="tag">
+{% for page_qrs in qr_pages %}
+<div class="page">
+  {% for qr in page_qrs %}
+  <div class="tag">
+    <!-- HEADER -->
+    <div class="header-bar">
+      <div class="logo-wrapper">
+        <img src="{% static 'tag/bnw.jpg' %}" class="brand-logo" alt="Scan2Talk">
+      </div>
+      <div class="header-badge">Vehicle Safety Tag</div>
+    </div>
 
-  <div class="tag-content">
-    <!-- LEFT -->
-    <div class="left">
-      <div class="logo-box">
-        <img src="{% static 'tag/header.jpeg' %}" alt="Scan2Talk Logo">
+    <!-- MAIN BODY -->
+    <div class="main-content">
+      <div class="text-zone">
+        <div class="title-en">Scan to Contact <br>Vehicle Owner</div>
+        <div class="divider"></div>
+        <div class="title-hi">वाहन मालिक से संपर्क <br>करने के लिए स्कैन करें</div>
       </div>
 
-      <div>
-        <div class="heading-en">
-          Scan the code to contact the vehicle owner
+      <div class="qr-container">
+        <div class="qr-frame">
+          <img src="data:image/png;base64,{{ qr.qr_code_data }}" class="qr-code-img" alt="QR Code">
         </div>
-
-        <div class="highlight"></div>
-
-        <div class="heading-hi">
-          कोड स्कैन करें और वाहन मालिक से संपर्क करें
-        </div>
+        <div class="scan-label">Scan Me</div>
       </div>
     </div>
 
-    <!-- DIVIDER -->
-    <div class="divider"></div>
-
-    <!-- RIGHT -->
-    <div class="right">
-      <div class="qr-box">
-        <div class="qr-inner">
-          {% if qr_code_data %}
-          <img src="data:image/png;base64,{{ qr_code_data }}" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;">
-          {% else %}
-          <!-- Demo QR Code - Scans to call +91 7988269874 -->
-          <img src="{% static 'tag/demo_qr.png' %}" alt="Scan to Call +91 7988269874" style="width: 100%; height: 100%; object-fit: contain;">
-          {% endif %}
-        </div>
+    <!-- FOOTER WITH COLOURFUL ICONS -->
+    <div class="footer-lean">
+      <div class="footer-left">
+        <span class="shield-icon">🛡️</span>
+        <span class="footer-label">Privacy Protected</span>
       </div>
-
-      <div class="footer">
-        <div class="footer-instruction">📱 Scan to know more & talk to our executive</div>
-        <strong>SCAN2TALK.IN</strong>
+      
+      <div class="footer-right">
+        <div class="icon-badge">
+          <span class="ib-icon warn">⚠️</span>
+          <span class="ib-text">Emergency</span>
+        </div>
+        <div class="icon-badge">
+          <span class="ib-icon park">🅿️</span>
+          <span class="ib-text">Parking</span>
+        </div>
+        <div class="icon-badge">
+          <span class="ib-icon call">📞</span>
+          <span class="ib-text">Contact</span>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- BOTTOM FOOTER BAR -->
-  <div class="bottom-bar">
-    <div class="icon-row">
-      <span class="icon">🔔</span>
-      <span class="icon">🅿️</span>
-      <span class="icon">⚠️</span>
-      <span class="icon">📞</span>
-    </div>
-    <div class="bottom-text">
-      <strong>Wrong Parking Emergency Contact:</strong> Any issue with the vehicle? Scan the QR.
-    </div>
-  </div>
-
+  {% endfor %}
 </div>
+{% endfor %}
 
 </body>
 </html>

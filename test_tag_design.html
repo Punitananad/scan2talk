@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Tag Design - Quick Links</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        .link-box {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .link-box h3 {
+            margin-top: 0;
+            color: #0f172a;
+        }
+        a {
+            display: inline-block;
+            background: #0f172a;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        a:hover {
+            background: #1e293b;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🏷️ Tag Design Test Page</h1>
+        <p class="subtitle">Click the links below to view your new tag design</p>
+        
+        <div class="link-box">
+            <h3>✅ Option 1: Test with Sample QR Codes</h3>
+            <p>View the new design with 8 sample QR codes</p>
+            <a href="http://localhost:8000/gateways/qr/tag-print/" target="_blank">
+                View Tag Print Design →
+            </a>
+        </div>
+        
+        <div class="link-box">
+            <h3>📦 Option 2: Test with Real Batch</h3>
+            <p>First, go to QR Dashboard to see your batch numbers</p>
+            <a href="http://localhost:8000/gateways/qr/dashboard/" target="_blank">
+                Go to QR Dashboard →
+            </a>
+            <p style="margin-top: 15px; color: #64748b; font-size: 14px;">
+                Then use: <code>http://localhost:8000/gateways/qr/batch/YOUR_BATCH_NUMBER/preview-page/</code>
+            </p>
+        </div>
+        
+        <div class="note">
+            <strong>⚠️ Important:</strong> Make sure your Django server is running!
+            <br>If not, run: <code>python manage.py runserver</code>
+        </div>
+        
+        <div class="note" style="background: #dbeafe; border-left-color: #2563eb;">
+            <strong>💡 Tip:</strong> Press <code>Ctrl + Shift + R</code> to clear cache if you don't see changes
+        </div>
+    </div>
+</body>
+</html>

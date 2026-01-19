@@ -139,9 +139,40 @@ def tag_clean_view(request):
 
 def tag_print_design(request):
     """
-    Display the print-ready tag design (HTML/CSS only, no images).
+    Display the print-ready tag design with sample QR codes for testing.
     """
-    return render(request, 'gateways/tag_print_design.html')
+    from apps.core.utils import generate_qr_code
+    import base64
+    from django.conf import settings
+    
+    # Generate sample QR codes for testing the design
+    sample_qr_codes = ['SAMPLE001', 'SAMPLE002', 'SAMPLE003', 'SAMPLE004', 
+                       'SAMPLE005', 'SAMPLE006', 'SAMPLE007', 'SAMPLE008']
+    
+    qr_data_list = []
+    protocol = 'http' if settings.DEBUG else 'https'
+    
+    for qr_code in sample_qr_codes:
+        url = f"{protocol}://{settings.PLATFORM_DOMAIN}/gateways/activate/{qr_code}/"
+        qr_image_file = generate_qr_code(url)
+        qr_image_file.seek(0)
+        qr_base64 = base64.b64encode(qr_image_file.read()).decode('utf-8')
+        
+        qr_data_list.append({
+            'qr_code': qr_code,
+            'qr_code_data': qr_base64
+        })
+    
+    # Split into pages (8 tags per page: 2 cols x 4 rows)
+    tags_per_page = 8
+    qr_pages = [qr_data_list[i:i + tags_per_page] for i in range(0, len(qr_data_list), tags_per_page)]
+    
+    context = {
+        'qr_pages': qr_pages,
+        'is_preview': True,
+    }
+    
+    return render(request, 'gateways/tag_print_design.html', context)
 
 
 @staff_member_required

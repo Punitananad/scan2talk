@@ -240,7 +240,7 @@ body {
                 <div class="mt-2 bg-gray-50 p-2 sm:p-4 rounded-xl">
                   <div class="flex justify-center">
                     <div class="tag-zoom-container" style="transform: scale(0.7) sm:scale(0.85) md:scale(0.95); transform-origin: center; transition: transform 0.3s ease;">
-                      {% include 'gateways/tag_print_design.html' with qr_code_data=None %}
+                      {% include 'gateways/tag_single_preview.html' with qr_code_data=None %}
                     </div>
                   </div>
                 </div>
@@ -491,7 +491,7 @@ body {
             <!-- Tag Design -->
             <div class="mt-4 flex justify-center items-center overflow-hidden">
               <div class="tag-zoom-container" style="transform: scale(0.7); transform-origin: center;">
-                {% include 'gateways/tag_print_design.html' with qr_code_data=None %}
+                {% include 'gateways/tag_single_preview.html' with qr_code_data=None %}
               </div>
             </div>
             

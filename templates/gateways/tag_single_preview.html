@@ -1,0 +1,55 @@
+{% load static %}
+<!-- Single Tag Preview for Homepage -->
+<div class="tag" style="width: 95mm; height: 65mm; background: #ffffff; display: flex; flex-direction: column; position: relative; overflow: hidden; border-radius: 0; border: 0.3mm solid #cbd5e1; box-shadow: 0 4mm 6mm -2mm rgba(0, 0, 0, 0.05);">
+  <!-- HEADER -->
+  <div style="height: 12mm; background: #0f172a; display: flex; align-items: center; justify-content: space-between; padding: 0 5mm;">
+    <div style="height: 8mm; display: flex; align-items: center;">
+      <img src="{% static 'tag/bnw.jpg' %}" style="height: 100%; width: auto; object-fit: contain;" alt="Scan2Talk">
+    </div>
+    <div style="color: #f8fafc; font-size: 2.2mm; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; opacity: 0.8;">Vehicle Safety Tag</div>
+  </div>
+
+  <!-- MAIN BODY -->
+  <div style="flex: 1; display: grid; grid-template-columns: 1fr 38mm; padding: 4mm 5mm; gap: 3mm; align-items: center;">
+    <div style="display: flex; flex-direction: column;">
+      <div style="font-size: 6mm; font-weight: 900; color: #0f172a; line-height: 1.05; letter-spacing: -0.3px; margin-bottom: 2mm;">Scan to Contact <br>Vehicle Owner</div>
+      <div style="width: 12mm; height: 1.2mm; background: #f59e0b; margin: 1mm 0 2mm 0;"></div>
+      <div style="font-family: 'Noto Sans Devanagari', sans-serif; font-size: 4.2mm; font-weight: 700; color: #475569; line-height: 1.25;">वाहन मालिक से संपर्क <br>करने के लिए स्कैन करें</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <div style="width: 36mm; height: 36mm; padding: 1mm; border: 0.8mm solid #0f172a; border-radius: 0; background: white;">
+        {% if qr_code_data %}
+        <img src="data:image/png;base64,{{ qr_code_data }}" style="width: 100%; height: 100%; object-fit: contain;" alt="QR Code">
+        {% else %}
+        <!-- Demo QR Code -->
+        <img src="{% static 'tag/demo_qr.png' %}" style="width: 100%; height: 100%; object-fit: contain;" alt="Demo QR Code">
+        {% endif %}
+      </div>
+      <div style="margin-top: 1.5mm; font-size: 2mm; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Scan Me</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="height: 9mm; background: #f8fafc; border-top: 0.3mm solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 5mm;">
+    <div style="display: flex; align-items: center; gap: 2mm;">
+      <span style="font-size: 3.5mm;">🛡️</span>
+      <span style="font-size: 2.2mm; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.3px;">Privacy Protected</span>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 3mm;">
+      <div style="display: flex; align-items: center; gap: 1mm; background: white; padding: 0.5mm 1.5mm; border-radius: 1mm; border: 0.2mm solid #e2e8f0;">
+        <span style="font-size: 2.8mm; color: #f59e0b;">⚠️</span>
+        <span style="font-size: 1.8mm; font-weight: 700; text-transform: uppercase; color: #334155;">Emergency</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1mm; background: white; padding: 0.5mm 1.5mm; border-radius: 1mm; border: 0.2mm solid #e2e8f0;">
+        <span style="font-size: 2.8mm; color: #2563eb;">🅿️</span>
+        <span style="font-size: 1.8mm; font-weight: 700; text-transform: uppercase; color: #334155;">Parking</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1mm; background: white; padding: 0.5mm 1.5mm; border-radius: 1mm; border: 0.2mm solid #e2e8f0;">
+        <span style="font-size: 2.8mm; color: #16a34a;">📞</span>
+        <span style="font-size: 1.8mm; font-weight: 700; text-transform: uppercase; color: #334155;">Contact</span>
+      </div>
+    </div>
+  </div>
+</div>
