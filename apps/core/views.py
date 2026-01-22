@@ -81,6 +81,8 @@ class OrderTagView(View):
     
     def post(self, request):
         # Store order data in session
+        quantity = int(request.POST.get('quantity', 1))
+        
         order_data = {
             'name': request.POST.get('name'),
             'phone': request.POST.get('phone'),
@@ -89,12 +91,12 @@ class OrderTagView(View):
             'city': request.POST.get('city'),
             'state': request.POST.get('state'),
             'pincode': request.POST.get('pincode'),
-            'quantity': int(request.POST.get('quantity', 1)),
+            'quantity': quantity,
         }
         
-        # Calculate total
-        prices = {1: 299, 2: 549, 3: 799, 5: 1299}
-        order_data['total'] = prices.get(order_data['quantity'], 299)
+        # Calculate total: ₹1 per tag
+        BASE_PRICE = 1
+        order_data['total'] = BASE_PRICE * quantity
         
         # Store in session
         request.session['order_data'] = order_data
@@ -103,30 +105,90 @@ class OrderTagView(View):
 
 
 class OrderPaymentView(View):
-    """Fake payment page for tag order."""
-    template_name = 'core/order_payment.html'
+    """Razorpay payment page for tag order."""
+    template_name = 'core/order_payment_razorpay.html'
     
     def get(self, request):
         order_data = request.session.get('order_data')
         if not order_data:
             return redirect('core:order_tag')
         
-        return render(request, self.template_name, {'order': order_data})
+        # Check if Razorpay order already created
+        razorpay_order_id = request.session.get('razorpay_tag_order_id')
+        
+        if not razorpay_order_id:
+            # Create Razorpay order
+            from apps.accounts.razorpay_service import RazorpayGatewayService
+            import uuid
+            
+            # Generate order ID
+            order_id = f"TAG{uuid.uuid4().hex[:8].upper()}"
+            order_data['order_id'] = order_id
+            
+            service = RazorpayGatewayService()
+            
+            if not service.client:
+                messages.error(request, 'Payment gateway not configured. Please contact support.')
+                return redirect('core:order_tag')
+            
+            try:
+                # Create Razorpay order
+                razorpay_order = service.client.order.create({
+                    'amount': int(float(order_data['total']) * 100),  # Amount in paise
+                    'currency': 'INR',
+                    'receipt': order_id,
+                    'notes': {
+                        'order_id': order_id,
+                        'name': order_data['name'],
+                        'phone': order_data['phone'],
+                        'quantity': order_data['quantity'],
+                        'type': 'tag_order'
+                    }
+                })
+                
+                razorpay_order_id = razorpay_order['id']
+                request.session['razorpay_tag_order_id'] = razorpay_order_id
+                request.session['order_data'] = order_data  # Update with order_id
+                
+            except Exception as e:
+                messages.error(request, f'Payment initiation failed: {str(e)}')
+                return redirect('core:order_tag')
+        
+        # Get Razorpay key
+        from apps.accounts.razorpay_service import RazorpayGatewayService
+        service = RazorpayGatewayService()
+        
+        context = {
+            'order': order_data,
+            'razorpay_key_id': service.key_id,
+            'razorpay_order_id': razorpay_order_id,
+            'amount': int(float(order_data['total']) * 100),  # Amount in paise
+        }
+        
+        return render(request, self.template_name, context)
     
     def post(self, request):
+        """Handle Razorpay payment success callback"""
         order_data = request.session.get('order_data')
         if not order_data:
-            return redirect('core:order_tag')
+            return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
         
-        # Generate order ID
-        import uuid
-        order_id = f"ORD{uuid.uuid4().hex[:8].upper()}"
-        order_data['order_id'] = order_id
+        # Get Razorpay payment details
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+        
+        # Verify signature
+        from apps.accounts.razorpay_service import RazorpayGatewayService
+        if not RazorpayGatewayService.verify_payment_signature(
+            razorpay_order_id, razorpay_payment_id, razorpay_signature
+        ):
+            return JsonResponse({'success': False, 'error': 'Invalid payment signature'}, status=400)
         
         # Save order to database
         from apps.core.models import TagOrder
-        TagOrder.objects.create(
-            order_id=order_id,
+        tag_order = TagOrder.objects.create(
+            order_id=order_data['order_id'],
             name=order_data['name'],
             phone=order_data['phone'],
             email=order_data['email'],
@@ -135,16 +197,23 @@ class OrderPaymentView(View):
             state=order_data['state'],
             pincode=order_data['pincode'],
             quantity=order_data['quantity'],
-            total_amount=order_data['total']
+            total_amount=order_data['total'],
+            status='processing',  # Mark as processing since payment is confirmed
+            notes=f"Razorpay Payment ID: {razorpay_payment_id}"
         )
         
         # Store in session for success page
         request.session['completed_order'] = order_data
         
-        # Clear order data
+        # Clear order data and Razorpay order ID
         del request.session['order_data']
+        if 'razorpay_tag_order_id' in request.session:
+            del request.session['razorpay_tag_order_id']
         
-        return redirect('core:order_success')
+        return JsonResponse({
+            'success': True,
+            'redirect_url': '/order-tag/success/'
+        })
 
 
 class OrderSuccessView(View):

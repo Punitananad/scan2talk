@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - Scan2Talk{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Complete Your Payment</h1>
+                <p class="text-gray-600">Secure payment via Razorpay</p>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-8">
+                <h2 class="font-bold text-gray-900 mb-4">Order Summary</h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Name:</span>
+                        <span class="font-semibold">{{ order.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Quantity:</span>
+                        <span class="font-semibold">{{ order.quantity }} Tag(s)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Delivery:</span>
+                        <span class="font-semibold">{{ order.city }}, {{ order.state }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-700">Order ID:</span>
+                        <span class="font-mono text-xs">{{ order.order_id }}</span>
+                    </div>
+                    <div class="border-t-2 border-blue-300 pt-3 mt-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-900">Total Amount</span>
+                            <span class="text-2xl font-bold text-blue-600">₹{{ order.total }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Button -->
+            <button 
+                id="rzp-button"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg mb-4"
+            >
+                Pay ₹{{ order.total }} with Razorpay
+            </button>
+
+            <div class="text-center mb-6">
+                <a href="{% url 'core:order_tag' %}" class="text-gray-600 hover:text-gray-900 text-sm">
+                    ← Back to Order Form
+                </a>
+            </div>
+
+            <!-- Security Badge -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <div class="flex items-center justify-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    Secured by Razorpay • PCI DSS Compliant
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('rzp-button').onclick = function(e){
+    e.preventDefault();
+    
+    var options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": "{{ amount }}",
+        "currency": "INR",
+        "name": "Scan2Talk",
+        "description": "QR Tag Order - {{ order.quantity }} Tag(s)",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response){
+            // Payment successful - send to backend for verification
+            fetch('/order-tag/payment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: new URLSearchParams({
+                    'razorpay_payment_id': response.razorpay_payment_id,
+                    'razorpay_order_id': response.razorpay_order_id,
+                    'razorpay_signature': response.razorpay_signature
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Payment verification failed: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        },
+        "prefill": {
+            "name": "{{ order.name }}",
+            "email": "{{ order.email }}",
+            "contact": "{{ order.phone }}"
+        },
+        "theme": {
+            "color": "#3DA9FC"
+        },
+        "modal": {
+            "ondismiss": function(){
+                console.log('Payment cancelled by user');
+            }
+        }
+    };
+    
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+        alert('Payment failed: ' + response.error.description);
+    });
+    rzp1.open();
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

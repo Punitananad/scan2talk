@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - Razorpay{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div class="max-w-md mx-auto px-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Wallet Recharge</h1>
+                <p class="text-gray-600">Complete your payment securely</p>
+            </div>
+
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-700 font-medium">Amount</span>
+                    <span class="text-3xl font-bold text-blue-600">₹{{ order.amount }}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-gray-600">Credits</span>
+                    <span class="font-semibold text-gray-900">{{ order.credits_to_add }} credits</span>
+                </div>
+                <div class="flex justify-between items-center text-sm mt-2">
+                    <span class="text-gray-600">Order ID</span>
+                    <span class="font-mono text-xs text-gray-700">{{ order.order_id }}</span>
+                </div>
+            </div>
+
+            <button 
+                id="rzp-button"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg mb-4"
+            >
+                Pay with Razorpay
+            </button>
+
+            <div class="text-center">
+                <a href="{% url 'accounts:wallet_dashboard' %}" class="text-gray-600 hover:text-gray-900 text-sm">
+                    ← Back to Wallet
+                </a>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <div class="flex items-center justify-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    Secured by Razorpay
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('rzp-button').onclick = function(e){
+    e.preventDefault();
+    
+    var options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": "{{ amount }}",
+        "currency": "{{ currency }}",
+        "name": "{{ name }}",
+        "description": "{{ description }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response){
+            // Payment successful
+            fetch('/api/v1/auth/wallet/razorpay/success/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: new URLSearchParams({
+                    'razorpay_payment_id': response.razorpay_payment_id,
+                    'razorpay_order_id': response.razorpay_order_id,
+                    'razorpay_signature': response.razorpay_signature
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Payment verification failed: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        },
+        "prefill": {
+            "name": "{{ user_name }}",
+            "email": "{{ user_email }}",
+            "contact": "{{ user_phone }}"
+        },
+        "theme": {
+            "color": "#2563eb"
+        },
+        "modal": {
+            "ondismiss": function(){
+                console.log('Payment cancelled');
+            }
+        }
+    };
+    
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+        alert('Payment failed: ' + response.error.description);
+    });
+    rzp1.open();
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

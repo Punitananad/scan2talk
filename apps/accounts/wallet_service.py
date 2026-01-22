@@ -33,7 +33,7 @@ class WalletService:
     
     @staticmethod
     def create_recharge_order(user, amount, ip_address=None, user_agent=None):
-        """Create a recharge order and initiate PhonePe payment."""
+        """Create a recharge order and initiate Razorpay payment."""
         if amount < 1:
             raise ValueError("Minimum recharge amount is ₹1")
         
@@ -49,8 +49,9 @@ class WalletService:
             user_agent=user_agent
         )
         
-        # Initiate PhonePe payment (all issues fixed)
-        payment_result = PhonePeGatewayService.initiate_payment(order)
+        # Use Razorpay for payment
+        from .razorpay_service import RazorpayGatewayService
+        payment_result = RazorpayGatewayService.initiate_payment(order)
         
         return order, payment_result
     
@@ -138,24 +139,13 @@ class RechargeGatewayService:
     
     @classmethod
     def initiate_recharge(cls, order):
-        """Initiate recharge with payment gateway."""
+        """Initiate recharge with payment gateway - Now using Razorpay."""
         
-        # TEST MODE: Skip actual gateway and return mock payment URL
-        if cls.TEST_MODE:
-            order.gateway_order_id = f"TEST_{order.order_id}"
-            order.status = 'pending'
-            order.save()
-            
-            # Return test payment URL
-            test_payment_url = f"http://localhost:8000/api/v1/auth/wallet/test-payment/{order.order_id}/"
-            
-            return {
-                'success': True,
-                'payment_url': test_payment_url,
-                'gateway_order_id': f"TEST_{order.order_id}",
-                'test_mode': True
-            }
+        # Use Razorpay for all payments
+        from .razorpay_service import RazorpayGatewayService
+        return RazorpayGatewayService.initiate_payment(order)
         
+        # OLD CODE - Keeping for reference
         # PRODUCTION MODE: Use actual payment gateway
         try:
             # Prepare request payload

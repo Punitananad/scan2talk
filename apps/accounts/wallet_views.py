@@ -1,18 +1,24 @@
 """
 Wallet management views and APIs.
 """
+import logging
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils import timezone
+from uuid import uuid4
 from .wallet_service import WalletService, RechargeGatewayService
 from .wallet_models import Wallet, RechargeOrder
+from .recharge_models import VisitorPayment
+
+logger = logging.getLogger(__name__)
 
 
 # Web Views
@@ -34,7 +40,7 @@ def wallet_dashboard(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def recharge_wallet(request):
-    """Recharge wallet page - DIRECT ADD (NO PAYMENT GATEWAY)."""
+    """Recharge wallet page - Razorpay Payment Gateway."""
     if request.method == 'POST':
         try:
             amount = float(request.POST.get('amount', 0))
@@ -43,19 +49,20 @@ def recharge_wallet(request):
                 messages.error(request, 'Minimum recharge amount is ₹1')
                 return redirect('accounts:recharge_wallet')
             
-            # DIRECT ADD - Skip payment gateway, add balance immediately
-            wallet = WalletService.get_or_create_wallet(request.user)
-            
-            # Add balance directly using the correct method
-            wallet.add_balance(
+            # Create recharge order
+            order, payment_result = WalletService.create_recharge_order(
+                user=request.user,
                 amount=amount,
-                transaction_type='recharge',
-                reference='DIRECT_ADD',
-                notes=f'Direct recharge ₹{amount} (Test Mode - No Gateway)'
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
             )
             
-            messages.success(request, f'✅ Successfully added ₹{amount} to your wallet! Balance: ₹{wallet.balance}')
-            return redirect('accounts:wallet_dashboard')
+            if payment_result['success']:
+                # Redirect to Razorpay checkout
+                return redirect(payment_result['payment_url'])
+            else:
+                messages.error(request, f'Payment initiation failed: {payment_result.get("error")}')
+                return redirect('accounts:recharge_wallet')
                 
         except Exception as e:
             messages.error(request, f'Error: {str(e)}')
@@ -288,6 +295,139 @@ def phonepe_callback(request):
     except Exception as e:
         messages.error(request, f'Callback error: {str(e)}')
         return redirect('accounts:wallet_dashboard')
+
+
+# Razorpay Integration
+@csrf_exempt
+@require_http_methods(["POST"])
+def razorpay_webhook(request):
+    """
+    Handle Razorpay webhook callbacks.
+    POST /api/v1/auth/wallet/recharge/callback/
+    """
+    try:
+        from .razorpay_service import RazorpayGatewayService
+        import json
+        
+        # Get raw body for signature verification
+        raw_body = request.body
+        signature = request.headers.get('X-Razorpay-Signature', '')
+        
+        # Verify webhook signature
+        if not RazorpayGatewayService.verify_webhook_signature(raw_body, signature):
+            logger.error("Razorpay webhook signature verification failed")
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid signature'
+            }, status=400)
+        
+        # Parse payload
+        payload = json.loads(raw_body)
+        
+        # Handle webhook
+        result = RazorpayGatewayService.handle_webhook(payload, signature)
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        logger.error(f"Razorpay webhook error: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
+
+
+@login_required
+def razorpay_checkout(request):
+    """
+    Razorpay checkout page.
+    GET /api/v1/auth/wallet/razorpay/checkout/?order_id=<order_id>
+    """
+    try:
+        from .razorpay_service import RazorpayGatewayService
+        
+        order_id = request.GET.get('order_id')
+        if not order_id:
+            messages.error(request, 'Order ID missing')
+            return redirect('accounts:wallet_dashboard')
+        
+        order = RechargeOrder.objects.get(order_id=order_id, user=request.user)
+        
+        # Get Razorpay key
+        service = RazorpayGatewayService()
+        
+        context = {
+            'order': order,
+            'razorpay_key_id': service.key_id,
+            'razorpay_order_id': order.gateway_order_id,
+            'amount': int(order.amount * 100),  # Amount in paise
+            'currency': 'INR',
+            'name': 'Scan2Talk',
+            'description': f'Wallet Recharge - {order.credits_to_add} credits',
+            'user_name': request.user.get_full_name() or request.user.username,
+            'user_email': request.user.email,
+            'user_phone': request.user.get_decrypted_phone() if hasattr(request.user, 'get_decrypted_phone') else '',
+        }
+        
+        return render(request, 'accounts/razorpay_checkout.html', context)
+        
+    except RechargeOrder.DoesNotExist:
+        messages.error(request, 'Order not found')
+        return redirect('accounts:wallet_dashboard')
+    except Exception as e:
+        messages.error(request, f'Error: {str(e)}')
+        return redirect('accounts:wallet_dashboard')
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def razorpay_payment_success(request):
+    """
+    Handle Razorpay payment success callback from frontend.
+    POST /api/v1/auth/wallet/razorpay/success/
+    """
+    try:
+        from .razorpay_service import RazorpayGatewayService
+        
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+        
+        # Verify signature
+        if not RazorpayGatewayService.verify_payment_signature(
+            razorpay_order_id, razorpay_payment_id, razorpay_signature
+        ):
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid payment signature'
+            }, status=400)
+        
+        # Find order
+        order = RechargeOrder.objects.get(gateway_order_id=razorpay_order_id)
+        
+        # Mark as completed
+        order.mark_completed(
+            gateway_payment_id=razorpay_payment_id,
+            gateway_signature=razorpay_signature
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Payment successful',
+            'order_id': order.order_id,
+            'redirect_url': f'/api/v1/auth/wallet/recharge/success/?order_id={order.order_id}'
+        })
+        
+    except RechargeOrder.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Order not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 

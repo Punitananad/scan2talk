@@ -295,6 +295,11 @@ PHONEPE_SALT_KEY = env('PHONEPE_SALT_KEY', default='5fb67f81-c6d6-4989-9bf4-e10c
 PHONEPE_SALT_INDEX = env('PHONEPE_SALT_INDEX', default=1)  # Usually 1 for production
 PHONEPE_PRODUCTION = env('PHONEPE_PRODUCTION', default=False)  # Set True for production
 
+# Razorpay Payment Gateway
+RAZORPAY_KEY_ID = env('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = env('RAZORPAY_KEY_SECRET', default='')
+RAZORPAY_WEBHOOK_SECRET = env('RAZORPAY_WEBHOOK_SECRET', default='')
+
 # Legacy settings (kept for backward compatibility)
 RECHARGE_API_KEY = '5fb67f81-c6d6-4989-9bf4-e10c6db8ae8d'
 RECHARGE_CLIENT_ID = 'SU2504042021229572318914'

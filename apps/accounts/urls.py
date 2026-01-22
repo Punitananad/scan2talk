@@ -27,6 +27,11 @@ urlpatterns = [
     path('wallet/test-payment/<str:order_id>/', wallet_views.test_payment_page, name='test_payment_page'),
     path('wallet/test-payment/<str:order_id>/complete/', wallet_views.test_payment_complete, name='test_payment_complete'),
     
+    # Razorpay routes
+    path('wallet/razorpay/checkout/', wallet_views.razorpay_checkout, name='razorpay_checkout'),
+    path('wallet/razorpay/success/', wallet_views.razorpay_payment_success, name='razorpay_payment_success'),
+    path('wallet/razorpay/webhook/', wallet_views.razorpay_webhook, name='razorpay_webhook'),
+    
     # Visitor payment routes (for prepaid QR codes)
     path('wallet/visitor-pay/<str:identifier>/', wallet_views.initiate_visitor_payment, name='initiate_visitor_payment'),
     path('wallet/visitor-pay/callback/', wallet_views.visitor_payment_callback, name='visitor_payment_callback'),
