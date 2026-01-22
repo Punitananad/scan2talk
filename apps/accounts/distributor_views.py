@@ -54,11 +54,23 @@ def become_distributor(request):
                     return redirect('accounts:become_distributor')
             
             # Send OTP
+            print(f"\n{'='*60}")
+            print(f"🔔 DISTRIBUTOR OTP REQUEST")
+            print(f"   Phone: {phone_digits}")
+            print(f"   User: {user.email}")
+            print(f"{'='*60}\n")
+            
             success, message = send_otp(phone_digits)
+            
+            print(f"\n{'='*60}")
+            print(f"📤 OTP SEND RESULT")
+            print(f"   Success: {success}")
+            print(f"   Message: {message}")
+            print(f"{'='*60}\n")
             
             if success:
                 request.session['distributor_phone'] = phone_digits
-                messages.success(request, 'OTP sent to your mobile number')
+                messages.success(request, 'OTP sent to your mobile number. Check your SMS or console output.')
                 return redirect('accounts:become_distributor_verify')
             else:
                 messages.error(request, f'Failed to send OTP: {message}')
@@ -84,14 +96,45 @@ def become_distributor_verify(request):
         return redirect('accounts:become_distributor')
     
     if request.method == 'POST':
+        action = request.POST.get('action', 'verify')
+        
+        # Handle resend OTP
+        if action == 'resend':
+            print(f"\n{'='*60}")
+            print(f"🔄 RESENDING OTP")
+            print(f"   Phone: {phone}")
+            print(f"{'='*60}\n")
+            
+            success, message = send_otp(phone)
+            
+            if success:
+                messages.success(request, 'New OTP sent! Check your SMS or console output.')
+            else:
+                messages.error(request, f'Failed to resend OTP: {message}')
+            
+            return redirect('accounts:become_distributor_verify')
+        
+        # Handle OTP verification
         otp = request.POST.get('otp', '').strip()
         
         if not otp:
             messages.error(request, 'Please enter the OTP')
             return redirect('accounts:become_distributor_verify')
         
+        print(f"\n{'='*60}")
+        print(f"🔐 VERIFYING OTP")
+        print(f"   Phone: {phone}")
+        print(f"   OTP: {otp}")
+        print(f"{'='*60}\n")
+        
         # Verify OTP
         success, message = verify_otp(phone, otp)
+        
+        print(f"\n{'='*60}")
+        print(f"✅ VERIFICATION RESULT")
+        print(f"   Success: {success}")
+        print(f"   Message: {message}")
+        print(f"{'='*60}\n")
         
         if success:
             # Register as distributor
