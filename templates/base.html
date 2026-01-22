@@ -52,6 +52,12 @@
 
       {% if user.is_authenticated %}
 
+        <!-- Order QR Button -->
+        <a href="{% url 'core:order_tag' %}"
+           class="px-5 py-3 text-white bg-[#3DA9FC] rounded-md shadow-[0_6px_30px_rgba(61,169,252,0.6)] font-semibold hover:bg-[#3498E4] transition">
+          Order QR
+        </a>
+
         <!-- Wallet (only show for prepaid/postpaid users) -->
         {% if show_wallet %}
         <a href="{% url 'accounts:wallet_dashboard' %}"
@@ -173,6 +179,7 @@
                 </div>
               </div>
 
+              <a href="{% url 'core:home' %}" class="block py-3 text-[#094067] font-medium">🏠 Home</a>
               <a href="{% url 'accounts:profile' %}" class="block py-3 text-[#094067] font-medium">My Profile</a>
               <a href="{% url 'accounts:dashboard' %}" class="block py-3 text-[#094067] font-medium">Dashboard</a>
               
@@ -186,6 +193,7 @@
 
               <a href="{% url 'accounts:logout' %}" class="block py-3 text-red-600 font-medium">Logout</a>
             {% else %}
+              <a href="{% url 'core:home' %}" class="block py-3 text-[#094067] font-medium">🏠 Home</a>
               <a href="{% url 'accounts:phone_login' %}" class="block w-full py-3 px-4 text-center bg-white border-2 border-[#3DA9FC] text-[#3DA9FC] font-bold rounded-lg">
                 Login
               </a>

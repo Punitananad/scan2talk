@@ -127,9 +127,36 @@ class OrderPaymentView(View):
             
             service = RazorpayGatewayService()
             
+            # If Razorpay is not configured, save order without payment
             if not service.client:
-                messages.error(request, 'Payment gateway not configured. Please contact support.')
-                return redirect('core:order_tag')
+                # Save order to database without payment
+                from apps.core.models import TagOrder
+                TagOrder.objects.create(
+                    order_id=order_id,
+                    name=order_data['name'],
+                    phone=order_data['phone'],
+                    email=order_data['email'],
+                    address=order_data['address'],
+                    city=order_data['city'],
+                    state=order_data['state'],
+                    pincode=order_data['pincode'],
+                    quantity=order_data['quantity'],
+                    total_amount=order_data['total'],
+                    status='pending',  # Pending payment
+                    notes='Order placed without payment gateway (Razorpay not configured)'
+                )
+                
+                # Store in session for success page
+                request.session['completed_order'] = order_data
+                
+                # Clear order data
+                if 'order_data' in request.session:
+                    del request.session['order_data']
+                if 'razorpay_tag_order_id' in request.session:
+                    del request.session['razorpay_tag_order_id']
+                
+                messages.success(request, 'Order received! We will contact you for payment details.')
+                return redirect('core:order_success')
             
             try:
                 # Create Razorpay order
