@@ -94,8 +94,8 @@ class OrderTagView(View):
             'quantity': quantity,
         }
         
-        # Calculate total: ₹1 per tag
-        BASE_PRICE = 1
+        # Calculate total: ₹499 per tag
+        BASE_PRICE = 499
         order_data['total'] = BASE_PRICE * quantity
         
         # Store in session
