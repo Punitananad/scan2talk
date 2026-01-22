@@ -526,6 +526,20 @@ def activate_qr_code(request, qr_code):
         }
         return render(request, 'gateways/activation_blocked.html', context)
     
+    # DISTRIBUTOR CATEGORY: Check if payment is required
+    if qr.category.category_type == 'distributor':
+        from apps.accounts.recharge_models import DistributorPayment
+        
+        # Check if payment exists and is completed
+        try:
+            payment = DistributorPayment.objects.get(qr_code=qr)
+            if payment.status != 'completed':
+                # Payment pending or failed - redirect to payment page
+                return redirect('accounts:distributor_payment', qr_code=qr.qr_code)
+        except DistributorPayment.DoesNotExist:
+            # No payment record - redirect to payment page
+            return redirect('accounts:distributor_payment', qr_code=qr.qr_code)
+    
     # Check if available
     if qr.status != 'available':
         messages.error(request, f'This QR code is {qr.status} and cannot be activated')

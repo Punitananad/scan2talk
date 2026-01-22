@@ -643,3 +643,135 @@ def visitor_payment_success(request, order_id):
 def visitor_payment_failed(request):
     """Visitor payment failed page"""
     return render(request, 'accounts/visitor_payment_failed.html')
+
+
+
+# Distributor Payment Views
+@require_http_methods(["GET", "POST"])
+def distributor_payment(request, qr_code):
+    """
+    One-time payment page for distributor category QR codes.
+    NO LOGIN REQUIRED - Payment before activation.
+    """
+    from apps.gateways.qr_models import PreGeneratedQR
+    from .recharge_models import DistributorPayment
+    
+    qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
+    
+    # Verify this is a distributor category
+    if not qr.category or qr.category.category_type != 'distributor':
+        messages.error(request, 'This QR code does not require distributor payment')
+        return redirect('core:home')
+    
+    # Check if already activated
+    if qr.status == 'activated':
+        return redirect('core:gateway_access', identifier=qr.qr_code)
+    
+    # Check if payment already completed
+    try:
+        payment = DistributorPayment.objects.get(qr_code=qr)
+        if payment.status == 'completed':
+            # Payment done, redirect to activation
+            messages.success(request, 'Payment already completed. Please proceed with activation.')
+            return redirect(f'/gateways/activate/{qr_code}/')
+    except DistributorPayment.DoesNotExist:
+        payment = None
+    
+    # Get activation fee from category
+    activation_fee = qr.category.distributor_activation_fee
+    
+    if request.method == 'POST':
+        try:
+            # Create payment order
+            order_id = f"DIST-{qr_code}-{uuid4().hex[:8].upper()}"
+            
+            # Create or update payment record
+            if payment:
+                payment.status = 'pending'
+                payment.order_id = order_id
+                payment.amount = activation_fee
+                payment.save()
+            else:
+                payment = DistributorPayment.objects.create(
+                    qr_code=qr,
+                    amount=activation_fee,
+                    order_id=order_id,
+                    status='pending'
+                )
+            
+            # Create PhonePe payment order
+            from .phonepe_service import PhonePeService
+            phonepe = PhonePeService()
+            
+            # Redirect URL after payment
+            redirect_url = request.build_absolute_uri(
+                f'/accounts/distributor-payment-callback/{qr_code}/'
+            )
+            
+            payment_data = phonepe.create_payment_order(
+                amount=float(activation_fee),
+                order_id=order_id,
+                redirect_url=redirect_url,
+                user_phone=None  # Optional
+            )
+            
+            if payment_data.get('success'):
+                # Store gateway order ID
+                payment.gateway_order_id = payment_data.get('merchantTransactionId', order_id)
+                payment.save()
+                
+                # Redirect to PhonePe payment page
+                payment_url = payment_data.get('data', {}).get('instrumentResponse', {}).get('redirectInfo', {}).get('url')
+                if payment_url:
+                    return redirect(payment_url)
+                else:
+                    messages.error(request, 'Failed to initiate payment. Please try again.')
+            else:
+                messages.error(request, f"Payment initiation failed: {payment_data.get('message', 'Unknown error')}")
+                
+        except Exception as e:
+            logger.error(f"Distributor payment error: {str(e)}")
+            messages.error(request, f'Error initiating payment: {str(e)}')
+    
+    context = {
+        'qr': qr,
+        'activation_fee': activation_fee,
+        'payment': payment,
+    }
+    return render(request, 'accounts/distributor_payment.html', context)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def distributor_payment_callback(request, qr_code):
+    """
+    Callback after PhonePe payment for distributor activation.
+    """
+    from apps.gateways.qr_models import PreGeneratedQR
+    from .recharge_models import DistributorPayment
+    from .phonepe_service import PhonePeService
+    
+    qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
+    
+    try:
+        payment = DistributorPayment.objects.get(qr_code=qr)
+    except DistributorPayment.DoesNotExist:
+        messages.error(request, 'Payment record not found')
+        return redirect('core:home')
+    
+    # Verify payment status with PhonePe
+    phonepe = PhonePeService()
+    payment_status = phonepe.check_payment_status(payment.gateway_order_id or payment.order_id)
+    
+    if payment_status.get('success') and payment_status.get('code') == 'PAYMENT_SUCCESS':
+        # Payment successful
+        payment.mark_completed(payment_status.get('data', {}).get('transactionId', ''))
+        
+        messages.success(request, '✅ Payment successful! Please proceed with activation.')
+        return redirect(f'/gateways/activate/{qr_code}/?step=1')
+    else:
+        # Payment failed
+        payment.mark_failed()
+        
+        messages.error(request, f"❌ Payment failed: {payment_status.get('message', 'Unknown error')}")
+        return redirect('accounts:distributor_payment', qr_code=qr_code)

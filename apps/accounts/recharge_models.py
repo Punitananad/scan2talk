@@ -16,6 +16,7 @@ class RechargeCategory(BaseModel):
         ('prepaid', 'Prepaid - Recharge Required'),
         ('postpaid', 'Postpaid - Bill Later'),
         ('trial', 'Trial - Limited Free Usage'),
+        ('distributor', 'Distributor - One-Time Payment'),
     ]
     
     name = models.CharField(max_length=100)
@@ -29,6 +30,14 @@ class RechargeCategory(BaseModel):
     # Pricing (for prepaid/postpaid)
     message_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     call_cost_per_minute = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Distributor one-time payment
+    distributor_activation_fee = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00,
+        help_text="One-time payment for distributor category activation"
+    )
     
     # Status
     is_active = models.BooleanField(default=True)
@@ -160,6 +169,10 @@ class QRWallet(BaseModel):
         if not self.category:
             return False, "No category assigned"
         
+        # Distributor category - works like free after payment
+        if self.category.category_type == 'distributor':
+            return True, "Distributor - unlimited messages"
+        
         # Free category
         if self.category.category_type == 'free':
             if self.category.free_messages_limit == 0:
@@ -196,6 +209,10 @@ class QRWallet(BaseModel):
         if not self.category:
             return False, "No category assigned"
         
+        # Distributor category - works like free after payment
+        if self.category.category_type == 'distributor':
+            return True, "Distributor - unlimited calls"
+        
         # Free category
         if self.category.category_type == 'free':
             if self.category.free_calls_limit == 0:
@@ -226,6 +243,12 @@ class QRWallet(BaseModel):
     
     def deduct_message_credit(self):
         """Deduct credit for sending a message"""
+        # Distributor category - no deduction needed (free after payment)
+        if self.category.category_type == 'distributor':
+            self.total_messages_sent += 1
+            self.save()
+            return
+        
         if self.category.category_type in ['free', 'trial']:
             if self.free_messages_used < self.category.free_messages_limit:
                 self.free_messages_used += 1
@@ -239,6 +262,13 @@ class QRWallet(BaseModel):
     
     def deduct_call_minutes(self, minutes):
         """Deduct minutes for a call"""
+        # Distributor category - no deduction needed (free after payment)
+        if self.category.category_type == 'distributor':
+            self.total_calls_made += 1
+            self.total_call_duration += (minutes * 60)
+            self.save()
+            return
+        
         if self.category.category_type in ['free', 'trial']:
             if self.free_calls_used < self.category.free_calls_limit:
                 self.free_calls_used += 1
@@ -371,6 +401,65 @@ class VisitorPayment(BaseModel):
         self.save()
     
     def mark_failed(self, reason=''):
+        """Mark payment as failed"""
+        self.status = 'failed'
+        self.save()
+
+
+
+class DistributorPayment(BaseModel):
+    """
+    Track one-time distributor activation payments
+    """
+    qr_code = models.OneToOneField(
+        'gateways.PreGeneratedQR',
+        on_delete=models.CASCADE,
+        related_name='distributor_payment'
+    )
+    
+    # Payment details
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Payment gateway tracking
+    order_id = models.CharField(max_length=100, unique=True)
+    gateway_order_id = models.CharField(max_length=100, blank=True)
+    gateway_payment_id = models.CharField(max_length=100, blank=True)
+    
+    # Status
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    
+    # User info (captured during payment)
+    phone = models.CharField(max_length=20, blank=True)
+    
+    # Timestamps
+    paid_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'distributor_payments'
+        verbose_name = 'Distributor Payment'
+        verbose_name_plural = 'Distributor Payments'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Distributor Payment ₹{self.amount} - {self.qr_code.qr_code} - {self.status}"
+    
+    def mark_completed(self, gateway_payment_id):
+        """Mark payment as completed"""
+        from django.utils import timezone as django_timezone
+        self.status = 'completed'
+        self.gateway_payment_id = gateway_payment_id
+        self.paid_at = django_timezone.now()
+        self.save()
+    
+    def mark_failed(self):
         """Mark payment as failed"""
         self.status = 'failed'
         self.save()

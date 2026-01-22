@@ -11,7 +11,7 @@ from apps.core.utils import encrypt_data, decrypt_data
 from .wallet_models import Wallet, WalletTransaction, RechargeOrder
 
 # Import recharge models to register them
-from .recharge_models import RechargeCategory, RechargePlan, QRWallet, QRWalletTransaction
+from .recharge_models import RechargeCategory, RechargePlan, QRWallet, QRWalletTransaction, DistributorPayment
 
 
 class User(AbstractUser):
@@ -44,6 +44,11 @@ class User(AbstractUser):
     subscription_tier = models.CharField(max_length=20, default='free')
     gateway_limit = models.PositiveIntegerField(default=5)
     monthly_interaction_limit = models.PositiveIntegerField(default=100)
+    
+    # Distributor fields
+    is_distributor = models.BooleanField(default=False)
+    distributor_verified = models.BooleanField(default=False)
+    distributor_registered_at = models.DateTimeField(null=True, blank=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

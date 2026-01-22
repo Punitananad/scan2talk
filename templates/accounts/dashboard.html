@@ -166,6 +166,52 @@
             </div>
         </a>
 
+        {% if user.is_distributor %}
+            {% if user.distributor_verified %}
+            <a href="{% url 'accounts:distributor_dashboard' %}" class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg card-shadow p-6 hover:shadow-lg transition-all border-2 border-transparent">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white">Distributor Dashboard</h3>
+                        <p class="text-sm text-white/80">Manage your distribution</p>
+                    </div>
+                </div>
+            </a>
+            {% else %}
+            <a href="{% url 'accounts:distributor_pending' %}" class="bg-yellow-50 rounded-lg card-shadow p-6 hover:shadow-lg transition-all border-2 border-yellow-300">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-yellow-900">Distributor Pending</h3>
+                        <p class="text-sm text-yellow-700">Awaiting admin verification</p>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+        {% else %}
+        <a href="{% url 'accounts:become_distributor' %}" class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg card-shadow p-6 hover:shadow-lg transition-all border-2 border-transparent hover:scale-105">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-white">Become a Distributor 🏪</h3>
+                    <p class="text-sm text-white/80">Register as QR distributor</p>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+
         <a href="{% url 'gateways:list' %}" class="bg-white rounded-lg card-shadow p-6 hover:shadow-lg transition-all border-2 border-transparent hover:border-green-500">
             <div class="flex items-center">
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">

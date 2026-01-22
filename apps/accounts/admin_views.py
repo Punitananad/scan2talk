@@ -178,6 +178,7 @@ def manage_categories(request):
                 free_calls_limit=int(request.POST.get('free_calls_limit', 0)),
                 message_cost=float(request.POST.get('message_cost', 0)),
                 call_cost_per_minute=float(request.POST.get('call_cost_per_minute', 0)),
+                distributor_activation_fee=float(request.POST.get('distributor_activation_fee', 0)),
                 color=request.POST.get('color', '#3B82F6'),
                 icon=request.POST.get('icon', '💳'),
             )
@@ -193,6 +194,7 @@ def manage_categories(request):
             category.free_calls_limit = int(request.POST.get('free_calls_limit', 0))
             category.message_cost = float(request.POST.get('message_cost', 0))
             category.call_cost_per_minute = float(request.POST.get('call_cost_per_minute', 0))
+            category.distributor_activation_fee = float(request.POST.get('distributor_activation_fee', 0))
             category.color = request.POST.get('color', '#3B82F6')
             category.icon = request.POST.get('icon', '💳')
             category.save()

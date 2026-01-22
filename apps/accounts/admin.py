@@ -12,10 +12,10 @@ class UserAdmin(BaseUserAdmin):
     
     list_display = [
         'email', 'username', 'first_name', 'last_name',
-        'role', 'is_verified', 'is_active', 'created_at'
+        'role', 'is_verified', 'is_distributor', 'distributor_verified', 'is_active', 'created_at'
     ]
     list_filter = [
-        'role', 'is_verified', 'is_active', 'subscription_tier', 'created_at'
+        'role', 'is_verified', 'is_active', 'subscription_tier', 'is_distributor', 'distributor_verified', 'created_at'
     ]
     search_fields = ['email', 'username', 'first_name', 'last_name', 'company_name']
     ordering = ['-created_at']
@@ -27,6 +27,9 @@ class UserAdmin(BaseUserAdmin):
         ('Verification', {
             'fields': ('is_verified', 'is_phone_verified')
         }),
+        ('Distributor', {
+            'fields': ('is_distributor', 'distributor_verified', 'distributor_registered_at')
+        }),
         ('Subscription', {
             'fields': ('subscription_tier', 'gateway_limit', 'monthly_interaction_limit')
         }),
@@ -35,7 +38,48 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
     
-    readonly_fields = ['created_at', 'updated_at', 'last_login_ip']
+    readonly_fields = ['created_at', 'updated_at', 'last_login_ip', 'distributor_registered_at']
+    
+    actions = ['verify_distributors', 'assign_password_to_distributors']
+    
+    def verify_distributors(self, request, queryset):
+        """Verify selected distributors."""
+        count = 0
+        for user in queryset.filter(is_distributor=True, distributor_verified=False):
+            user.distributor_verified = True
+            user.save()
+            count += 1
+        self.message_user(request, f'{count} distributors verified. Remember to assign passwords!')
+    verify_distributors.short_description = 'Verify selected distributors'
+    
+    def assign_password_to_distributors(self, request, queryset):
+        """Assign random password to distributors."""
+        import secrets
+        import string
+        
+        count = 0
+        passwords = []
+        for user in queryset.filter(is_distributor=True):
+            # Generate random password
+            password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+            user.set_password(password)
+            user.save()
+            
+            passwords.append({
+                'username': user.username,
+                'email': user.email,
+                'phone': user.get_decrypted_phone(),
+                'password': password
+            })
+            count += 1
+        
+        # Show passwords in message (in production, send via SMS/Email)
+        if passwords:
+            msg = f'Assigned passwords to {count} distributors:\n\n'
+            for p in passwords:
+                msg += f"Phone: {p['phone']} | Password: {p['password']}\n"
+            self.message_user(request, msg)
+    assign_password_to_distributors.short_description = 'Assign random passwords to distributors'
 
 
 @admin.register(UserProfile)
@@ -189,3 +233,144 @@ class RechargeOrderAdmin(admin.ModelAdmin):
             count += 1
         self.message_user(request, f'{count} orders marked as failed')
     mark_failed.short_description = 'Mark as failed'
+
+
+
+# Recharge Models Admin
+from .recharge_models import RechargeCategory, RechargePlan, QRWallet, QRWalletTransaction, VisitorPayment, DistributorPayment
+
+
+@admin.register(RechargeCategory)
+class RechargeCategoryAdmin(admin.ModelAdmin):
+    """Recharge category admin."""
+    
+    list_display = ['name', 'category_type', 'distributor_activation_fee', 'message_cost', 'call_cost_per_minute', 'is_active', 'is_default']
+    list_filter = ['category_type', 'is_active', 'is_default']
+    search_fields = ['name', 'description']
+    
+    fieldsets = (
+        ('Basic Info', {
+            'fields': ('name', 'category_type', 'description', 'is_active', 'is_default')
+        }),
+        ('Free Usage Limits', {
+            'fields': ('free_messages_limit', 'free_calls_limit'),
+            'description': 'For trial/free categories'
+        }),
+        ('Pricing', {
+            'fields': ('message_cost', 'call_cost_per_minute'),
+            'description': 'For prepaid/postpaid categories'
+        }),
+        ('Distributor Settings', {
+            'fields': ('distributor_activation_fee',),
+            'description': 'One-time payment for distributor category'
+        }),
+        ('Display', {
+            'fields': ('color', 'icon')
+        }),
+    )
+
+
+@admin.register(RechargePlan)
+class RechargePlanAdmin(admin.ModelAdmin):
+    """Recharge plan admin."""
+    
+    list_display = ['name', 'amount', 'message_credits', 'call_minutes', 'validity_days', 'is_popular', 'is_active']
+    list_filter = ['is_popular', 'is_active']
+    search_fields = ['name', 'description']
+    ordering = ['display_order', '-amount']
+
+
+@admin.register(QRWallet)
+class QRWalletAdmin(admin.ModelAdmin):
+    """QR Wallet admin."""
+    
+    list_display = ['qr_code', 'category', 'balance', 'message_credits', 'call_minutes', 'is_active', 'is_suspended']
+    list_filter = ['category', 'is_active', 'is_suspended']
+    search_fields = ['qr_code__qr_code']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('QR Code', {
+            'fields': ('qr_code', 'category')
+        }),
+        ('Balance & Credits', {
+            'fields': ('balance', 'message_credits', 'call_minutes')
+        }),
+        ('Usage Statistics', {
+            'fields': ('total_messages_sent', 'total_calls_made', 'total_call_duration', 'free_messages_used', 'free_calls_used')
+        }),
+        ('Status', {
+            'fields': ('is_active', 'is_suspended', 'suspension_reason')
+        }),
+        ('Auto-Recharge', {
+            'fields': ('auto_recharge_enabled', 'auto_recharge_plan', 'auto_recharge_threshold')
+        }),
+    )
+
+
+@admin.register(QRWalletTransaction)
+class QRWalletTransactionAdmin(admin.ModelAdmin):
+    """QR Wallet transaction admin."""
+    
+    list_display = ['wallet', 'transaction_type', 'amount', 'message_credits', 'call_minutes', 'created_at']
+    list_filter = ['transaction_type', 'created_at']
+    search_fields = ['wallet__qr_code__qr_code', 'reference_id']
+    readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'created_at'
+
+
+@admin.register(VisitorPayment)
+class VisitorPaymentAdmin(admin.ModelAdmin):
+    """Visitor payment admin."""
+    
+    list_display = ['qr_code', 'amount', 'payment_type', 'status', 'communication_sent', 'created_at']
+    list_filter = ['payment_type', 'status', 'communication_sent', 'created_at']
+    search_fields = ['qr_code__qr_code', 'order_id', 'visitor_phone']
+    readonly_fields = ['created_at', 'updated_at', 'communication_sent_at']
+    date_hierarchy = 'created_at'
+
+
+@admin.register(DistributorPayment)
+class DistributorPaymentAdmin(admin.ModelAdmin):
+    """Distributor payment admin - one-time activation payments."""
+    
+    list_display = ['qr_code', 'amount', 'status', 'phone', 'paid_at', 'created_at']
+    list_filter = ['status', 'created_at', 'paid_at']
+    search_fields = ['qr_code__qr_code', 'order_id', 'phone', 'gateway_payment_id']
+    readonly_fields = ['created_at', 'updated_at', 'paid_at']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('QR Code', {
+            'fields': ('qr_code',)
+        }),
+        ('Payment Details', {
+            'fields': ('amount', 'status', 'phone')
+        }),
+        ('Gateway Info', {
+            'fields': ('order_id', 'gateway_order_id', 'gateway_payment_id')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at', 'paid_at')
+        }),
+    )
+    
+    actions = ['mark_as_completed', 'mark_as_failed']
+    
+    def mark_as_completed(self, request, queryset):
+        """Manually mark payments as completed."""
+        count = 0
+        for payment in queryset.filter(status='pending'):
+            payment.mark_completed('MANUAL_ADMIN')
+            count += 1
+        self.message_user(request, f'{count} payments marked as completed')
+    mark_as_completed.short_description = 'Mark as completed (manual)'
+    
+    def mark_as_failed(self, request, queryset):
+        """Manually mark payments as failed."""
+        count = 0
+        for payment in queryset.filter(status='pending'):
+            payment.mark_failed()
+            count += 1
+        self.message_user(request, f'{count} payments marked as failed')
+    mark_as_failed.short_description = 'Mark as failed'

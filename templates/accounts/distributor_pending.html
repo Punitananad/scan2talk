@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Distributor Registration Pending{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="mx-auto h-24 w-24 bg-yellow-400 rounded-full flex items-center justify-center mb-4 animate-pulse">
+                <svg class="h-14 w-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Registration Pending</h1>
+            <p class="text-lg text-gray-600">Your distributor account is awaiting admin verification</p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
+            <div class="bg-gradient-to-r from-yellow-400 to-orange-400 px-6 py-4">
+                <h2 class="text-xl font-bold text-white">Registration Details</h2>
+            </div>
+            
+            <div class="p-8">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between py-3 border-b">
+                        <span class="text-gray-600">Mobile Number:</span>
+                        <span class="font-semibold text-gray-900">{{ phone }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-3 border-b">
+                        <span class="text-gray-600">Registration Date:</span>
+                        <span class="font-semibold text-gray-900">{{ user.distributor_registered_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-3 border-b">
+                        <span class="text-gray-600">Status:</span>
+                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
+                            Pending Verification
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between py-3">
+                        <span class="text-gray-600">Password:</span>
+                        <span class="text-gray-500 italic">Will be assigned by admin</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- What's Next -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">What happens next?</h3>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                        <span class="text-purple-600 font-bold">1</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Admin Review</h4>
+                        <p class="text-sm text-gray-600">Our team will review your registration request</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                        <span class="text-purple-600 font-bold">2</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Password Assignment</h4>
+                        <p class="text-sm text-gray-600">Admin will assign a secure password to your account</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                        <span class="text-purple-600 font-bold">3</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Notification</h4>
+                        <p class="text-sm text-gray-600">You'll receive your password via SMS/Email</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                        <span class="text-green-600 font-bold">4</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Start Distributing</h4>
+                        <p class="text-sm text-gray-600">Login with mobile + password and access distributor dashboard</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+            <div class="flex items-start">
+                <svg class="h-6 w-6 text-blue-600 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <div class="text-sm text-blue-800">
+                    <p class="font-semibold mb-2">Important Notes:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Verification usually takes 24-48 hours</li>
+                        <li>Keep your mobile number active to receive password</li>
+                        <li>After approval, login at: <a href="{% url 'accounts:distributor_login' %}" class="underline font-semibold">Distributor Login</a></li>
+                        <li>No OTP required for future logins</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4">
+            <a href="{% url 'accounts:dashboard' %}" class="flex-1 bg-gray-600 text-white text-center font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all">
+                Back to Dashboard
+            </a>
+            <a href="{% url 'accounts:distributor_login' %}" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center font-semibold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all">
+                Try Login
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

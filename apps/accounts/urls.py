@@ -5,6 +5,13 @@ from django.urls import path
 from . import views
 from . import wallet_views
 from . import admin_views
+from .distributor_views import (
+    become_distributor,
+    become_distributor_verify,
+    distributor_pending,
+    distributor_dashboard,
+    distributor_login
+)
 
 app_name = 'accounts'
 
@@ -37,6 +44,17 @@ urlpatterns = [
     path('wallet/visitor-pay/callback/', wallet_views.visitor_payment_callback, name='visitor_payment_callback'),
     path('wallet/visitor-pay/success/<str:order_id>/', wallet_views.visitor_payment_success, name='visitor_payment_success'),
     path('wallet/visitor-pay/failed/', wallet_views.visitor_payment_failed, name='visitor_payment_failed'),
+    
+    # Distributor payment routes (one-time activation payment)
+    path('distributor-payment/<str:qr_code>/', wallet_views.distributor_payment, name='distributor_payment'),
+    path('distributor-payment-callback/<str:qr_code>/', wallet_views.distributor_payment_callback, name='distributor_payment_callback'),
+    
+    # Distributor registration and dashboard
+    path('distributor/become/', become_distributor, name='become_distributor'),
+    path('distributor/verify/', become_distributor_verify, name='become_distributor_verify'),
+    path('distributor/pending/', distributor_pending, name='distributor_pending'),
+    path('distributor/dashboard/', distributor_dashboard, name='distributor_dashboard'),
+    path('distributor/login/', distributor_login, name='distributor_login'),
     
     # Admin Super Dashboard
     path('admin/dashboard/', admin_views.admin_super_dashboard, name='admin_super_dashboard'),
