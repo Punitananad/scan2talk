@@ -47,6 +47,8 @@ urlpatterns = [
     
     # Distributor payment routes (one-time activation payment)
     path('distributor-payment/<str:qr_code>/', wallet_views.distributor_payment, name='distributor_payment'),
+    path('distributor-payment-checkout/<str:qr_code>/', wallet_views.distributor_payment_checkout, name='distributor_payment_checkout'),
+    path('distributor-payment-success/', wallet_views.distributor_payment_success, name='distributor_payment_success'),
     path('distributor-payment-callback/<str:qr_code>/', wallet_views.distributor_payment_callback, name='distributor_payment_callback'),
     
     # Distributor registration and dashboard

@@ -732,35 +732,24 @@ def distributor_payment(request, qr_code):
                     distributor=distributor_found
                 )
             
-            # Create PhonePe payment order
-            from .phonepe_service import PhonePeService
-            phonepe = PhonePeService()
+            # Create Razorpay payment order
+            from .razorpay_service import RazorpayGatewayService
+            razorpay = RazorpayGatewayService()
             
-            # Redirect URL after payment
-            redirect_url = request.build_absolute_uri(
-                f'/accounts/distributor-payment-callback/{qr_code}/'
-            )
+            # Create Razorpay order
+            razorpay_order = razorpay.client.order.create({
+                'amount': int(float(activation_fee) * 100),  # Amount in paise
+                'currency': 'INR',
+                'receipt': order_id,
+                'payment_capture': 1
+            })
             
-            payment_data = phonepe.create_payment_order(
-                amount=float(activation_fee),
-                order_id=order_id,
-                redirect_url=redirect_url,
-                user_phone=None  # Optional
-            )
+            # Store gateway order ID
+            payment.gateway_order_id = razorpay_order['id']
+            payment.save()
             
-            if payment_data.get('success'):
-                # Store gateway order ID
-                payment.gateway_order_id = payment_data.get('merchantTransactionId', order_id)
-                payment.save()
-                
-                # Redirect to PhonePe payment page
-                payment_url = payment_data.get('data', {}).get('instrumentResponse', {}).get('redirectInfo', {}).get('url')
-                if payment_url:
-                    return redirect(payment_url)
-                else:
-                    messages.error(request, 'Failed to initiate payment. Please try again.')
-            else:
-                messages.error(request, f"Payment initiation failed: {payment_data.get('message', 'Unknown error')}")
+            # Redirect to Razorpay checkout page
+            return redirect(f'/accounts/distributor-payment-checkout/{qr_code}/?order_id={order_id}')
                 
         except Exception as e:
             logger.error(f"Distributor payment error: {str(e)}")
@@ -774,37 +763,103 @@ def distributor_payment(request, qr_code):
     return render(request, 'accounts/distributor_payment.html', context)
 
 
+@require_http_methods(["GET"])
+def distributor_payment_checkout(request, qr_code):
+    """
+    Razorpay checkout page for distributor payment.
+    """
+    from apps.gateways.qr_models import PreGeneratedQR
+    from .recharge_models import DistributorPayment
+    from .razorpay_service import RazorpayGatewayService
+    
+    qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
+    order_id = request.GET.get('order_id')
+    
+    if not order_id:
+        messages.error(request, 'Order ID missing')
+        return redirect('accounts:distributor_payment', qr_code=qr_code)
+    
+    try:
+        payment = DistributorPayment.objects.get(order_id=order_id, qr_code=qr)
+        
+        # Get Razorpay key
+        service = RazorpayGatewayService()
+        
+        context = {
+            'qr': qr,
+            'payment': payment,
+            'razorpay_key_id': service.key_id,
+            'razorpay_order_id': payment.gateway_order_id,
+            'amount': int(payment.amount * 100),  # Amount in paise
+            'currency': 'INR',
+            'name': 'Scan2Talk',
+            'description': f'Distributor QR Activation - {qr.qr_code}',
+            'callback_url': f'/accounts/distributor-payment-success/',
+        }
+        
+        return render(request, 'accounts/distributor_razorpay_checkout.html', context)
+        
+    except DistributorPayment.DoesNotExist:
+        messages.error(request, 'Payment not found')
+        return redirect('accounts:distributor_payment', qr_code=qr_code)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def distributor_payment_success(request):
+    """
+    Handle Razorpay payment success callback for distributor payment.
+    """
+    from .recharge_models import DistributorPayment
+    from .razorpay_service import RazorpayGatewayService
+    
+    try:
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+        
+        # Verify signature
+        if not RazorpayGatewayService.verify_payment_signature(
+            razorpay_order_id, razorpay_payment_id, razorpay_signature
+        ):
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid payment signature'
+            }, status=400)
+        
+        # Find payment
+        payment = DistributorPayment.objects.get(gateway_order_id=razorpay_order_id)
+        
+        # Mark as completed
+        payment.status = 'completed'
+        payment.gateway_payment_id = razorpay_payment_id
+        payment.paid_at = timezone.now()
+        payment.save()
+        
+        # Redirect to activation page
+        return JsonResponse({
+            'success': True,
+            'message': 'Payment successful! Please proceed with activation.',
+            'redirect_url': f'/gateways/activate/{payment.qr_code.qr_code}/'
+        })
+        
+    except DistributorPayment.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Payment not found'
+        }, status=404)
+    except Exception as e:
+        logger.error(f"Distributor payment success error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def distributor_payment_callback(request, qr_code):
     """
-    Callback after PhonePe payment for distributor activation.
+    Legacy callback - redirect to new Razorpay flow
     """
-    from apps.gateways.qr_models import PreGeneratedQR
-    from .recharge_models import DistributorPayment
-    from .phonepe_service import PhonePeService
-    
-    qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
-    
-    try:
-        payment = DistributorPayment.objects.get(qr_code=qr)
-    except DistributorPayment.DoesNotExist:
-        messages.error(request, 'Payment record not found')
-        return redirect('core:home')
-    
-    # Verify payment status with PhonePe
-    phonepe = PhonePeService()
-    payment_status = phonepe.check_payment_status(payment.gateway_order_id or payment.order_id)
-    
-    if payment_status.get('success') and payment_status.get('code') == 'PAYMENT_SUCCESS':
-        # Payment successful
-        payment.mark_completed(payment_status.get('data', {}).get('transactionId', ''))
-        
-        messages.success(request, '✅ Payment successful! Please proceed with activation.')
-        return redirect(f'/gateways/activate/{qr_code}/?step=1')
-    else:
-        # Payment failed
-        payment.mark_failed()
-        
-        messages.error(request, f"❌ Payment failed: {payment_status.get('message', 'Unknown error')}")
-        return redirect('accounts:distributor_payment', qr_code=qr_code)
+    return redirect('accounts:distributor_payment', qr_code=qr_code)
