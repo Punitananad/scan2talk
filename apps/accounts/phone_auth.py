@@ -59,6 +59,7 @@ def verify_otp(phone_number, otp):
     """
     from apps.communications.otp_service import get_otp_service
     from django.core.cache import cache
+    from django.conf import settings
     
     otp_service = get_otp_service()
     
@@ -76,6 +77,13 @@ def verify_otp(phone_number, otp):
         print(f"   Attempts Remaining: {cached_data.get('attempts')}")
         print(f"   Created At: {cached_data.get('created_at')}")
     print(f"{'='*60}\n")
+    
+    # TEMPORARY: In DEBUG mode, if OTP not in cache, accept any 6-digit OTP
+    if settings.DEBUG and not cached_data:
+        if otp.isdigit() and len(otp) == 6:
+            print(f"⚠️  DEBUG MODE: OTP not in cache, accepting any 6-digit OTP")
+            print(f"✅ DEBUG MODE: OTP '{otp}' accepted for testing")
+            return True, "OTP verified (debug mode - cache bypass)"
     
     result = otp_service.verify_otp(phone_number, otp)
     
