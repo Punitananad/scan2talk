@@ -797,3 +797,139 @@ def order_detail_view(request, order_id):
     }
     
     return render(request, 'admin/order_detail.html', context)
+
+
+@staff_member_required
+def manage_distributors(request):
+    """
+    Manage distributor registrations - view, verify, assign passwords
+    """
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'all')
+    search_query = request.GET.get('search', '')
+    
+    # Base queryset - all distributors
+    distributors = User.objects.filter(is_distributor=True)
+    
+    # Apply filters
+    if status_filter == 'pending':
+        distributors = distributors.filter(distributor_verified=False)
+    elif status_filter == 'verified':
+        distributors = distributors.filter(distributor_verified=True)
+    
+    if search_query:
+        distributors = distributors.filter(
+            Q(email__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query)
+        )
+    
+    # Annotate with QR counts and payment stats
+    from apps.gateways.qr_models import PreGeneratedQR
+    from apps.accounts.recharge_models import DistributorPayment
+    
+    distributors = distributors.annotate(
+        qr_count=Count('qr_codes', distinct=True),
+        activated_qr_count=Count('qr_codes', filter=Q(qr_codes__status='activated'), distinct=True)
+    ).order_by('-distributor_registered_at')
+    
+    # Get payment stats for each distributor
+    distributor_list = []
+    for dist in distributors:
+        payments = DistributorPayment.objects.filter(qr_code__owner=dist)
+        total_payments = payments.filter(status='completed').count()
+        total_revenue = sum(p.amount for p in payments if p.status == 'completed')
+        
+        distributor_list.append({
+            'user': dist,
+            'phone': dist.get_decrypted_phone(),
+            'qr_count': dist.qr_count,
+            'activated_qr_count': dist.activated_qr_count,
+            'total_payments': total_payments,
+            'total_revenue': total_revenue,
+        })
+    
+    # Statistics
+    stats = {
+        'total': User.objects.filter(is_distributor=True).count(),
+        'pending': User.objects.filter(is_distributor=True, distributor_verified=False).count(),
+        'verified': User.objects.filter(is_distributor=True, distributor_verified=True).count(),
+        'total_qrs': PreGeneratedQR.objects.filter(owner__is_distributor=True).count(),
+        'activated_qrs': PreGeneratedQR.objects.filter(owner__is_distributor=True, status='activated').count(),
+    }
+    
+    context = {
+        'distributors': distributor_list,
+        'stats': stats,
+        'status_filter': status_filter,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'admin/manage_distributors.html', context)
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def verify_distributor(request, user_id):
+    """
+    Verify distributor and assign password
+    """
+    user = get_object_or_404(User, id=user_id, is_distributor=True)
+    password = request.POST.get('password', '').strip()
+    
+    if not password:
+        messages.error(request, 'Password is required')
+        return redirect('accounts:admin_manage_distributors')
+    
+    if len(password) < 6:
+        messages.error(request, 'Password must be at least 6 characters')
+        return redirect('accounts:admin_manage_distributors')
+    
+    # Set password and verify
+    user.set_password(password)
+    user.distributor_verified = True
+    user.save()
+    
+    messages.success(request, f'✅ Distributor {user.email} verified and password assigned!')
+    return redirect('accounts:admin_manage_distributors')
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def reset_distributor_password(request, user_id):
+    """
+    Reset distributor password
+    """
+    user = get_object_or_404(User, id=user_id, is_distributor=True)
+    password = request.POST.get('password', '').strip()
+    
+    if not password:
+        messages.error(request, 'Password is required')
+        return redirect('accounts:admin_manage_distributors')
+    
+    if len(password) < 6:
+        messages.error(request, 'Password must be at least 6 characters')
+        return redirect('accounts:admin_manage_distributors')
+    
+    # Reset password
+    user.set_password(password)
+    user.save()
+    
+    messages.success(request, f'✅ Password reset for distributor {user.email}')
+    return redirect('accounts:admin_manage_distributors')
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def revoke_distributor(request, user_id):
+    """
+    Revoke distributor status
+    """
+    user = get_object_or_404(User, id=user_id, is_distributor=True)
+    
+    user.is_distributor = False
+    user.distributor_verified = False
+    user.save()
+    
+    messages.success(request, f'Distributor status revoked for {user.email}')
+    return redirect('accounts:admin_manage_distributors')

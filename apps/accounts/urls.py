@@ -74,6 +74,12 @@ urlpatterns = [
     path('admin/orders/<str:order_id>/', admin_views.order_detail_view, name='order_detail'),
     path('admin/orders/<str:order_id>/update/', admin_views.update_order_status, name='update_order_status'),
     
+    # Distributor management
+    path('admin/distributors/', admin_views.manage_distributors, name='admin_manage_distributors'),
+    path('admin/distributors/<uuid:user_id>/verify/', admin_views.verify_distributor, name='verify_distributor'),
+    path('admin/distributors/<uuid:user_id>/reset-password/', admin_views.reset_distributor_password, name='reset_distributor_password'),
+    path('admin/distributors/<uuid:user_id>/revoke/', admin_views.revoke_distributor, name='revoke_distributor'),
+    
     # ===== API ENDPOINTS =====
     # Authentication API
     path('api/register/', views.register_api, name='register_api'),

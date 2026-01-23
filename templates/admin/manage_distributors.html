@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Distributors - Admin{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Distributor Management</h1>
+                    <p class="mt-2 text-gray-600">View and manage distributor registrations</p>
+                </div>
+                <a href="{% url 'accounts:admin_super_dashboard' %}" 
+                   class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                <div class="text-sm font-medium text-gray-600">Total Distributors</div>
+                <div class="mt-2 text-3xl font-bold text-gray-900">{{ stats.total }}</div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+                <div class="text-sm font-medium text-gray-600">Pending Verification</div>
+                <div class="mt-2 text-3xl font-bold text-yellow-600">{{ stats.pending }}</div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                <div class="text-sm font-medium text-gray-600">Verified</div>
+                <div class="mt-2 text-3xl font-bold text-green-600">{{ stats.verified }}</div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="text-sm font-medium text-gray-600">Total QR Codes</div>
+                <div class="mt-2 text-3xl font-bold text-purple-600">{{ stats.total_qrs }}</div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-pink-500">
+                <div class="text-sm font-medium text-gray-600">Activated QRs</div>
+                <div class="mt-2 text-3xl font-bold text-pink-600">{{ stats.activated_qrs }}</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <form method="GET" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="search" value="{{ search_query }}" 
+                           placeholder="Search by email, name..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div class="min-w-[150px]">
+                    <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Verified</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Filter
+                </button>
+                
+                <a href="{% url 'accounts:admin_manage_distributors' %}" 
+                   class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    Clear
+                </a>
+            </form>
+        </div>
+
+        <!-- Distributors Table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Distributor</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR Codes</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payments</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for dist in distributors %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold">{{ dist.user.first_name.0|default:dist.user.email.0|upper }}</span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ dist.user.first_name }} {{ dist.user.last_name }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">{{ dist.user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ dist.phone|default:"N/A" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if dist.user.distributor_verified %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        ✓ Verified
+                                    </span>
+                                {% else %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        ⏳ Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <span class="font-semibold">{{ dist.activated_qr_count }}</span> / {{ dist.qr_count }}
+                                </div>
+                                <div class="text-xs text-gray-500">Activated / Total</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-semibold text-gray-900">{{ dist.total_payments }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-semibold text-green-600">₹{{ dist.total_revenue|floatformat:2 }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ dist.user.distributor_registered_at|date:"M d, Y" }}</div>
+                                <div class="text-xs text-gray-500">{{ dist.user.distributor_registered_at|timesince }} ago</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {% if not dist.user.distributor_verified %}
+                                    <!-- Verify Button -->
+                                    <button onclick="showVerifyModal('{{ dist.user.id }}', '{{ dist.user.email }}')"
+                                            class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-xs font-medium">
+                                        Verify & Assign Password
+                                    </button>
+                                {% else %}
+                                    <!-- Reset Password Button -->
+                                    <button onclick="showResetPasswordModal('{{ dist.user.id }}', '{{ dist.user.email }}')"
+                                            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-medium mr-2">
+                                        Reset Password
+                                    </button>
+                                    <!-- Revoke Button -->
+                                    <button onclick="revokeDistributor('{{ dist.user.id }}', '{{ dist.user.email }}')"
+                                            class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-xs font-medium">
+                                        Revoke
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                <div class="text-4xl mb-4">📦</div>
+                                <p class="text-lg font-medium">No distributors found</p>
+                                <p class="text-sm mt-2">Distributors will appear here when they register</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Verify Modal -->
+<div id="verifyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Verify Distributor</h3>
+        <p class="text-gray-600 mb-6">Assign a password for <span id="verifyEmail" class="font-semibold"></span></p>
+        
+        <form id="verifyForm" method="POST">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Password (min 6 characters)</label>
+                <input type="password" name="password" required minlength="6"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                       placeholder="Enter secure password">
+            </div>
+            
+            <div class="flex gap-3">
+                <button type="submit" 
+                        class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                    Verify & Assign
+                </button>
+                <button type="button" onclick="closeVerifyModal()"
+                        class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div id="resetPasswordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Reset Password</h3>
+        <p class="text-gray-600 mb-6">Reset password for <span id="resetEmail" class="font-semibold"></span></p>
+        
+        <form id="resetPasswordForm" method="POST">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">New Password (min 6 characters)</label>
+                <input type="password" name="password" required minlength="6"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       placeholder="Enter new password">
+            </div>
+            
+            <div class="flex gap-3">
+                <button type="submit" 
+                        class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                    Reset Password
+                </button>
+                <button type="button" onclick="closeResetPasswordModal()"
+                        class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showVerifyModal(userId, email) {
+    document.getElementById('verifyEmail').textContent = email;
+    document.getElementById('verifyForm').action = `/accounts/admin/distributors/${userId}/verify/`;
+    document.getElementById('verifyModal').classList.remove('hidden');
+}
+
+function closeVerifyModal() {
+    document.getElementById('verifyModal').classList.add('hidden');
+}
+
+function showResetPasswordModal(userId, email) {
+    document.getElementById('resetEmail').textContent = email;
+    document.getElementById('resetPasswordForm').action = `/accounts/admin/distributors/${userId}/reset-password/`;
+    document.getElementById('resetPasswordModal').classList.remove('hidden');
+}
+
+function closeResetPasswordModal() {
+    document.getElementById('resetPasswordModal').classList.add('hidden');
+}
+
+function revokeDistributor(userId, email) {
+    if (confirm(`Are you sure you want to revoke distributor status for ${email}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/accounts/admin/distributors/${userId}/revoke/`;
+        
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrfmiddlewaretoken';
+        csrf.value = '{{ csrf_token }}';
+        form.appendChild(csrf);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Close modals on ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeVerifyModal();
+        closeResetPasswordModal();
+    }
+});
+</script>
+
+{% endblock %}
