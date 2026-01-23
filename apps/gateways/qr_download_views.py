@@ -30,7 +30,9 @@ def generate_qr_base64(qr_code_text):
 def preview_batch_sample(request, batch_number):
     """
     Preview the complete batch layout with all QR codes.
-    Shows exactly what the PDF will look like - 8 tags per page (4 unique QRs, each printed twice).
+    Shows exactly what the PDF will look like.
+    - For SINGLE type: 1 tag per QR code (8 tags per page)
+    - For PAIR type: 2 tags per QR code (8 tags per page = 4 unique QRs with 2 copies each)
     """
     batch = get_object_or_404(QRBatch, batch_number=batch_number)
     qr_codes = list(PreGeneratedQR.objects.filter(batch_number=batch_number).select_related('category'))
@@ -38,7 +40,14 @@ def preview_batch_sample(request, batch_number):
     if not qr_codes:
         return HttpResponse("No QR codes in this batch", status=404)
     
-    # Generate QR codes with base64 data and DUPLICATE each QR (2 copies per QR)
+    # Detect QR type from batch notes
+    qr_type = 'single'  # default
+    if batch.notes and '[QR Type: PAIR' in batch.notes:
+        qr_type = 'pair'
+    
+    print(f"🔍 Preview batch {batch_number}: QR Type = {qr_type}, Total QR codes = {len(qr_codes)}")
+    
+    # Generate QR codes with base64 data
     qr_data_list = []
     for qr in qr_codes:
         qr_data = {
@@ -46,19 +55,26 @@ def preview_batch_sample(request, batch_number):
             'qr_code_data': generate_qr_base64(qr.qr_code),
             'category': qr.category  # Include category for visual indicator
         }
-        # Add original
+        
+        # For SINGLE type: add once
+        # For PAIR type: add twice (duplicate for front/back)
         qr_data_list.append(qr_data)
-        # Add duplicate (copy)
-        qr_data_list.append(qr_data)
+        if qr_type == 'pair':
+            qr_data_list.append(qr_data)  # Add duplicate
     
-    # Split into pages (8 tags per page: 2 cols x 4 rows = 4 unique QRs with 2 copies each)
+    print(f"   - Total tags to display: {len(qr_data_list)}")
+    
+    # Split into pages (8 tags per page: 2 cols x 4 rows)
     tags_per_page = 8
     qr_pages = [qr_data_list[i:i + tags_per_page] for i in range(0, len(qr_data_list), tags_per_page)]
+    
+    print(f"   - Total pages: {len(qr_pages)}")
     
     # Render the batch print template (same as PDF but as HTML)
     context = {
         'qr_pages': qr_pages,
         'batch_number': batch_number,
+        'qr_type': qr_type,
         'is_preview': True,  # Flag to indicate this is preview mode
     }
     

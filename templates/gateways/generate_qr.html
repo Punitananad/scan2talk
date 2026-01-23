@@ -83,7 +83,7 @@
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                         placeholder="Enter quantity (1-1000)"
                     >
-                    <p class="text-xs text-gray-500 mt-1" id="quantity-help">Number of vehicles (QR codes will be generated based on type)</p>
+                    <p class="text-xs text-gray-500 mt-1" id="quantity-help">Number of QR codes to generate</p>
                 </div>
             </div>
 
@@ -322,9 +322,9 @@ function updateQuantityHelp() {
     const quantity = parseInt(quantityInput.value) || 0;
     
     if (qrType === 'single') {
-        quantityHelp.textContent = `Number of vehicles (${quantity} QR code${quantity !== 1 ? 's' : ''} will be generated)`;
+        quantityHelp.textContent = `Will generate ${quantity} QR code${quantity !== 1 ? 's' : ''} (1 per vehicle)`;
     } else {
-        quantityHelp.textContent = `Number of vehicles (${quantity * 2} QR codes will be generated - 2 per vehicle)`;
+        quantityHelp.textContent = `Will generate ${quantity * 2} QR codes (2 per vehicle - ${quantity} vehicle${quantity !== 1 ? 's' : ''})`;
     }
 }
 

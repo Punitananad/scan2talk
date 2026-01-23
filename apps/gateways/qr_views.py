@@ -37,6 +37,12 @@ def generate_qr_codes(request):
             action = request.POST.get('action', 'generate_only')  # New: get action type
             qr_type = request.POST.get('qr_type', 'single')  # New: get QR type (single or pair)
             
+            # Debug logging
+            print(f"🔍 QR Generation Request:")
+            print(f"   - Quantity: {quantity}")
+            print(f"   - QR Type: {qr_type}")
+            print(f"   - Action: {action}")
+            
             if quantity < 1 or quantity > 1000:
                 messages.error(request, 'Quantity must be between 1 and 1000')
                 return redirect('gateways:generate_qr')
@@ -56,9 +62,18 @@ def generate_qr_codes(request):
                     return redirect('gateways:generate_qr')
             
             # Calculate actual QR codes to generate based on type
-            # quantity = number of vehicles
-            # If pair, we generate 2 QR codes per vehicle
-            qr_codes_to_generate = quantity if qr_type == 'single' else quantity * 2
+            # quantity = number of QR codes to generate (not vehicles)
+            # For single: generate exactly the quantity specified
+            # For pair: generate quantity * 2 (pair for each vehicle)
+            if qr_type == 'single':
+                qr_codes_to_generate = quantity
+                vehicle_count = quantity
+            else:  # pair
+                qr_codes_to_generate = quantity * 2
+                vehicle_count = quantity
+            
+            print(f"   - QR codes to generate: {qr_codes_to_generate}")
+            print(f"   - Vehicle count: {vehicle_count}")
             
             # Use custom batch name with unique suffix to ensure uniqueness
             batch_number = f"{batch_name}-{generate_short_code(4).upper()}"
@@ -68,15 +83,17 @@ def generate_qr_codes(request):
                 batch_number=batch_number,
                 quantity=qr_codes_to_generate,  # Store actual QR count
                 purpose=purpose,
-                notes=notes + (f"\n[QR Type: {qr_type.upper()} - {quantity} vehicles]" if notes else f"[QR Type: {qr_type.upper()} - {quantity} vehicles]"),
+                notes=notes + (f"\n[QR Type: {qr_type.upper()} - {vehicle_count} vehicle{'s' if vehicle_count != 1 else ''}]" if notes else f"[QR Type: {qr_type.upper()} - {vehicle_count} vehicle{'s' if vehicle_count != 1 else ''}]"),
                 category=category,
                 created_by=request.user,
                 available_count=qr_codes_to_generate
             )
             
+            print(f"✅ Creating batch {batch_number} with {qr_codes_to_generate} QR codes")
+            
             # Generate QR codes
             qr_codes = []
-            for _ in range(qr_codes_to_generate):
+            for i in range(qr_codes_to_generate):
                 qr = PreGeneratedQR.objects.create(
                     batch_number=batch_number,
                     category=category
@@ -91,15 +108,17 @@ def generate_qr_codes(request):
                         category=category
                     )
             
+            print(f"✅ Generated {len(qr_codes)} QR codes successfully")
+            
             # Check if user wants to download PDF immediately
             if action == 'generate_and_download_pdf':
                 # Redirect to preview page first
-                qr_type_msg = f"{qr_type} ({quantity} vehicle{'s' if quantity != 1 else ''}, {qr_codes_to_generate} QR code{'s' if qr_codes_to_generate != 1 else ''})"
+                qr_type_msg = f"{qr_type} ({vehicle_count} vehicle{'s' if vehicle_count != 1 else ''}, {qr_codes_to_generate} QR code{'s' if qr_codes_to_generate != 1 else ''})"
                 messages.success(request, f'Generated {qr_type_msg} in batch {batch_number}')
                 return redirect('gateways:batch_preview_page', batch_number=batch_number)
             else:
                 # Just show success message and redirect to dashboard
-                qr_type_msg = f"{qr_type} - {quantity} vehicle{'s' if quantity != 1 else ''}, {qr_codes_to_generate} QR code{'s' if qr_codes_to_generate != 1 else ''}"
+                qr_type_msg = f"{qr_type} - {vehicle_count} vehicle{'s' if vehicle_count != 1 else ''}, {qr_codes_to_generate} QR code{'s' if qr_codes_to_generate != 1 else ''}"
                 messages.success(request, f'Successfully generated {qr_type_msg} in batch {batch_number}' + 
                                (f' with category {category.name}' if category else ''))
                 return redirect('gateways:qr_dashboard')
