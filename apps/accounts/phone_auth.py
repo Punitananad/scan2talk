@@ -22,10 +22,28 @@ def send_otp(phone_number):
     # Send OTP
     success, otp, message = otp_service.send_otp(phone_number)
     
-    if success:
+    print(f"\n{'='*60}")
+    print(f"📤 SEND OTP RESULT")
+    print(f"   Phone: {phone_number}")
+    print(f"   Success: {success}")
+    print(f"   OTP: {otp}")
+    print(f"   Message: {message}")
+    print(f"{'='*60}\n")
+    
+    if success and otp:
         # Store OTP securely
         otp_service.store_otp(phone_number, otp)
-        print(f"📤 OTP sent and stored for {phone_number}: {otp}")
+        print(f"✅ OTP stored in cache for {phone_number}")
+        
+        # Verify it was stored
+        from django.core.cache import cache
+        cache_key = f"otp_{phone_number}"
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            print(f"✅ Verified: OTP is in cache with {cached_data.get('attempts')} attempts")
+        else:
+            print(f"❌ WARNING: OTP not found in cache after storing!")
+        
         return True, "OTP sent successfully"
     else:
         print(f"❌ Failed to send OTP for {phone_number}: {message}")
@@ -40,11 +58,33 @@ def verify_otp(phone_number, otp):
         tuple: (success: bool, message: str)
     """
     from apps.communications.otp_service import get_otp_service
+    from django.core.cache import cache
     
     otp_service = get_otp_service()
-    print(f"🔐 Verifying OTP for {phone_number}: {otp}")
+    
+    # Check if OTP exists in cache first
+    cache_key = f"otp_{phone_number}"
+    cached_data = cache.get(cache_key)
+    
+    print(f"\n{'='*60}")
+    print(f"🔐 VERIFY OTP")
+    print(f"   Phone: {phone_number}")
+    print(f"   OTP Entered: '{otp}' (length: {len(otp)})")
+    print(f"   Cache Key: {cache_key}")
+    print(f"   OTP in Cache: {'YES' if cached_data else 'NO'}")
+    if cached_data:
+        print(f"   Attempts Remaining: {cached_data.get('attempts')}")
+        print(f"   Created At: {cached_data.get('created_at')}")
+    print(f"{'='*60}\n")
+    
     result = otp_service.verify_otp(phone_number, otp)
-    print(f"🔐 Verification result: {result}")
+    
+    print(f"{'='*60}")
+    print(f"🔐 VERIFICATION RESULT")
+    print(f"   Success: {result[0]}")
+    print(f"   Message: {result[1]}")
+    print(f"{'='*60}\n")
+    
     return result
 
 
