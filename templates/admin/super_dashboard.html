@@ -50,7 +50,12 @@
     </div>
 
     <!-- Secondary Actions -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <a href="/admin/core/pricingsettings/" class="bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 border-2 border-amber-300 rounded-lg p-6 text-center transition-all hover:border-amber-500 shadow-md">
+            <div class="text-3xl mb-2">💲</div>
+            <div class="font-bold text-amber-900">Pricing Control</div>
+            <div class="text-sm text-amber-700 mt-1 font-semibold">Tag & Distributor Fees</div>
+        </a>
         <a href="{% url 'accounts:admin_manage_categories' %}" class="bg-white hover:bg-gray-50 border-2 border-gray-200 rounded-lg p-6 text-center transition-all hover:border-blue-400">
             <div class="text-3xl mb-2">📂</div>
             <div class="font-semibold text-gray-900">Categories</div>

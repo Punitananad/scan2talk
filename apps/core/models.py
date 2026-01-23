@@ -5,6 +5,9 @@ import uuid
 from django.db import models
 from django.utils import timezone as django_timezone
 
+# Import pricing models
+from .pricing_models import PricingSettings
+
 
 class BaseModel(models.Model):
     """

@@ -77,9 +77,16 @@ class OrderTagView(View):
     template_name = 'core/order_tag.html'
     
     def get(self, request):
-        return render(request, self.template_name)
+        from apps.core.pricing_models import PricingSettings
+        
+        context = {
+            'tag_price': PricingSettings.get_tag_price()
+        }
+        return render(request, self.template_name, context)
     
     def post(self, request):
+        from apps.core.pricing_models import PricingSettings
+        
         # Store order data in session
         quantity = int(request.POST.get('quantity', 1))
         
@@ -94,8 +101,8 @@ class OrderTagView(View):
             'quantity': quantity,
         }
         
-        # Calculate total: ₹499 per tag
-        BASE_PRICE = 499
+        # Calculate total using dynamic pricing
+        BASE_PRICE = float(PricingSettings.get_tag_price())
         order_data['total'] = BASE_PRICE * quantity
         
         # Store in session

@@ -655,6 +655,7 @@ def distributor_payment(request, qr_code):
     """
     from apps.gateways.qr_models import PreGeneratedQR
     from .recharge_models import DistributorPayment
+    from apps.core.pricing_models import PricingSettings
     
     qr = get_object_or_404(PreGeneratedQR, qr_code=qr_code.upper())
     
@@ -677,8 +678,8 @@ def distributor_payment(request, qr_code):
     except DistributorPayment.DoesNotExist:
         payment = None
     
-    # Get activation fee from category
-    activation_fee = qr.category.distributor_activation_fee
+    # Get activation fee from centralized pricing settings
+    activation_fee = PricingSettings.get_distributor_fee()
     
     if request.method == 'POST':
         # Get distributor ID (mobile number)

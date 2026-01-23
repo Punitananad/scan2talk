@@ -280,9 +280,9 @@ function orderForm() {
         pincode: '',
         quantity: 1,
         customQuantity: '',
-        subtotal: 499,
-        total: 499,
-        basePrice: 499,
+        subtotal: {{ tag_price }},
+        total: {{ tag_price }},
+        basePrice: {{ tag_price }},
         
         updateTotal() {
             if (this.quantity === 'custom') {
