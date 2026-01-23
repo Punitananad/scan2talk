@@ -1,189 +1,170 @@
-# Distributor Registration - Quick Start Guide
+# Distributor Registration System - Quick Start
 
-## 🎯 What You Need to Know
+## Overview
+Standalone distributor registration system that allows anyone to register as a distributor without needing to login as a regular user first.
 
-The OTP **IS working** - it's just being printed to your terminal instead of sent via SMS because you're in DEBUG mode.
+## Features
+✅ **No Login Required** - Direct registration without user account
+✅ **OTP Verification** - Two-step mobile number verification
+✅ **Bank Details Collection** - For payment processing
+✅ **Admin Approval** - Accounts pending admin verification
+✅ **Business Name Removed** - Simplified registration (per user request)
 
-## 📋 Step-by-Step Instructions
+## Registration Flow
 
-### 1. Start Your Django Server
+### Step 1: Enter Details
+User provides:
+- Full Name (required)
+- Mobile Number (required) - 10 digits
+- Email (optional)
+- Account Holder Name (required)
+- Bank Account Number (required) - 9-18 digits
+- IFSC Code (required) - 11 characters
 
-Open a terminal and run:
-```bash
-python manage.py runserver
+### Step 2: OTP Verification
+- OTP sent to mobile number
+- User enters 6-digit OTP
+- Option to resend OTP
+- Account created upon successful verification
+
+### Step 3: Pending Approval
+- Account created with `distributor_verified=False`
+- User shown pending approval page
+- Admin must approve before distributor can login
+
+## Technical Details
+
+### URL Routes
+```
+/accounts/distributor/register/          - Registration form (step 1)
+/accounts/distributor/register/?step=2   - OTP verification (step 2)
+/accounts/distributor/pending/public/    - Pending approval page
 ```
 
-**IMPORTANT**: Keep this terminal window visible!
+### Data Storage
+- **User Model Fields:**
+  - `username`: Auto-generated as `dist_{last4digits}_{random6}`
+  - `first_name`: Full name
+  - `email`: Email or auto-generated
+  - `phone`: Encrypted mobile number
+  - `is_phone_verified`: True after OTP
+  - `is_distributor`: True
+  - `distributor_verified`: False (pending admin)
+  - `distributor_registered_at`: Registration timestamp
+  - `last_name`: JSON string with bank details (temporary storage)
 
-### 2. Open Your Browser
-
-Go to: `http://localhost:8000` or `http://127.0.0.1:8000`
-
-### 3. Login and Go to Profile
-
-- Login with your account
-- Click on "My Profile" or go to your dashboard
-- You'll see a "Become a Distributor" button
-
-### 4. Click "Become a Distributor"
-
-- Enter your 10-digit mobile number
-- Click "Send OTP"
-
-### 5. **LOOK AT YOUR TERMINAL** 👀
-
-This is the most important step!
-
-In the terminal where Django is running, you'll see something like:
-
-```
-==================================================
-📱 OTP for 9876543210: 123456
-==================================================
+- **Bank Details JSON Structure:**
+```json
+{
+    "account_holder_name": "John Doe",
+    "account_number": "1234567890",
+    "ifsc_code": "SBIN0001234"
+}
 ```
 
-**That's your OTP!** Copy it (123456 in this example).
+### Session Variables (Step 1 → Step 2)
+- `dist_reg_name`
+- `dist_reg_email`
+- `dist_reg_phone`
+- `dist_reg_account_holder`
+- `dist_reg_account_number`
+- `dist_reg_ifsc`
 
-### 6. Enter the OTP
-
-- Go back to your browser
-- Paste the OTP you copied from terminal
-- Click "Verify & Register"
-
-### 7. Success!
-
-You'll see a success message and be redirected to a pending page.
-
-Now admin needs to:
-- Verify your distributor account
-- Assign you a password
-
-## 🔧 If You Don't See OTP in Terminal
-
-### Option 1: Run Diagnostic Test
-
-```bash
-python test_distributor_otp.py
-```
-
-Enter your phone number when prompted. The OTP will be shown.
-
-### Option 2: Check Console Output
-
-Look for these messages in terminal:
-- `🔔 DISTRIBUTOR OTP REQUEST`
-- `📤 OTP SEND RESULT`
-- `📱 OTP for [phone]: [code]`
-
-### Option 3: Try Resend
-
-On the OTP verification page, click "Resend OTP" and check terminal again.
-
-## 🎨 UI Features
+## Access Points
 
 ### Navigation Bar
-- **Desktop**: "Distributor Login" button in top navigation
-- **Mobile**: "Distributor Login" in mobile menu
+- "Distributor Login" button visible when user NOT logged in
+- Purple-themed to distinguish from regular login
 
-### Profile Page
-- "Become a Distributor" button with purple gradient
-- Shows if you're already a distributor
+### Homepage
+- "Distributor Login" link in hero section
+- Visible to all visitors
 
-### Distributor Login
-- Separate login page for distributors
-- Uses mobile number + admin-assigned password
-- No OTP needed after initial registration
+### Registration Page
+- "Register here" link on distributor login page
+- Direct access via URL
 
-## 👨‍💼 Admin Actions
+## Admin Actions Required
 
-After user registers, admin needs to:
+After registration, admin must:
+1. Review distributor details in admin panel
+2. Verify bank account information
+3. Set `distributor_verified=True`
+4. Distributor can then login with OTP
 
-1. Go to Django admin: `/admin/`
-2. Go to Users section
-3. Find the user who registered
-4. Select the user
-5. Choose action: "Verify distributor and assign password"
-6. Enter a secure password
-7. Click "Go"
+## Files Modified
 
-The user can now login at `/accounts/distributor/login/` with:
-- Mobile number
-- Admin-assigned password
+### Backend
+- `apps/accounts/distributor_views.py` - Registration logic
+- `apps/accounts/urls.py` - URL routing
 
-## 📊 Distributor Dashboard
+### Templates
+- `templates/accounts/distributor_register.html` - Registration form
+- `templates/accounts/distributor_pending_public.html` - Pending page
+- `templates/accounts/distributor_login.html` - Login page
+- `templates/base.html` - Navigation bar
+- `templates/core/home_new.html` - Homepage link
 
-After admin verification, distributor can:
-- View assigned QR codes
-- See activation statistics
-- Track payments
-- Monitor revenue
+## Testing
 
-## 🐛 Troubleshooting
+### Test Registration Flow
+1. Go to `/accounts/distributor/register/`
+2. Fill in all required fields
+3. Click "Send OTP"
+4. Enter OTP received
+5. Verify account created with pending status
 
-### "Session expired" error
-- Start over from step 3
-- Don't wait too long between steps
+### Verify Data Storage
+```python
+from apps.accounts.models import User
+import json
 
-### "Invalid OTP" error
-- Make sure you copied the correct OTP from terminal
-- Check if you're looking at the latest OTP (if you clicked resend)
-- OTP expires after 5 minutes
+# Find the distributor
+user = User.objects.filter(is_distributor=True).last()
 
-### "Too many failed attempts"
-- Wait 2 hours or contact admin to reset
-- Or run: `python manage.py shell` and clear cache
+# Check details
+print(f"Name: {user.first_name}")
+print(f"Phone: {user.get_decrypted_phone()}")
+print(f"Verified: {user.distributor_verified}")
 
-### OTP not in terminal
-- Make sure Django server is running in terminal (not background)
-- Check if terminal is scrolled up - scroll to bottom
-- Try the diagnostic test: `python test_distributor_otp.py`
+# Check bank details
+bank_details = json.loads(user.last_name)
+print(f"Bank Details: {bank_details}")
+```
 
-## 📱 Why SMS Not Coming?
+## Security Features
 
-In DEBUG mode (`DEBUG=True` in `.env`):
-- OTP is printed to console instead of SMS
-- This is **intentional** for development
-- Allows testing without SMS credits
-- Allows testing even if SMS API has issues
+- Phone number encryption
+- OTP verification required
+- Session-based data transfer
+- Admin approval required
+- Unusable password (OTP login only)
 
-In PRODUCTION mode (`DEBUG=False`):
-- OTP will be sent via SMS
-- Must have working SMSCountry credentials
-- Must have SMS credits
+## User Experience
 
-## ✅ Success Indicators
+### Benefits Shown
+- Earn commission on QR sales
+- Manage QR inventory
+- Track sales and revenue
+- Admin approval within 24 hours
 
-You know it's working when you see:
+### Clear Navigation
+- Link to login if already registered
+- Back to home option
+- Step indicators
+- Helpful error messages
 
-1. **In Terminal**:
-   ```
-   📤 OTP SEND RESULT
-      Success: True
-      Message: OTP generated (dev mode - not sent)
-   ```
+## Next Steps
 
-2. **In Browser**:
-   - "OTP sent to your mobile number" message
-   - Redirected to verification page
+After admin approval:
+1. Distributor can login via OTP
+2. Access distributor dashboard
+3. View assigned QR codes
+4. Track payments and revenue
 
-3. **After Verification**:
-   - "🎉 Distributor registration successful!" message
-   - Redirected to pending page
+## Notes
 
-## 🚀 What's Next?
-
-1. **User**: Wait for admin to verify and assign password
-2. **Admin**: Verify distributor and assign password
-3. **User**: Login at `/accounts/distributor/login/`
-4. **User**: Access distributor dashboard
-
-## 📞 Need Help?
-
-Read the detailed guides:
-- `DISTRIBUTOR_OTP_DEBUG_GUIDE.md` - Comprehensive debugging
-- `DISTRIBUTOR_OTP_FIX.md` - Technical details
-- Run `python test_distributor_otp.py` - Interactive test
-
-## 🎉 That's It!
-
-The system is working correctly. Just remember to **look at the terminal** for the OTP!
+- Business Name field was removed per user request
+- Bank details stored temporarily in `last_name` field
+- Consider creating separate BankDetails model in future
+- OTP uses existing SMS service credentials

@@ -10,7 +10,9 @@ from .distributor_views import (
     become_distributor_verify,
     distributor_pending,
     distributor_dashboard,
-    distributor_login
+    distributor_login,
+    distributor_register,
+    distributor_pending_public,
 )
 
 app_name = 'accounts'
@@ -52,6 +54,8 @@ urlpatterns = [
     path('distributor-payment-callback/<str:qr_code>/', wallet_views.distributor_payment_callback, name='distributor_payment_callback'),
     
     # Distributor registration and dashboard
+    path('distributor/register/', distributor_register, name='distributor_register'),
+    path('distributor/pending-approval/', distributor_pending_public, name='distributor_pending_public'),
     path('distributor/become/', become_distributor, name='become_distributor'),
     path('distributor/verify/', become_distributor_verify, name='become_distributor_verify'),
     path('distributor/pending/', distributor_pending, name='distributor_pending'),

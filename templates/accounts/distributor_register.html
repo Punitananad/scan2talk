@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Distributor Login{% endblock %}
+{% block title %}Become a Distributor{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -9,20 +9,20 @@
         <div class="text-center mb-8">
             <div class="mx-auto h-20 w-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mb-4">
                 <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900">Distributor Login</h1>
+            <h1 class="text-3xl font-bold text-gray-900">Become a Distributor</h1>
             <p class="mt-2 text-gray-600">
                 {% if step == 2 %}
-                    Verify OTP to access dashboard
+                    Verify OTP to complete registration
                 {% else %}
-                    Access your distributor dashboard
+                    Join our distributor network
                 {% endif %}
             </p>
         </div>
 
-        <!-- Login Card -->
+        <!-- Registration Card -->
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="px-6 py-8">
                 {% if step == 2 %}
@@ -58,7 +58,7 @@
                                 <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                Verify & Login
+                                Complete Registration
                             </span>
                         </button>
                     </form>
@@ -74,34 +74,81 @@
 
                     <!-- Back to Step 1 -->
                     <div class="mt-4 text-center">
-                        <a href="{% url 'accounts:distributor_login' %}" class="text-gray-600 hover:text-gray-800 text-sm">
-                            ← Use different number
+                        <a href="{% url 'accounts:distributor_register' %}" class="text-gray-600 hover:text-gray-800 text-sm">
+                            ← Use different details
                         </a>
                     </div>
 
                 {% else %}
-                    <!-- Step 1: Enter Mobile Number -->
+                    <!-- Step 1: Registration Form -->
                     <form method="POST">
                         {% csrf_token %}
                         
-                        <div class="mb-6">
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Mobile Number
+                                Full Name <span class="text-red-500">*</span>
                             </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                                <input type="tel" name="phone" required
-                                       placeholder="Enter 10-digit mobile number"
-                                       pattern="[0-9]{10}"
-                                       maxlength="10"
-                                       autofocus
-                                       class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <input type="text" name="name" required
+                                   placeholder="Enter your full name"
+                                   autofocus
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Mobile Number <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel" name="phone" required
+                                   placeholder="Enter 10-digit mobile number"
+                                   pattern="[0-9]{10}"
+                                   maxlength="10"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Email (Optional)
+                            </label>
+                            <input type="email" name="email"
+                                   placeholder="your@email.com"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+
+                        <!-- Bank Details Section -->
+                        <div class="border-t border-gray-200 pt-4 mt-6 mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Bank Account Details</h3>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Account Holder Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="account_holder_name" required
+                                       placeholder="Name as per bank account"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                             </div>
-                            <p class="text-xs text-gray-500 mt-2">Enter your registered distributor mobile number</p>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Bank Account Number <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="account_number" required
+                                       placeholder="Enter bank account number"
+                                       pattern="[0-9]{9,18}"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    IFSC Code <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="ifsc_code" required
+                                       placeholder="Enter IFSC code (e.g., SBIN0001234)"
+                                       pattern="[A-Z]{4}0[A-Z0-9]{6}"
+                                       maxlength="11"
+                                       style="text-transform: uppercase;"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">11-character code (e.g., SBIN0001234)</p>
+                            </div>
                         </div>
 
                         <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
@@ -119,56 +166,43 @@
 
         <!-- Info Boxes -->
         <div class="mt-6 space-y-4">
-            <!-- Not Registered -->
+            <!-- Already Registered -->
             <div class="bg-white rounded-xl shadow-md p-4">
                 <p class="text-sm text-gray-600 text-center">
-                    Want to become a distributor?
-                    <a href="{% url 'accounts:distributor_register' %}" class="text-purple-600 hover:text-purple-800 font-semibold ml-1">
-                        Register here
+                    Already a distributor?
+                    <a href="{% url 'accounts:distributor_login' %}" class="text-purple-600 hover:text-purple-800 font-semibold ml-1">
+                        Login here
                     </a>
                 </p>
             </div>
 
-            <!-- OTP Info -->
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <div class="flex items-start">
-                    <svg class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                    </svg>
-                    <div class="text-sm text-blue-800">
-                        <p class="font-semibold mb-1">Secure OTP Login</p>
-                        <p>We'll send a one-time password to your registered mobile number. No password needed!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Features -->
+            <!-- Benefits -->
             <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 text-white">
-                <h3 class="font-bold mb-3">Distributor Features:</h3>
+                <h3 class="font-bold mb-3">Distributor Benefits:</h3>
                 <ul class="space-y-2 text-sm">
                     <li class="flex items-center">
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
-                        Track QR sales and revenue
+                        Earn commission on QR sales
                     </li>
                     <li class="flex items-center">
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
-                        Manage assigned QR codes
+                        Manage your QR inventory
                     </li>
                     <li class="flex items-center">
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
-                        View payment history
+                        Track sales and revenue
                     </li>
                     <li class="flex items-center">
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
-                        Secure OTP-based login
+                        Admin approval within 24 hours
                     </li>
                 </ul>
             </div>
