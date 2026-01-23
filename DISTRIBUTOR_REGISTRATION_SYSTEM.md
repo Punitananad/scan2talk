@@ -1,216 +1,254 @@
-# Distributor Registration System
+# Distributor Registration System - Complete Implementation
 
-## Overview
-Users can register as distributors to sell QR codes. The system uses **OTP verification once** and **admin-assigned passwords** for future logins.
+## ✅ COMPLETED TASKS
 
-## User Flow
+### Task 1: QR Type Selection (Single vs Pair)
+- Added radio button selection on QR generation page
+- Backend calculates correct QR count based on type
+- Preview system detects and displays accordingly
+- **Status**: ✅ Complete
 
-### 1. Registration (One-Time)
-```
-Dashboard → "Become a Distributor" Button
-  ↓
-Enter Mobile Number
-  ↓
-Verify OTP (one-time only)
-  ↓
-Registration Complete → Pending Admin Verification
-```
+### Task 2: Distributor Login in Navigation
+- Added "Distributor Login" button to navigation bar
+- Purple-themed styling
+- Visible when user NOT logged in
+- **Status**: ✅ Complete
 
-### 2. Admin Verification
-```
-Admin Panel → Users → Filter: is_distributor=True, distributor_verified=False
-  ↓
-Select Distributor(s)
-  ↓
-Action: "Verify selected distributors"
-  ↓
-Action: "Assign random passwords to distributors"
-  ↓
-Send password to distributor via SMS/Email
-```
+### Task 3: OTP-Based Distributor Login
+- Converted from password to OTP authentication
+- Two-step process: Mobile → OTP → Login
+- Session-based flow
+- **Status**: ✅ Complete
 
-### 3. Distributor Login (No OTP)
-```
-/accounts/distributor/login/
-  ↓
-Enter: Mobile Number + Password
-  ↓
-Login Success → Distributor Dashboard
-```
+### Task 4: Standalone Distributor Registration
+- No user login required
+- Two-step OTP verification
+- Collects essential details + bank info
+- Business Name field removed
+- **Status**: ✅ Complete
 
-## Features
+## 🔧 FIXES APPLIED
 
-### For Users
-- ✅ One-click registration from dashboard
-- ✅ OTP verification (one-time only)
-- ✅ No password creation (admin assigns)
-- ✅ Simple login with mobile + password
-- ✅ Dedicated distributor dashboard
+### URL Redirect Issue Fix
+**Problem**: `NoReverseMatch at /accounts/distributor/register/`
+- Django was trying to find URL pattern named `'accounts:distributor_register?step=2'`
+- Query parameters were being treated as part of URL name
 
-### For Admins
-- ✅ View pending distributor registrations
-- ✅ Verify distributors with one click
-- ✅ Auto-generate secure passwords
-- ✅ Track distributor activity
-- ✅ Manage distributor permissions
-
-## Database Changes
-
-### User Model
+**Solution**: Changed all redirects from:
 ```python
-is_distributor = BooleanField(default=False)
-distributor_verified = BooleanField(default=False)
-distributor_registered_at = DateTimeField(null=True)
+# WRONG ❌
+redirect('accounts:distributor_register?step=2')
+
+# CORRECT ✅
+redirect('/accounts/distributor/register/?step=2')
 ```
 
-## URLs
+**Files Fixed**:
+- `apps/accounts/distributor_views.py` - All redirect statements
+- `templates/accounts/distributor_register.html` - Back link
 
-| Purpose | URL | Auth Required |
-|---------|-----|---------------|
-| Registration | `/accounts/distributor/become/` | Yes (logged in) |
-| OTP Verification | `/accounts/distributor/verify/` | Yes (logged in) |
-| Pending Status | `/accounts/distributor/pending/` | Yes (logged in) |
-| Login | `/accounts/distributor/login/` | No |
-| Dashboard | `/accounts/distributor/dashboard/` | Yes (distributor) |
+## 📋 REGISTRATION FLOW
 
-## Templates
+### Step 1: Enter Details
+**URL**: `/accounts/distributor/register/`
 
-1. **become_distributor.html** - Registration form
-2. **become_distributor_verify.html** - OTP verification
-3. **distributor_pending.html** - Pending verification status
-4. **distributor_login.html** - Login with mobile + password
-5. **distributor_dashboard.html** - Distributor dashboard
+**Fields Collected**:
+- ✅ Full Name (required)
+- ✅ Mobile Number (required) - 10 digits
+- ✅ Email (optional)
+- ✅ Account Holder Name (required)
+- ✅ Bank Account Number (required)
+- ✅ IFSC Code (required) - 11 characters
+- ❌ Business Name (REMOVED per user request)
 
-## Admin Actions
+**Validation**:
+- Phone: 10 digits, unique check
+- Email: Valid format, unique check
+- IFSC: 11 characters, uppercase
+- Account Number: 9-18 digits
 
-### 1. Verify Distributors
-- Select users with `is_distributor=True` and `distributor_verified=False`
-- Click "Verify selected distributors"
-- Sets `distributor_verified=True`
+**Action**: Send OTP → Redirect to Step 2
 
-### 2. Assign Passwords
-- Select verified distributors
-- Click "Assign random passwords to distributors"
-- Generates 8-character random password
-- Shows passwords in admin message
-- **Production:** Send via SMS/Email instead
+### Step 2: OTP Verification
+**URL**: `/accounts/distributor/register/?step=2`
 
-## Security
+**Process**:
+1. User enters 6-digit OTP
+2. Option to resend OTP
+3. Verify OTP
+4. Create account on success
+5. Redirect to pending page
 
-### Password Generation
+**Account Creation**:
 ```python
-import secrets
-import string
-password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+User.objects.create(
+    username=f"dist_{phone[-4:]}_{random6}",
+    email=email or f"{username}@distributor.local",
+    first_name=name,
+    phone=encrypt_data(phone),
+    is_phone_verified=True,
+    is_distributor=True,
+    distributor_verified=False,  # Admin approval needed
+    distributor_registered_at=now()
+)
 ```
 
-### Login Authentication
-- Uses Django's built-in authentication
-- Finds user by decrypted phone number
-- Authenticates with username + password
-- No OTP required after first registration
-
-## Testing
-
-### 1. Test Registration
-```
-1. Login as regular user
-2. Go to dashboard
-3. Click "Become a Distributor"
-4. Enter mobile number
-5. Verify OTP
-6. Check pending status
+**Bank Details Storage**:
+```python
+# Stored in last_name field as JSON
+bank_details = {
+    'account_holder_name': 'John Doe',
+    'account_number': '1234567890',
+    'ifsc_code': 'SBIN0001234'
+}
+user.last_name = json.dumps(bank_details)
 ```
 
-### 2. Test Admin Verification
+### Step 3: Pending Approval
+**URL**: `/accounts/distributor/pending/public/`
+
+**Display**:
+- Success message
+- Pending approval status
+- Link to login page
+- Expected approval time
+
+## 🔐 LOGIN FLOW
+
+### Step 1: Enter Mobile Number
+**URL**: `/accounts/distributor/login/`
+
+**Process**:
+1. User enters 10-digit mobile
+2. System finds verified distributor
+3. Send OTP
+4. Redirect to Step 2
+
+### Step 2: Verify OTP & Login
+**URL**: `/accounts/distributor/login/?step=2`
+
+**Process**:
+1. User enters OTP
+2. Verify OTP
+3. Auto-login user
+4. Redirect to distributor dashboard
+
+## 🗂️ FILES MODIFIED
+
+### Backend
+- ✅ `apps/accounts/distributor_views.py` - All logic
+- ✅ `apps/accounts/urls.py` - URL routing
+
+### Templates
+- ✅ `templates/accounts/distributor_register.html` - Registration form
+- ✅ `templates/accounts/distributor_login.html` - Login form
+- ✅ `templates/accounts/distributor_pending_public.html` - Pending page
+- ✅ `templates/base.html` - Navigation bar
+- ✅ `templates/core/home_new.html` - Homepage link
+
+### Documentation
+- ✅ `DISTRIBUTOR_REGISTRATION_QUICK_START.md`
+- ✅ `DISTRIBUTOR_REGISTRATION_SYSTEM.md` (this file)
+- ✅ `DISTRIBUTOR_OTP_LOGIN.md`
+- ✅ `DISTRIBUTOR_DIRECT_LOGIN.md`
+
+## 🧪 TESTING
+
+### Test Registration
+1. Navigate to `/accounts/distributor/register/`
+2. Fill all required fields
+3. Click "Send OTP"
+4. Should redirect to step 2 (not error)
+5. Enter OTP
+6. Should create account and show pending page
+
+### Test Login
+1. Navigate to `/accounts/distributor/login/`
+2. Enter registered mobile number
+3. Click "Send OTP"
+4. Should redirect to step 2
+5. Enter OTP
+6. Should login and redirect to dashboard
+
+### Verify Data
+```python
+from apps.accounts.models import User
+import json
+
+# Find distributor
+user = User.objects.filter(is_distributor=True).last()
+
+# Check details
+print(f"Name: {user.first_name}")
+print(f"Phone: {user.get_decrypted_phone()}")
+print(f"Email: {user.email}")
+print(f"Verified: {user.distributor_verified}")
+
+# Check bank details
+bank_details = json.loads(user.last_name)
+print(f"Account Holder: {bank_details['account_holder_name']}")
+print(f"Account Number: {bank_details['account_number']}")
+print(f"IFSC: {bank_details['ifsc_code']}")
 ```
-1. Login to admin panel
-2. Go to Users
-3. Filter: is_distributor=True
-4. Select pending distributor
-5. Action: Verify distributors
-6. Action: Assign passwords
-7. Note the generated password
-```
 
-### 3. Test Login
-```
-1. Logout
-2. Go to /accounts/distributor/login/
-3. Enter mobile + assigned password
-4. Should login to distributor dashboard
-```
+## 🎯 KEY FEATURES
 
-## Migration
+✅ **No Login Required** - Direct registration
+✅ **OTP Verification** - Secure mobile verification
+✅ **Bank Details** - For payment processing
+✅ **Admin Approval** - Manual verification
+✅ **Session Management** - Secure data transfer
+✅ **Error Handling** - Validation and messages
+✅ **Mobile Responsive** - Works on all devices
+✅ **Purple Theme** - Distinct branding
 
-Run migration to add distributor fields:
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
+## 🔒 SECURITY
 
-## Dashboard Button Logic
+- Phone number encryption
+- OTP verification required
+- Session-based data transfer
+- Admin approval required
+- Unusable password (OTP only)
+- Unique phone/email validation
 
-```django
-{% if user.is_distributor %}
-    {% if user.distributor_verified %}
-        <!-- Show Distributor Dashboard button -->
-    {% else %}
-        <!-- Show Pending Verification button -->
-    {% endif %}
-{% else %}
-    <!-- Show "Become a Distributor" button -->
-{% endif %}
-```
+## 📱 USER EXPERIENCE
 
-## Distributor Dashboard Features
+### Navigation
+- Distributor Login button in navbar
+- Link on homepage
+- Register link on login page
+- Back to home option
 
-- Total QR codes assigned
-- Activated vs Available QR codes
-- Total revenue from sales
-- Recent payment history
-- Quick actions
+### Visual Design
+- Purple gradient theme
+- Clear step indicators
+- Helpful error messages
+- Success confirmations
+- Resend OTP option
 
-## Future Enhancements
+### Benefits Display
+- Earn commission
+- Manage inventory
+- Track revenue
+- Quick approval
 
-1. **SMS Integration:** Auto-send password via SMS
-2. **Email Notification:** Send password via email
-3. **Password Reset:** Allow distributors to request password reset
-4. **Two-Factor Auth:** Optional 2FA for distributors
-5. **Commission Tracking:** Track distributor commissions
-6. **Performance Metrics:** Sales analytics and reports
+## 🚀 DEPLOYMENT
 
-## Production Checklist
+All changes are ready for deployment:
+1. Backend logic complete
+2. Templates updated
+3. URL routing fixed
+4. No database migrations needed
+5. Uses existing OTP service
 
-- [ ] Migration applied
-- [ ] Templates created
-- [ ] URLs configured
-- [ ] Admin actions tested
-- [ ] SMS/Email integration for password delivery
-- [ ] Security review
-- [ ] User documentation
-- [ ] Admin training
+## 📝 NOTES
 
-## Support
+- Business Name field removed per user request
+- Bank details stored in `last_name` field (temporary)
+- Consider creating separate BankDetails model in future
+- OTP uses existing SMS credentials
+- Admin must approve before distributor can login
 
-### For Users
-- Registration issues: Check OTP delivery
-- Login issues: Verify password with admin
-- Access issues: Check verification status
+## ✅ STATUS: READY FOR TESTING
 
-### For Admins
-- Verify pending distributors regularly
-- Send passwords securely (SMS/Email)
-- Monitor distributor activity
-- Handle password reset requests
-
-## Summary
-
-The distributor registration system provides:
-- ✅ Simple one-time OTP registration
-- ✅ Admin-controlled password assignment
-- ✅ Secure login without repeated OTP
-- ✅ Dedicated distributor dashboard
-- ✅ Easy admin management
-
-**Status:** ✅ Complete and ready to use!
+All tasks completed. System ready for end-to-end testing.

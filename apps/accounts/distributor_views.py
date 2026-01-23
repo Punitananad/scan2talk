@@ -86,7 +86,7 @@ def distributor_register(request):
                 request.session['dist_reg_ifsc'] = ifsc_code
                 
                 messages.success(request, 'OTP sent to your mobile number')
-                return redirect('accounts:distributor_register?step=2')
+                return redirect('/accounts/distributor/register/?step=2')
             else:
                 messages.error(request, f'Failed to send OTP: {message}')
                 return redirect('accounts:distributor_register')
@@ -117,14 +117,14 @@ def distributor_register(request):
                     messages.success(request, 'New OTP sent successfully')
                 else:
                     messages.error(request, f'Failed to resend OTP: {message}')
-                return redirect('accounts:distributor_register?step=2')
+                return redirect('/accounts/distributor/register/?step=2')
             
             # Handle OTP verification
             otp = request.POST.get('otp', '').strip()
             
             if not otp:
                 messages.error(request, 'Please enter the OTP')
-                return redirect('accounts:distributor_register?step=2')
+                return redirect('/accounts/distributor/register/?step=2')
             
             print(f"\n{'='*60}")
             print(f"🔐 DISTRIBUTOR REGISTRATION - STEP 2")
@@ -195,7 +195,7 @@ def distributor_register(request):
                     return redirect('accounts:distributor_register')
             else:
                 messages.error(request, message)
-                return redirect('accounts:distributor_register?step=2')
+                return redirect('/accounts/distributor/register/?step=2')
         
         # GET - show OTP form
         return render(request, 'accounts/distributor_register.html', {
@@ -493,7 +493,7 @@ def distributor_login(request):
                 request.session['distributor_user_id'] = user_found.id
                 
                 messages.success(request, 'OTP sent to your mobile number')
-                return redirect('accounts:distributor_login?step=2')
+                return redirect('/accounts/distributor/login/?step=2')
             else:
                 messages.error(request, f'Failed to send OTP: {message}')
                 return redirect('accounts:distributor_login')
@@ -523,14 +523,14 @@ def distributor_login(request):
                 else:
                     messages.error(request, f'Failed to resend OTP: {message}')
                 
-                return redirect('accounts:distributor_login?step=2')
+                return redirect('/accounts/distributor/login/?step=2')
             
             # Handle OTP verification
             otp = request.POST.get('otp', '').strip()
             
             if not otp:
                 messages.error(request, 'Please enter the OTP')
-                return redirect('accounts:distributor_login?step=2')
+                return redirect('/accounts/distributor/login/?step=2')
             
             print(f"\n{'='*60}")
             print(f"🔐 DISTRIBUTOR LOGIN - STEP 2")
@@ -567,7 +567,7 @@ def distributor_login(request):
                     return redirect('accounts:distributor_login')
             else:
                 messages.error(request, message)
-                return redirect('accounts:distributor_login?step=2')
+                return redirect('/accounts/distributor/login/?step=2')
         
         # GET request - show OTP input form
         return render(request, 'accounts/distributor_login.html', {
