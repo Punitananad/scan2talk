@@ -49,6 +49,9 @@ class Gateway(BaseModel):
     total_interactions = models.PositiveIntegerField(default=0)
     last_interaction_at = models.DateTimeField(null=True, blank=True)
     
+    # Distributor tracking
+    distributor_code = models.CharField(max_length=20, blank=True, help_text="Distributor mobile number used during activation")
+    
     class Meta:
         db_table = 'gateways'
         indexes = [

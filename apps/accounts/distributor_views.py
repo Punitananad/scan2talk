@@ -398,6 +398,7 @@ def distributor_pending(request):
 def distributor_dashboard(request):
     """
     Distributor dashboard - only accessible after admin verification.
+    Shows QR codes activated using distributor's mobile number as code.
     """
     user = request.user
     
@@ -408,30 +409,41 @@ def distributor_dashboard(request):
     if not user.distributor_verified:
         return redirect('accounts:distributor_pending')
     
-    # Get distributor statistics
-    from apps.gateways.qr_models import PreGeneratedQR
-    from apps.accounts.recharge_models import DistributorPayment
+    # Get distributor's phone number (used as distributor code)
+    distributor_code = user.get_decrypted_phone()
     
-    # QR codes assigned to this distributor (if any)
-    assigned_qrs = PreGeneratedQR.objects.filter(owner=user)
+    # Get statistics from Gateway model (activations with distributor code)
+    from apps.gateways.models import Gateway
     
-    # Payments made through distributor QRs
-    payments = DistributorPayment.objects.filter(
-        qr_code__owner=user
-    ).select_related('qr_code')
+    # Total QR codes assigned by admin
+    total_qrs = user.distributor_total_qr
     
-    total_revenue = sum(p.amount for p in payments if p.status == 'completed')
+    # Activated QR codes (gateways created with this distributor code)
+    activated_gateways = Gateway.objects.filter(
+        distributor_code=distributor_code,
+        is_active=True
+    )
+    activated_count = activated_gateways.count()
+    
+    # Available QR codes
+    available_qrs = total_qrs - activated_count if total_qrs > activated_count else 0
+    
+    # Calculate revenue
+    commission_per_activation = user.distributor_commission_per_activation
+    total_revenue = activated_count * commission_per_activation
+    
+    # Recent activations
+    recent_activations = activated_gateways.select_related('owner').order_by('-created_at')[:10]
     
     context = {
         'user': user,
-        'phone': user.get_decrypted_phone(),
-        'total_qrs': assigned_qrs.count(),
-        'activated_qrs': assigned_qrs.filter(status='activated').count(),
-        'available_qrs': assigned_qrs.filter(status='available').count(),
-        'total_payments': payments.count(),
-        'completed_payments': payments.filter(status='completed').count(),
+        'phone': distributor_code,
+        'total_qrs': total_qrs,
+        'activated_qrs': activated_count,
+        'available_qrs': available_qrs,
+        'commission_per_activation': commission_per_activation,
         'total_revenue': total_revenue,
-        'recent_payments': payments.order_by('-created_at')[:10],
+        'recent_activations': recent_activations,
     }
     return render(request, 'accounts/distributor_dashboard.html', context)
 

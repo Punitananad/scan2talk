@@ -49,6 +49,8 @@ class User(AbstractUser):
     is_distributor = models.BooleanField(default=False)
     distributor_verified = models.BooleanField(default=False)
     distributor_registered_at = models.DateTimeField(null=True, blank=True)
+    distributor_total_qr = models.PositiveIntegerField(default=0, help_text="Total QR codes assigned by admin")
+    distributor_commission_per_activation = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Commission earned per QR activation")
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
