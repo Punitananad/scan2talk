@@ -784,6 +784,28 @@ def update_order_status(request, order_id):
 
 
 @staff_member_required
+@require_http_methods(["POST"])
+def delete_order(request, order_id):
+    """
+    Delete an order (AJAX endpoint)
+    """
+    try:
+        order = get_object_or_404(TagOrder, order_id=order_id)
+        order_display = f"{order.order_id} ({order.name})"
+        
+        # Delete the order
+        order.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Order {order_display} has been deleted successfully'
+        })
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@staff_member_required
 def order_detail_view(request, order_id):
     """
     View detailed information about a specific order.

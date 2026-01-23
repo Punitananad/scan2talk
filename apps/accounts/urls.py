@@ -75,6 +75,7 @@ urlpatterns = [
     path('admin/orders/', admin_views.manage_tag_orders, name='manage_tag_orders'),
     path('admin/orders/<str:order_id>/', admin_views.order_detail_view, name='order_detail'),
     path('admin/orders/<str:order_id>/update/', admin_views.update_order_status, name='update_order_status'),
+    path('admin/orders/<str:order_id>/delete/', admin_views.delete_order, name='delete_order'),
     
     # Distributor management
     path('admin/distributors/', admin_views.manage_distributors, name='admin_manage_distributors'),
