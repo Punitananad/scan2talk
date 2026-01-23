@@ -825,6 +825,7 @@ def order_detail_view(request, order_id):
 def manage_distributors(request):
     """
     Manage distributor registrations - view, verify, assign passwords
+    Commission tracked on SUCCESSFUL PAYMENT, not activation.
     """
     # Get filter parameters
     status_filter = request.GET.get('status', 'all')
@@ -846,42 +847,37 @@ def manage_distributors(request):
             Q(last_name__icontains=search_query)
         )
     
-    # Annotate with QR counts and payment stats
-    from apps.gateways.qr_models import PreGeneratedQR
-    from apps.accounts.recharge_models import DistributorPayment
-    
-    distributors = distributors.annotate(
-        qr_count=Count('qr_codes', distinct=True),
-        activated_qr_count=Count('qr_codes', filter=Q(qr_codes__status='activated'), distinct=True)
-    ).order_by('-distributor_registered_at')
+    distributors = distributors.order_by('-distributor_registered_at')
     
     # Get payment stats for each distributor
+    from apps.core.models import TagOrder
+    
     distributor_list = []
     for dist in distributors:
         # Get distributor's phone (used as code)
         dist_phone = dist.get_decrypted_phone()
         
-        # Count activations with distributor code
-        from apps.gateways.models import Gateway
-        activated_with_code = Gateway.objects.filter(
+        # Count successful payments with distributor code
+        successful_payments = TagOrder.objects.filter(
             distributor_code=dist_phone,
-            is_active=True
+            status__in=['processing', 'shipped', 'delivered']  # Exclude pending/cancelled
         ).count()
         
         # Calculate revenue
-        total_revenue = activated_with_code * dist.distributor_commission_per_activation
+        total_revenue = successful_payments * dist.distributor_commission_per_activation
         
         distributor_list.append({
             'user': dist,
             'phone': dist_phone,
             'total_qr': dist.distributor_total_qr,
             'commission': dist.distributor_commission_per_activation,
-            'activated_qr_count': activated_with_code,
-            'available_qr': dist.distributor_total_qr - activated_with_code if dist.distributor_total_qr > activated_with_code else 0,
+            'activated_qr_count': successful_payments,  # Now represents successful payments
+            'available_qr': dist.distributor_total_qr - successful_payments if dist.distributor_total_qr > successful_payments else 0,
             'total_revenue': total_revenue,
         })
     
     # Statistics
+    from apps.gateways.qr_models import PreGeneratedQR
     stats = {
         'total': User.objects.filter(is_distributor=True).count(),
         'pending': User.objects.filter(is_distributor=True, distributor_verified=False).count(),

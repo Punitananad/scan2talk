@@ -53,6 +53,9 @@ class TagOrder(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
+    # Distributor tracking (commission earned on successful payment)
+    distributor_code = models.CharField(max_length=15, blank=True, db_index=True, help_text="Distributor's mobile number")
+    
     # Tracking
     tracking_number = models.CharField(max_length=100, blank=True)
     notes = models.TextField(blank=True)

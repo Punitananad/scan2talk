@@ -163,6 +163,26 @@ body {
                         </p>
                     </div>
 
+                    <!-- Distributor Code (Optional) -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-[#094067] mb-2">
+                            Distributor Code (Optional)
+                            <span class="text-xs font-normal text-[#5F6C7B]">- If you have one</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="distributor_code" 
+                            x-model="distributorCode"
+                            pattern="[0-9]{10}"
+                            maxlength="10"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DA9FC] focus:border-transparent transition-all"
+                            placeholder="Enter 10-digit distributor code"
+                        >
+                        <p class="text-xs text-[#5F6C7B] mt-2 font-medium">
+                            💡 Enter your distributor's mobile number to support them
+                        </p>
+                    </div>
+
                     <!-- Price Summary -->
                     <div class="bg-gradient-to-br from-[#D8EEFE] to-[#3DA9FC]/10 border-2 border-[#3DA9FC]/30 rounded-xl p-6 mb-6">
                         <div class="flex justify-between items-center mb-3">
@@ -280,6 +300,7 @@ function orderForm() {
         pincode: '',
         quantity: 1,
         customQuantity: '',
+        distributorCode: '',
         subtotal: {{ tag_price }},
         total: {{ tag_price }},
         basePrice: {{ tag_price }},

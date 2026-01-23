@@ -89,6 +89,7 @@ class OrderTagView(View):
         
         # Store order data in session
         quantity = int(request.POST.get('quantity', 1))
+        distributor_code = request.POST.get('distributor_code', '').strip()
         
         order_data = {
             'name': request.POST.get('name'),
@@ -99,6 +100,7 @@ class OrderTagView(View):
             'state': request.POST.get('state'),
             'pincode': request.POST.get('pincode'),
             'quantity': quantity,
+            'distributor_code': distributor_code,  # Save distributor code
         }
         
         # Calculate total using dynamic pricing
@@ -149,6 +151,7 @@ class OrderPaymentView(View):
                     pincode=order_data['pincode'],
                     quantity=order_data['quantity'],
                     total_amount=order_data['total'],
+                    distributor_code=order_data.get('distributor_code', ''),  # Save distributor code
                     status='pending',  # Pending payment
                     notes='Order placed without payment gateway (Razorpay not configured)'
                 )
@@ -232,9 +235,20 @@ class OrderPaymentView(View):
             pincode=order_data['pincode'],
             quantity=order_data['quantity'],
             total_amount=order_data['total'],
+            distributor_code=order_data.get('distributor_code', ''),  # Save distributor code
             status='processing',  # Mark as processing since payment is confirmed
             notes=f"Razorpay Payment ID: {razorpay_payment_id}"
         )
+        
+        # Log distributor commission if code provided
+        if order_data.get('distributor_code'):
+            print(f"\n{'='*60}")
+            print(f"💰 DISTRIBUTOR COMMISSION EARNED")
+            print(f"   Distributor Code: {order_data['distributor_code']}")
+            print(f"   Order ID: {order_data['order_id']}")
+            print(f"   Amount: ₹{order_data['total']}")
+            print(f"   Payment Status: SUCCESS")
+            print(f"{'='*60}\n")
         
         # Store in session for success page
         request.session['completed_order'] = order_data

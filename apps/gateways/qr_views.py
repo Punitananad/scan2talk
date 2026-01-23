@@ -679,17 +679,10 @@ def activate_qr_code(request, qr_code):
                     vehicle_type = request.POST.get('vehicle_type', 'car')
                     vehicle_number = request.POST.get('vehicle_number', '').strip().upper()
                     vehicle_model = request.POST.get('vehicle_model', '').strip()
-                    distributor_code = request.POST.get('distributor_code', '').strip()
                     
                     if not name or not vehicle_number:
                         messages.error(request, 'Name and vehicle number are required')
                         return redirect(f'/gateways/activate/{qr_code}/?step=3')
-                    
-                    # Validate distributor code if provided
-                    if distributor_code:
-                        if not distributor_code.isdigit() or len(distributor_code) != 10:
-                            messages.error(request, 'Distributor code must be a 10-digit mobile number')
-                            return redirect(f'/gateways/activate/{qr_code}/?step=3')
                     
                     # Check if vehicle number already exists
                     existing_gateway = Gateway.objects.filter(
@@ -719,7 +712,6 @@ def activate_qr_code(request, qr_code):
                         context_type='vehicle',
                         description=f"{vehicle_model}",
                         identifier_text=vehicle_number,
-                        distributor_code=distributor_code if distributor_code else '',  # Save distributor code
                         is_active=True  # Explicitly set to active
                     )
                     
@@ -727,7 +719,6 @@ def activate_qr_code(request, qr_code):
                     print(f"✅ GATEWAY CREATED")
                     print(f"   Owner: {name}")
                     print(f"   Vehicle: {vehicle_number}")
-                    print(f"   Distributor Code: {distributor_code if distributor_code else 'None'}")
                     print(f"{'='*60}\n")
                     
                     # Activate QR code
