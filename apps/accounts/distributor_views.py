@@ -120,20 +120,29 @@ def distributor_register(request):
                 return redirect('/accounts/distributor/register/?step=2')
             
             # Handle OTP verification
-            otp = request.POST.get('otp', '').strip()
+            otp = request.POST.get('otp', '').strip().replace(' ', '')  # Remove all whitespace
             
             if not otp:
                 messages.error(request, 'Please enter the OTP')
                 return redirect('/accounts/distributor/register/?step=2')
             
+            # Validate OTP format (6 digits)
+            if not otp.isdigit() or len(otp) != 6:
+                messages.error(request, 'OTP must be 6 digits')
+                return redirect('/accounts/distributor/register/?step=2')
+            
             print(f"\n{'='*60}")
             print(f"🔐 DISTRIBUTOR REGISTRATION - STEP 2")
             print(f"   Phone: {phone}")
-            print(f"   OTP: {otp}")
+            print(f"   OTP Entered: '{otp}' (length: {len(otp)})")
+            print(f"   OTP is digits: {otp.isdigit()}")
             print(f"{'='*60}\n")
             
             # Verify OTP
             success, message = verify_otp(phone, otp)
+            
+            print(f"   Verification Result: {'SUCCESS' if success else 'FAILED'}")
+            print(f"   Message: {message}\n")
             
             if success:
                 # Create distributor account
@@ -490,7 +499,7 @@ def distributor_login(request):
             if success:
                 # Store phone in session
                 request.session['distributor_login_phone'] = phone_digits
-                request.session['distributor_user_id'] = user_found.id
+                request.session['distributor_user_id'] = str(user_found.id)  # Convert UUID to string
                 
                 messages.success(request, 'OTP sent to your mobile number')
                 return redirect('/accounts/distributor/login/?step=2')
@@ -526,16 +535,22 @@ def distributor_login(request):
                 return redirect('/accounts/distributor/login/?step=2')
             
             # Handle OTP verification
-            otp = request.POST.get('otp', '').strip()
+            otp = request.POST.get('otp', '').strip().replace(' ', '')  # Remove all whitespace
             
             if not otp:
                 messages.error(request, 'Please enter the OTP')
                 return redirect('/accounts/distributor/login/?step=2')
             
+            # Validate OTP format (6 digits)
+            if not otp.isdigit() or len(otp) != 6:
+                messages.error(request, 'OTP must be 6 digits')
+                return redirect('/accounts/distributor/login/?step=2')
+            
             print(f"\n{'='*60}")
             print(f"🔐 DISTRIBUTOR LOGIN - STEP 2")
             print(f"   Phone: {phone}")
-            print(f"   OTP: {otp}")
+            print(f"   OTP Entered: '{otp}' (length: {len(otp)})")
+            print(f"   OTP is digits: {otp.isdigit()}")
             print(f"{'='*60}\n")
             
             # Verify OTP
