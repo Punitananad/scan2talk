@@ -54,6 +54,25 @@ body {
   box-shadow: 0 4mm 6mm -2mm rgba(0, 0, 0, 0.05);
 }
 
+/* ================= CATEGORY INDICATOR (SUBTLE DOT) ================= */
+.category-badge {
+  position: absolute;
+  bottom: 2mm;
+  right: 2mm;
+  width: 2mm;
+  height: 2mm;
+  border-radius: 50%;
+  z-index: 10;
+  opacity: 0.7;
+}
+
+/* Category Colors */
+.cat-free { background: #10b981; } /* Green */
+.cat-prepaid { background: #3b82f6; } /* Blue */
+.cat-postpaid { background: #8b5cf6; } /* Purple */
+.cat-trial { background: #f59e0b; } /* Amber */
+.cat-distributor { background: #ef4444; } /* Red */
+
 /* ================= HEADER ================= */
 .header-bar {
   height: 12mm;
@@ -156,6 +175,15 @@ body {
   letter-spacing: 0.5px;
 }
 
+.qr-code-text {
+  margin-top: 0.5mm;
+  font-size: 1.8mm;
+  font-weight: 600;
+  color: #0f172a;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.3px;
+}
+
 /* ================= FOOTER ================= */
 .footer-lean {
   height: 9mm;
@@ -235,6 +263,11 @@ body {
 <div class="page">
   {% for qr in page_qrs %}
   <div class="tag">
+    <!-- CATEGORY INDICATOR (Small Dot - Bottom Right) -->
+    {% if qr.category %}
+    <div class="category-badge cat-{{ qr.category.category_type }}"></div>
+    {% endif %}
+    
     <!-- HEADER -->
     <div class="header-bar">
       <div class="logo-wrapper">
@@ -256,6 +289,7 @@ body {
           <img src="data:image/png;base64,{{ qr.qr_code_data }}" class="qr-code-img" alt="QR Code">
         </div>
         <div class="scan-label">Scan Me</div>
+        <div class="qr-code-text">{{ qr.qr_code }}</div>
       </div>
     </div>
 

@@ -30,23 +30,28 @@ def generate_qr_base64(qr_code_text):
 def preview_batch_sample(request, batch_number):
     """
     Preview the complete batch layout with all QR codes.
-    Shows exactly what the PDF will look like - 8 tags per page.
+    Shows exactly what the PDF will look like - 8 tags per page (4 unique QRs, each printed twice).
     """
     batch = get_object_or_404(QRBatch, batch_number=batch_number)
-    qr_codes = list(PreGeneratedQR.objects.filter(batch_number=batch_number))
+    qr_codes = list(PreGeneratedQR.objects.filter(batch_number=batch_number).select_related('category'))
     
     if not qr_codes:
         return HttpResponse("No QR codes in this batch", status=404)
     
-    # Generate QR codes with base64 data for ALL QR codes
+    # Generate QR codes with base64 data and DUPLICATE each QR (2 copies per QR)
     qr_data_list = []
     for qr in qr_codes:
-        qr_data_list.append({
+        qr_data = {
             'qr_code': qr.qr_code,
-            'qr_code_data': generate_qr_base64(qr.qr_code)
-        })
+            'qr_code_data': generate_qr_base64(qr.qr_code),
+            'category': qr.category  # Include category for visual indicator
+        }
+        # Add original
+        qr_data_list.append(qr_data)
+        # Add duplicate (copy)
+        qr_data_list.append(qr_data)
     
-    # Split into pages (8 tags per page: 2 cols x 4 rows)
+    # Split into pages (8 tags per page: 2 cols x 4 rows = 4 unique QRs with 2 copies each)
     tags_per_page = 8
     qr_pages = [qr_data_list[i:i + tags_per_page] for i in range(0, len(qr_data_list), tags_per_page)]
     
