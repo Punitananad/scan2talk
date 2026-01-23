@@ -251,22 +251,45 @@ def distributor_login(request):
         from apps.core.utils import encrypt_data
         users = User.objects.filter(is_distributor=True)
         
+        print(f"\n{'='*60}")
+        print(f"🔐 DISTRIBUTOR LOGIN ATTEMPT")
+        print(f"   Phone entered: {phone_digits}")
+        print(f"   Total distributors: {users.count()}")
+        print(f"{'='*60}\n")
+        
         user_found = None
         for u in users:
-            if u.get_decrypted_phone() == phone_digits:
+            decrypted_phone = u.get_decrypted_phone()
+            print(f"   Checking: {u.email} - Phone: {decrypted_phone}")
+            if decrypted_phone == phone_digits:
                 user_found = u
+                print(f"   ✓ MATCH FOUND!")
                 break
         
         if not user_found:
+            print(f"\n❌ No user found with phone: {phone_digits}\n")
             messages.error(request, 'Invalid phone number or password')
             return redirect('accounts:distributor_login')
         
+        print(f"\n{'='*60}")
+        print(f"👤 USER FOUND")
+        print(f"   Email: {user_found.email}")
+        print(f"   Username: {user_found.username}")
+        print(f"   Verified: {user_found.distributor_verified}")
+        print(f"   Has password: {user_found.has_usable_password()}")
+        print(f"{'='*60}\n")
+        
         # Check if verified
         if not user_found.distributor_verified:
+            print(f"❌ User not verified\n")
             messages.error(request, 'Your distributor account is pending admin verification')
             return redirect('accounts:distributor_login')
         
         # Authenticate with username and password
+        print(f"🔐 Attempting authentication...")
+        print(f"   Username: {user_found.username}")
+        print(f"   Password length: {len(password)}")
+        
         authenticated_user = authenticate(
             request,
             username=user_found.username,
@@ -274,10 +297,12 @@ def distributor_login(request):
         )
         
         if authenticated_user:
+            print(f"✅ Authentication SUCCESS!\n")
             login(request, authenticated_user)
             messages.success(request, f'Welcome back, {authenticated_user.first_name or "Distributor"}!')
             return redirect('accounts:distributor_dashboard')
         else:
+            print(f"❌ Authentication FAILED - Wrong password\n")
             messages.error(request, 'Invalid phone number or password')
             return redirect('accounts:distributor_login')
     

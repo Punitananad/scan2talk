@@ -874,8 +874,36 @@ def verify_distributor(request, user_id):
     """
     Verify distributor and assign password
     """
+    # CRITICAL: Get the distributor user by ID
     user = get_object_or_404(User, id=user_id, is_distributor=True)
     password = request.POST.get('password', '').strip()
+    
+    # SAFETY CHECK: Make sure we're not modifying the logged-in admin
+    if user.id == request.user.id:
+        messages.error(request, '❌ ERROR: Cannot modify your own admin account!')
+        return redirect('accounts:admin_manage_distributors')
+    
+    # SAFETY CHECK: Make sure target user is actually a distributor
+    if not user.is_distributor:
+        messages.error(request, '❌ ERROR: User is not a distributor!')
+        return redirect('accounts:admin_manage_distributors')
+    
+    # SAFETY CHECK: Don't modify superuser accounts
+    if user.is_superuser or user.is_staff:
+        messages.error(request, '❌ ERROR: Cannot modify admin/staff accounts!')
+        return redirect('accounts:admin_manage_distributors')
+    
+    print(f"\n{'='*60}")
+    print(f"🔐 VERIFYING DISTRIBUTOR")
+    print(f"   Admin user: {request.user.email} (ID: {request.user.id})")
+    print(f"   Target user: {user.email} (ID: {user.id})")
+    print(f"   Username: {user.username}")
+    print(f"   Phone: {user.get_decrypted_phone()}")
+    print(f"   Is distributor: {user.is_distributor}")
+    print(f"   Is staff: {user.is_staff}")
+    print(f"   Is superuser: {user.is_superuser}")
+    print(f"   Password length: {len(password)}")
+    print(f"{'='*60}\n")
     
     if not password:
         messages.error(request, 'Password is required')
@@ -885,10 +913,19 @@ def verify_distributor(request, user_id):
         messages.error(request, 'Password must be at least 6 characters')
         return redirect('accounts:admin_manage_distributors')
     
-    # Set password and verify
+    # Set password and verify - ONLY for the distributor user
     user.set_password(password)
     user.distributor_verified = True
     user.save()
+    
+    print(f"\n{'='*60}")
+    print(f"✅ DISTRIBUTOR VERIFIED")
+    print(f"   User: {user.email} (ID: {user.id})")
+    print(f"   Password set: YES")
+    print(f"   Has usable password: {user.has_usable_password()}")
+    print(f"   Verified: {user.distributor_verified}")
+    print(f"   Admin user unchanged: {request.user.email}")
+    print(f"{'='*60}\n")
     
     messages.success(request, f'✅ Distributor {user.email} verified and password assigned!')
     return redirect('accounts:admin_manage_distributors')
@@ -900,8 +937,33 @@ def reset_distributor_password(request, user_id):
     """
     Reset distributor password
     """
+    # CRITICAL: Get the distributor user by ID
     user = get_object_or_404(User, id=user_id, is_distributor=True)
     password = request.POST.get('password', '').strip()
+    
+    # SAFETY CHECK: Make sure we're not modifying the logged-in admin
+    if user.id == request.user.id:
+        messages.error(request, '❌ ERROR: Cannot modify your own admin account!')
+        return redirect('accounts:admin_manage_distributors')
+    
+    # SAFETY CHECK: Make sure target user is actually a distributor
+    if not user.is_distributor:
+        messages.error(request, '❌ ERROR: User is not a distributor!')
+        return redirect('accounts:admin_manage_distributors')
+    
+    # SAFETY CHECK: Don't modify superuser accounts
+    if user.is_superuser or user.is_staff:
+        messages.error(request, '❌ ERROR: Cannot modify admin/staff accounts!')
+        return redirect('accounts:admin_manage_distributors')
+    
+    print(f"\n{'='*60}")
+    print(f"🔐 RESETTING DISTRIBUTOR PASSWORD")
+    print(f"   Admin user: {request.user.email} (ID: {request.user.id})")
+    print(f"   Target user: {user.email} (ID: {user.id})")
+    print(f"   Is distributor: {user.is_distributor}")
+    print(f"   Is staff: {user.is_staff}")
+    print(f"   Password length: {len(password)}")
+    print(f"{'='*60}\n")
     
     if not password:
         messages.error(request, 'Password is required')
@@ -911,9 +973,15 @@ def reset_distributor_password(request, user_id):
         messages.error(request, 'Password must be at least 6 characters')
         return redirect('accounts:admin_manage_distributors')
     
-    # Reset password
+    # Reset password - ONLY for the distributor user
     user.set_password(password)
     user.save()
+    
+    print(f"\n{'='*60}")
+    print(f"✅ PASSWORD RESET")
+    print(f"   User: {user.email} (ID: {user.id})")
+    print(f"   Admin user unchanged: {request.user.email}")
+    print(f"{'='*60}\n")
     
     messages.success(request, f'✅ Password reset for distributor {user.email}')
     return redirect('accounts:admin_manage_distributors')
