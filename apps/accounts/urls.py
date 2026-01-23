@@ -84,6 +84,7 @@ urlpatterns = [
     # Distributor management
     path('admin/distributors/', admin_views.manage_distributors, name='admin_manage_distributors'),
     path('admin/distributors/<uuid:user_id>/verify/', admin_views.verify_distributor, name='verify_distributor'),
+    path('admin/distributors/<uuid:user_id>/update/', admin_views.update_distributor_details, name='update_distributor_details'),
     path('admin/distributors/<uuid:user_id>/reset-password/', admin_views.reset_distributor_password, name='reset_distributor_password'),
     path('admin/distributors/<uuid:user_id>/revoke/', admin_views.revoke_distributor, name='revoke_distributor'),
     

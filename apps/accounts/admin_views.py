@@ -858,16 +858,26 @@ def manage_distributors(request):
     # Get payment stats for each distributor
     distributor_list = []
     for dist in distributors:
-        payments = DistributorPayment.objects.filter(qr_code__owner=dist)
-        total_payments = payments.filter(status='completed').count()
-        total_revenue = sum(p.amount for p in payments if p.status == 'completed')
+        # Get distributor's phone (used as code)
+        dist_phone = dist.get_decrypted_phone()
+        
+        # Count activations with distributor code
+        from apps.gateways.models import Gateway
+        activated_with_code = Gateway.objects.filter(
+            distributor_code=dist_phone,
+            is_active=True
+        ).count()
+        
+        # Calculate revenue
+        total_revenue = activated_with_code * dist.distributor_commission_per_activation
         
         distributor_list.append({
             'user': dist,
-            'phone': dist.get_decrypted_phone(),
-            'qr_count': dist.qr_count,
-            'activated_qr_count': dist.activated_qr_count,
-            'total_payments': total_payments,
+            'phone': dist_phone,
+            'total_qr': dist.distributor_total_qr,
+            'commission': dist.distributor_commission_per_activation,
+            'activated_qr_count': activated_with_code,
+            'available_qr': dist.distributor_total_qr - activated_with_code if dist.distributor_total_qr > activated_with_code else 0,
             'total_revenue': total_revenue,
         })
     
@@ -948,6 +958,58 @@ def verify_distributor(request, user_id):
     print(f"   Verified: {user.distributor_verified}")
     print(f"   Admin user unchanged: {request.user.email}")
     print(f"{'='*60}\n")
+    
+    messages.success(request, f'✅ Distributor {user.first_name} verified successfully!')
+    return redirect('accounts:admin_manage_distributors')
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def update_distributor_details(request, user_id):
+    """
+    Update distributor QR count and commission
+    """
+    user = get_object_or_404(User, id=user_id, is_distributor=True)
+    
+    # SAFETY CHECK: Make sure we're not modifying the logged-in admin
+    if user.id == request.user.id:
+        messages.error(request, '❌ ERROR: Cannot modify your own admin account!')
+        return redirect('accounts:admin_manage_distributors')
+    
+    # Get form data
+    total_qr = request.POST.get('total_qr', '0').strip()
+    commission = request.POST.get('commission', '0').strip()
+    
+    try:
+        total_qr = int(total_qr)
+        commission = float(commission)
+        
+        if total_qr < 0:
+            messages.error(request, 'Total QR codes cannot be negative')
+            return redirect('accounts:admin_manage_distributors')
+        
+        if commission < 0:
+            messages.error(request, 'Commission cannot be negative')
+            return redirect('accounts:admin_manage_distributors')
+        
+        # Update distributor details
+        user.distributor_total_qr = total_qr
+        user.distributor_commission_per_activation = commission
+        user.save()
+        
+        print(f"\n{'='*60}")
+        print(f"✅ DISTRIBUTOR DETAILS UPDATED")
+        print(f"   User: {user.first_name} ({user.get_decrypted_phone()})")
+        print(f"   Total QR: {total_qr}")
+        print(f"   Commission: ₹{commission}")
+        print(f"{'='*60}\n")
+        
+        messages.success(request, f'✅ Updated details for {user.first_name}')
+        return redirect('accounts:admin_manage_distributors')
+        
+    except ValueError:
+        messages.error(request, 'Invalid number format')
+        return redirect('accounts:admin_manage_distributors')
     
     messages.success(request, f'✅ Distributor {user.email} verified and password assigned!')
     return redirect('accounts:admin_manage_distributors')
