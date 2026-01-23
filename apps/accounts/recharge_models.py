@@ -360,6 +360,9 @@ class VisitorPayment(BaseModel):
     visitor_phone = models.CharField(max_length=20, blank=True)
     visitor_ip = models.GenericIPAddressField(blank=True, null=True)
     
+    # Distributor tracking (commission earned on successful payment)
+    distributor_code = models.CharField(max_length=15, blank=True, db_index=True, help_text="Distributor's mobile number")
+    
     # PhonePe payment tracking
     order_id = models.CharField(max_length=100, unique=True)
     gateway_order_id = models.CharField(max_length=100, blank=True)

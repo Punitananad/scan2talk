@@ -850,29 +850,29 @@ def manage_distributors(request):
     distributors = distributors.order_by('-distributor_registered_at')
     
     # Get payment stats for each distributor
-    from apps.core.models import TagOrder
+    from apps.accounts.recharge_models import DistributorPayment
     
     distributor_list = []
     for dist in distributors:
         # Get distributor's phone (used as code)
         dist_phone = dist.get_decrypted_phone()
         
-        # Count successful payments with distributor code
-        successful_payments = TagOrder.objects.filter(
-            distributor_code=dist_phone,
-            status__in=['processing', 'shipped', 'delivered']  # Exclude pending/cancelled
+        # Count completed payments for this distributor
+        completed_payments = DistributorPayment.objects.filter(
+            distributor=dist,
+            status='completed'
         ).count()
         
         # Calculate revenue
-        total_revenue = successful_payments * dist.distributor_commission_per_activation
+        total_revenue = completed_payments * dist.distributor_commission_per_activation
         
         distributor_list.append({
             'user': dist,
             'phone': dist_phone,
             'total_qr': dist.distributor_total_qr,
             'commission': dist.distributor_commission_per_activation,
-            'activated_qr_count': successful_payments,  # Now represents successful payments
-            'available_qr': dist.distributor_total_qr - successful_payments if dist.distributor_total_qr > successful_payments else 0,
+            'activated_qr_count': completed_payments,  # Now represents completed payments
+            'available_qr': dist.distributor_total_qr - completed_payments if dist.distributor_total_qr > completed_payments else 0,
             'total_revenue': total_revenue,
         })
     

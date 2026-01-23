@@ -398,8 +398,7 @@ def distributor_pending(request):
 def distributor_dashboard(request):
     """
     Distributor dashboard - only accessible after admin verification.
-    Shows successful TAG ORDER payments with distributor's mobile number as code.
-    Commission earned on SUCCESSFUL PAYMENT, not activation.
+    Shows successful payments (commission earned AFTER payment, BEFORE activation).
     """
     user = request.user
     
@@ -410,21 +409,21 @@ def distributor_dashboard(request):
     if not user.distributor_verified:
         return redirect('accounts:distributor_pending')
     
-    # Get distributor's phone number (used as distributor code)
+    # Get distributor's phone number
     distributor_code = user.get_decrypted_phone()
     
-    # Get statistics from TagOrder model (successful payments with distributor code)
-    from apps.core.models import TagOrder
+    # Get statistics from DistributorPayment model (payments for QR codes provided by this distributor)
+    from apps.accounts.recharge_models import DistributorPayment
     
     # Total QR codes assigned by admin
     total_qrs = user.distributor_total_qr
     
-    # Successful payments with distributor code (processing, shipped, delivered)
-    successful_payments = TagOrder.objects.filter(
-        distributor_code=distributor_code,
-        status__in=['processing', 'shipped', 'delivered']  # Exclude pending/cancelled
+    # Completed payments (commission earned)
+    completed_payments = DistributorPayment.objects.filter(
+        distributor=user,
+        status='completed'
     )
-    payment_count = successful_payments.count()
+    payment_count = completed_payments.count()
     
     # Available QR codes
     available_qrs = total_qrs - payment_count if total_qrs > payment_count else 0
@@ -434,17 +433,17 @@ def distributor_dashboard(request):
     total_revenue = payment_count * commission_per_activation
     
     # Recent payments (only Commission and Date)
-    recent_payments = successful_payments.order_by('-created_at')[:20]
+    recent_payments = completed_payments.order_by('-paid_at')[:20]
     
     context = {
         'user': user,
         'phone': distributor_code,
         'total_qrs': total_qrs,
-        'activated_qrs': payment_count,  # Now represents successful payments
+        'activated_qrs': payment_count,  # Represents completed payments
         'available_qrs': available_qrs,
         'commission_per_activation': commission_per_activation,
         'total_revenue': total_revenue,
-        'recent_payments': recent_payments,  # Changed from recent_activations
+        'recent_payments': recent_payments,
     }
     return render(request, 'accounts/distributor_dashboard.html', context)
 
