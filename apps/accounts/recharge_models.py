@@ -417,6 +417,16 @@ class DistributorPayment(BaseModel):
         related_name='distributor_payment'
     )
     
+    # Link to distributor who provided this QR
+    distributor = models.ForeignKey(
+        'User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='distributor_sales',
+        help_text='Distributor who provided this QR code'
+    )
+    
     # Payment details
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     

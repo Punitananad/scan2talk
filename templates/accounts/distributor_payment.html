@@ -91,12 +91,30 @@
                 <form method="POST" class="space-y-4">
                     {% csrf_token %}
                     
+                    <!-- Distributor ID Input -->
+                    <div class="bg-purple-50 border-2 border-purple-200 rounded-xl p-6">
+                        <label class="block text-sm font-semibold text-purple-900 mb-3">
+                            <svg class="inline h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                            </svg>
+                            Distributor ID (Mobile Number)
+                        </label>
+                        <input type="tel" name="distributor_id" required
+                               placeholder="Enter 10-digit mobile number"
+                               pattern="[0-9]{10}"
+                               maxlength="10"
+                               class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg font-semibold text-center tracking-wider">
+                        <p class="text-xs text-purple-700 mt-2">
+                            💡 Enter the mobile number of the distributor who provided this QR tag
+                        </p>
+                    </div>
+                    
                     <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         <span class="flex items-center justify-center">
                             <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
-                            Pay ₹{{ activation_fee }} & Activate
+                            Continue to Payment
                         </span>
                     </button>
                 </form>
@@ -119,14 +137,18 @@
             <ol class="space-y-2 text-sm text-gray-600">
                 <li class="flex items-start">
                     <span class="font-semibold text-blue-600 mr-2">1.</span>
-                    <span>Pay the one-time activation fee</span>
+                    <span>Enter your distributor's mobile number (Distributor ID)</span>
                 </li>
                 <li class="flex items-start">
                     <span class="font-semibold text-blue-600 mr-2">2.</span>
-                    <span>Complete the activation process (phone + vehicle details)</span>
+                    <span>Pay the one-time activation fee</span>
                 </li>
                 <li class="flex items-start">
                     <span class="font-semibold text-blue-600 mr-2">3.</span>
+                    <span>Complete the activation process (phone + vehicle details)</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="font-semibold text-blue-600 mr-2">4.</span>
                     <span>Start using your QR tag immediately - no recharge needed!</span>
                 </li>
             </ol>

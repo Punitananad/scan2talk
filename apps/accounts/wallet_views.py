@@ -650,7 +650,7 @@ def visitor_payment_failed(request):
 @require_http_methods(["GET", "POST"])
 def distributor_payment(request, qr_code):
     """
-    One-time payment page for distributor category QR codes.
+    Step 1: Enter Distributor ID (mobile number) before payment.
     NO LOGIN REQUIRED - Payment before activation.
     """
     from apps.gateways.qr_models import PreGeneratedQR
@@ -681,22 +681,55 @@ def distributor_payment(request, qr_code):
     activation_fee = qr.category.distributor_activation_fee
     
     if request.method == 'POST':
+        # Get distributor ID (mobile number)
+        distributor_id = request.POST.get('distributor_id', '').strip()
+        
+        if not distributor_id:
+            messages.error(request, 'Please enter Distributor ID (mobile number)')
+            return redirect('accounts:distributor_payment', qr_code=qr_code)
+        
+        # Validate phone number format
+        distributor_phone = ''.join(filter(str.isdigit, distributor_id))
+        if len(distributor_phone) != 10:
+            messages.error(request, 'Invalid Distributor ID. Must be 10-digit mobile number.')
+            return redirect('accounts:distributor_payment', qr_code=qr_code)
+        
+        # Find distributor by phone number
+        from apps.accounts.models import User
+        distributors = User.objects.filter(is_distributor=True, distributor_verified=True)
+        
+        distributor_found = None
+        for dist in distributors:
+            if dist.get_decrypted_phone() == distributor_phone:
+                distributor_found = dist
+                break
+        
+        if not distributor_found:
+            messages.error(request, f'Distributor ID {distributor_phone} not found or not verified. Please check with your distributor.')
+            return redirect('accounts:distributor_payment', qr_code=qr_code)
+        
+        # Store distributor ID in session for payment callback
+        request.session['distributor_id'] = str(distributor_found.id)
+        request.session['distributor_phone'] = distributor_phone
+        
         try:
             # Create payment order
             order_id = f"DIST-{qr_code}-{uuid4().hex[:8].upper()}"
             
-            # Create or update payment record
+            # Create or update payment record with distributor link
             if payment:
                 payment.status = 'pending'
                 payment.order_id = order_id
                 payment.amount = activation_fee
+                payment.distributor = distributor_found
                 payment.save()
             else:
                 payment = DistributorPayment.objects.create(
                     qr_code=qr,
                     amount=activation_fee,
                     order_id=order_id,
-                    status='pending'
+                    status='pending',
+                    distributor=distributor_found
                 )
             
             # Create PhonePe payment order
