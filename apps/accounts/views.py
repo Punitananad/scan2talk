@@ -72,6 +72,7 @@ class ProfileView(TemplateView):
         # Get user's QR codes with categories
         from apps.gateways.qr_models import PreGeneratedQR
         from apps.accounts.recharge_models import QRWallet
+        from apps.gateways.models import Gateway
         from django.db.models import Sum
         
         user_qr_codes = PreGeneratedQR.objects.filter(
@@ -99,10 +100,28 @@ class ProfileView(TemplateView):
             is_active=True
         ).aggregate(total=Sum('balance'))['total'] or 0
         
+        # Get total gateways (QR tags) count
+        total_gateways = Gateway.objects.filter(owner=user, is_active=True).count()
+        
+        # Get registered vehicles from activated QR codes
+        user_vehicles = []
+        for qr in user_qr_codes:
+            if qr.gateway and qr.gateway.owner_name:
+                # Extract vehicle info from gateway's owner_name or identifier
+                vehicle_info = {
+                    'vehicle_number': qr.qr_code,  # Use QR code as identifier
+                    'owner_name': qr.gateway.owner_name
+                }
+                # Avoid duplicates
+                if vehicle_info not in user_vehicles:
+                    user_vehicles.append(vehicle_info)
+        
         context['user_qr_codes'] = user_qr_codes
         context['user_categories'] = list(categories)
         context['wallet_balance'] = total_balance
         context['show_wallet'] = show_wallet
+        context['total_gateways'] = total_gateways
+        context['user_vehicles'] = user_vehicles
         
         return context
 
