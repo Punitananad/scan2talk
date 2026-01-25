@@ -470,6 +470,7 @@ def distributor_dashboard(request):
     """
     Distributor dashboard - only accessible after admin verification.
     Shows successful payments (commission earned AFTER payment, BEFORE activation).
+    Shows pending balance (unpaid) and paid amount separately.
     """
     user = request.user
     
@@ -485,6 +486,7 @@ def distributor_dashboard(request):
     
     # Get statistics from DistributorPayment model (payments for QR codes provided by this distributor)
     from apps.accounts.recharge_models import DistributorPayment
+    from django.db.models import Sum, Q
     
     # Total QR codes assigned by admin
     total_qrs = user.distributor_total_qr
@@ -496,24 +498,50 @@ def distributor_dashboard(request):
     )
     payment_count = completed_payments.count()
     
-    # Available QR codes
-    available_qrs = total_qrs - payment_count if total_qrs > payment_count else 0
+    # Calculate paid and unpaid commissions
+    paid_payments = completed_payments.filter(commission_paid=True)
+    unpaid_payments = completed_payments.filter(commission_paid=False)
     
-    # Calculate revenue
+    paid_count = paid_payments.count()
+    unpaid_count = unpaid_payments.count()
+    
+    # Calculate amounts
     commission_per_activation = user.distributor_commission_per_activation
-    total_revenue = payment_count * commission_per_activation
     
-    # Recent payments (only Commission and Date)
+    # Total earned (all completed payments)
+    total_earned = completed_payments.aggregate(
+        total=Sum('commission_amount')
+    )['total'] or 0
+    
+    # Paid amount (commissions marked as paid by admin)
+    paid_amount = paid_payments.aggregate(
+        total=Sum('commission_amount')
+    )['total'] or 0
+    
+    # Pending balance (commissions not yet paid)
+    pending_balance = unpaid_payments.aggregate(
+        total=Sum('commission_amount')
+    )['total'] or 0
+    
+    # Available QR codes (total - paid commissions, not activated)
+    # Only reduce available QR when commission is PAID, not when activated
+    available_qrs = total_qrs - paid_count if total_qrs > paid_count else 0
+    
+    # Recent payments (with payment status)
     recent_payments = completed_payments.order_by('-paid_at')[:20]
     
     context = {
         'user': user,
         'phone': distributor_code,
         'total_qrs': total_qrs,
-        'activated_qrs': payment_count,  # Represents completed payments
-        'available_qrs': available_qrs,
+        'activated_qrs': payment_count,  # Total activations (completed payments)
+        'paid_qrs': paid_count,  # QRs with paid commissions
+        'unpaid_qrs': unpaid_count,  # QRs with unpaid commissions
+        'available_qrs': available_qrs,  # Available = Total - Paid
         'commission_per_activation': commission_per_activation,
-        'total_revenue': total_revenue,
+        'total_earned': total_earned,  # Total earned (all time)
+        'paid_amount': paid_amount,  # Amount already paid by admin
+        'pending_balance': pending_balance,  # Amount waiting to be paid
         'recent_payments': recent_payments,
     }
     return render(request, 'accounts/distributor_dashboard.html', context)
