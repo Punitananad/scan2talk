@@ -21,20 +21,25 @@
         </div>
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
                 <div class="text-sm font-medium text-gray-600">Total Distributors</div>
                 <div class="mt-2 text-3xl font-bold text-gray-900">{{ stats.total }}</div>
             </div>
             
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                <div class="text-sm font-medium text-gray-600">Active</div>
+                <div class="mt-2 text-3xl font-bold text-green-600">{{ stats.active }}</div>
+            </div>
+            
             <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
-                <div class="text-sm font-medium text-gray-600">Pending Verification</div>
+                <div class="text-sm font-medium text-gray-600">Pending</div>
                 <div class="mt-2 text-3xl font-bold text-yellow-600">{{ stats.pending }}</div>
             </div>
             
-            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
-                <div class="text-sm font-medium text-gray-600">Verified</div>
-                <div class="mt-2 text-3xl font-bold text-green-600">{{ stats.verified }}</div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+                <div class="text-sm font-medium text-gray-600">Revoked</div>
+                <div class="mt-2 text-3xl font-bold text-red-600">{{ stats.revoked }}</div>
             </div>
             
             <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
@@ -59,9 +64,11 @@
                 
                 <div class="min-w-[150px]">
                     <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
-                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active (All Non-Revoked)</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Verification</option>
                         <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Verified</option>
+                        <option value="revoked" {% if status_filter == 'revoked' %}selected{% endif %}>Revoked</option>
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
                     </select>
                 </div>
                 
@@ -112,7 +119,11 @@
                                 <div class="text-sm text-gray-900">{{ dist.phone|default:"N/A" }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {% if dist.user.distributor_verified %}
+                                {% if dist.user.distributor_revoked %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        ❌ Revoked
+                                    </span>
+                                {% elif dist.user.distributor_verified %}
                                     <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         ✓ Verified
                                     </span>
@@ -142,29 +153,45 @@
                                 <div class="text-xs text-gray-500">{{ dist.user.distributor_registered_at|timesince }} ago</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <!-- Edit Details Button (Always visible) -->
-                                <button onclick="showEditModal('{{ dist.user.id }}', '{{ dist.user.first_name }}', {{ dist.total_qr }}, {{ dist.commission }})"
-                                        class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors text-xs font-medium mr-2 mb-1">
-                                    Edit Details
-                                </button>
-                                
-                                {% if not dist.user.distributor_verified %}
-                                    <!-- Verify Button -->
-                                    <button onclick="showVerifyModal('{{ dist.user.id }}', '{{ dist.user.email }}')"
-                                            class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-xs font-medium mb-1">
-                                        Verify & Assign Password
+                                {% if dist.user.distributor_revoked %}
+                                    <!-- Revoked - Show Restore Button -->
+                                    <div class="mb-2">
+                                        <span class="text-xs text-red-600 font-medium">Revoked by {{ dist.user.distributor_revoked_by.first_name|default:dist.user.distributor_revoked_by.email }}</span><br>
+                                        <span class="text-xs text-gray-500">{{ dist.user.distributor_revoked_at|date:"M d, Y" }}</span>
+                                        {% if dist.user.distributor_revoke_reason %}
+                                        <br><span class="text-xs text-gray-600">Reason: {{ dist.user.distributor_revoke_reason }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <button onclick="unrevokeDistributor('{{ dist.user.id }}', '{{ dist.user.email }}')"
+                                            class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-xs font-medium">
+                                        ↻ Restore Distributor
                                     </button>
                                 {% else %}
-                                    <!-- Reset Password Button -->
-                                    <button onclick="showResetPasswordModal('{{ dist.user.id }}', '{{ dist.user.email }}')"
-                                            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-medium mr-2 mb-1">
-                                        Reset Password
+                                    <!-- Active - Show Normal Actions -->
+                                    <!-- Edit Details Button (Always visible) -->
+                                    <button onclick="showEditModal('{{ dist.user.id }}', '{{ dist.user.first_name }}', {{ dist.total_qr }}, {{ dist.commission }})"
+                                            class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors text-xs font-medium mr-2 mb-1">
+                                        Edit Details
                                     </button>
-                                    <!-- Revoke Button -->
-                                    <button onclick="revokeDistributor('{{ dist.user.id }}', '{{ dist.user.email }}')"
-                                            class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-xs font-medium mb-1">
-                                        Revoke
-                                    </button>
+                                    
+                                    {% if not dist.user.distributor_verified %}
+                                        <!-- Verify Button -->
+                                        <button onclick="showVerifyModal('{{ dist.user.id }}', '{{ dist.user.email }}')"
+                                                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-xs font-medium mb-1">
+                                            Verify & Assign Password
+                                        </button>
+                                    {% else %}
+                                        <!-- Reset Password Button -->
+                                        <button onclick="showResetPasswordModal('{{ dist.user.id }}', '{{ dist.user.email }}')"
+                                                class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-medium mr-2 mb-1">
+                                            Reset Password
+                                        </button>
+                                        <!-- Revoke Button -->
+                                        <button onclick="showRevokeModal('{{ dist.user.id }}', '{{ dist.user.email }}')"
+                                                class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-xs font-medium mb-1">
+                                            Revoke
+                                        </button>
+                                    {% endif %}
                                 {% endif %}
                             </td>
                         </tr>
@@ -235,6 +262,36 @@
                     Reset Password
                 </button>
                 <button type="button" onclick="closeResetPasswordModal()"
+                        class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Revoke Modal -->
+<div id="revokeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-red-600 mb-4">⚠️ Revoke Distributor</h3>
+        <p class="text-gray-600 mb-6">Revoke distributor status for <span id="revokeEmail" class="font-semibold"></span></p>
+        <p class="text-sm text-gray-500 mb-6">Note: This can be undone later if needed. The distributor will be marked as "Revoked" but not deleted.</p>
+        
+        <form id="revokeForm" method="POST">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Revocation (Optional)</label>
+                <textarea name="reason" id="revokeReason" rows="3"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                       placeholder="Enter reason for revoking distributor status..."></textarea>
+            </div>
+            
+            <div class="flex gap-4">
+                <button type="submit" 
+                        class="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold">
+                    Revoke Distributor
+                </button>
+                <button type="button" onclick="closeRevokeModal()"
                         class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
                     Cancel
                 </button>
@@ -314,11 +371,22 @@ function closeEditModal() {
     document.getElementById('editModal').classList.add('hidden');
 }
 
-function revokeDistributor(userId, email) {
-    if (confirm(`Are you sure you want to revoke distributor status for ${email}?`)) {
+function showRevokeModal(userId, email) {
+    document.getElementById('revokeModal').classList.remove('hidden');
+    document.getElementById('revokeEmail').textContent = email;
+    document.getElementById('revokeForm').action = `/accounts/admin/distributors/${userId}/revoke/`;
+}
+
+function closeRevokeModal() {
+    document.getElementById('revokeModal').classList.add('hidden');
+    document.getElementById('revokeReason').value = '';
+}
+
+function unrevokeDistributor(userId, email) {
+    if (confirm(`Are you sure you want to restore distributor status for ${email}?`)) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/accounts/admin/distributors/${userId}/revoke/`;
+        form.action = `/accounts/admin/distributors/${userId}/unrevoke/`;
         
         const csrf = document.createElement('input');
         csrf.type = 'hidden';

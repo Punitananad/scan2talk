@@ -455,6 +455,35 @@ class DistributorPayment(BaseModel):
     # Timestamps
     paid_at = models.DateTimeField(null=True, blank=True)
     
+    # Commission payment tracking
+    commission_amount = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00,
+        help_text='Commission earned by distributor'
+    )
+    commission_paid = models.BooleanField(
+        default=False,
+        help_text='Has the commission been paid to distributor?'
+    )
+    commission_paid_at = models.DateTimeField(
+        null=True, 
+        blank=True,
+        help_text='When was the commission paid?'
+    )
+    commission_paid_by = models.ForeignKey(
+        'User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='commissions_paid',
+        help_text='Admin who marked commission as paid'
+    )
+    payment_notes = models.TextField(
+        blank=True,
+        help_text='Notes about commission payment (transaction ID, etc.)'
+    )
+    
     class Meta:
         db_table = 'distributor_payments'
         verbose_name = 'Distributor Payment'

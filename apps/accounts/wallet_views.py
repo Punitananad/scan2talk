@@ -831,10 +831,17 @@ def distributor_payment_success(request):
         # Find payment
         payment = DistributorPayment.objects.get(gateway_order_id=razorpay_order_id)
         
+        # Calculate commission amount (from distributor's commission rate)
+        if payment.distributor:
+            commission_amount = payment.distributor.distributor_commission_per_activation
+        else:
+            commission_amount = 0
+        
         # Mark as completed
         payment.status = 'completed'
         payment.gateway_payment_id = razorpay_payment_id
         payment.paid_at = timezone.now()
+        payment.commission_amount = commission_amount
         payment.save()
         
         # Redirect to activation page

@@ -51,17 +51,37 @@ def distributor_register(request):
                 messages.error(request, 'IFSC code must be 11 characters')
                 return redirect('accounts:distributor_register')
             
-            # Check if phone already exists
+            # Check if phone already exists as a distributor
+            # Note: Users and distributors are NOT mutually exclusive
+            # A person can be BOTH a tag owner AND a distributor
             users = User.objects.all()
+            existing_user = None
             for u in users:
                 if u.get_decrypted_phone() == phone_digits:
-                    messages.error(request, 'This phone number is already registered')
-                    return redirect('accounts:distributor_register')
+                    existing_user = u
+                    break
             
-            # Check if email already exists
-            if email and User.objects.filter(email=email).exists():
-                messages.error(request, 'This email is already registered')
+            # If user exists and is already a distributor, block registration
+            if existing_user and existing_user.is_distributor:
+                messages.error(request, 'This phone number is already registered as a distributor')
                 return redirect('accounts:distributor_register')
+            
+            # If user exists but is NOT a distributor, they can upgrade
+            # Store the existing user ID for upgrade in step 2
+            if existing_user:
+                request.session['dist_reg_existing_user_id'] = str(existing_user.id)
+                print(f"   ℹ️  EXISTING USER FOUND - Will upgrade to distributor")
+                print(f"   User ID: {existing_user.id}")
+                print(f"   Email: {existing_user.email}")
+            
+            # Check if email already exists (but allow if it's the existing user's email)
+            if email:
+                email_exists = User.objects.filter(email=email)
+                if existing_user:
+                    email_exists = email_exists.exclude(id=existing_user.id)
+                if email_exists.exists():
+                    messages.error(request, 'This email is already registered')
+                    return redirect('accounts:distributor_register')
             
             # Send OTP
             print(f"\n{'='*60}")
@@ -145,14 +165,13 @@ def distributor_register(request):
             print(f"   Message: {message}\n")
             
             if success:
-                # Create distributor account
+                # Check if this is an existing user upgrade or new user creation
+                existing_user_id = request.session.get('dist_reg_existing_user_id')
+                
                 try:
                     from apps.core.utils import encrypt_data
                     import uuid
                     import json
-                    
-                    # Generate username
-                    username = f"dist_{phone[-4:]}_{uuid.uuid4().hex[:6]}"
                     
                     # Prepare bank details as JSON
                     bank_details = {
@@ -161,25 +180,79 @@ def distributor_register(request):
                         'ifsc_code': ifsc_code
                     }
                     
-                    # Create user
-                    user = User.objects.create(
-                        username=username,
-                        email=email if email else f"{username}@distributor.local",
-                        first_name=name,
-                        phone=encrypt_data(phone),
-                        is_phone_verified=True,
-                        is_distributor=True,
-                        distributor_verified=False,  # Pending admin approval
-                        distributor_registered_at=django_timezone.now()
-                    )
+                    if existing_user_id:
+                        # UPGRADE EXISTING USER TO DISTRIBUTOR
+                        print(f"\n{'='*60}")
+                        print(f"⬆️  UPGRADING EXISTING USER TO DISTRIBUTOR")
+                        print(f"{'='*60}\n")
+                        
+                        user = User.objects.get(id=existing_user_id)
+                        
+                        # Update user to be a distributor
+                        user.is_distributor = True
+                        user.distributor_verified = False  # Pending admin approval
+                        user.distributor_registered_at = django_timezone.now()
+                        
+                        # Update name if provided
+                        if name:
+                            user.first_name = name
+                        
+                        # Update email if provided and different
+                        if email and email != user.email:
+                            # Check if new email is available
+                            if User.objects.filter(email=email).exclude(id=user.id).exists():
+                                messages.error(request, 'This email is already in use by another account')
+                                return redirect('/accounts/distributor/register/?step=2')
+                            user.email = email
+                        
+                        # Store bank details
+                        user.last_name = json.dumps(bank_details)
+                        
+                        user.save()
+                        
+                        print(f"✅ USER UPGRADED TO DISTRIBUTOR")
+                        print(f"   User ID: {user.id}")
+                        print(f"   Email: {user.email}")
+                        print(f"   Phone: {phone}")
+                        print(f"   Bank Details: {json.dumps(bank_details, indent=2)}\n")
+                        
+                        messages.success(request, '🎉 Your account has been upgraded to distributor! Pending admin approval.')
                     
-                    # Store bank details in last_name field temporarily (or create a separate model)
-                    # For now, we'll store as JSON in last_name field
-                    user.last_name = json.dumps(bank_details)
-                    
-                    # Set unusable password (OTP login only)
-                    user.set_unusable_password()
-                    user.save()
+                    else:
+                        # CREATE NEW DISTRIBUTOR ACCOUNT
+                        print(f"\n{'='*60}")
+                        print(f"➕ CREATING NEW DISTRIBUTOR ACCOUNT")
+                        print(f"{'='*60}\n")
+                        
+                        # Generate username
+                        username = f"dist_{phone[-4:]}_{uuid.uuid4().hex[:6]}"
+                        
+                        # Create user
+                        user = User.objects.create(
+                            username=username,
+                            email=email if email else f"{username}@distributor.local",
+                            first_name=name,
+                            phone=encrypt_data(phone),
+                            is_phone_verified=True,
+                            is_distributor=True,
+                            distributor_verified=False,  # Pending admin approval
+                            distributor_registered_at=django_timezone.now()
+                        )
+                        
+                        # Store bank details in last_name field
+                        user.last_name = json.dumps(bank_details)
+                        
+                        # Set unusable password (OTP login only)
+                        user.set_unusable_password()
+                        user.save()
+                        
+                        print(f"✅ DISTRIBUTOR ACCOUNT CREATED")
+                        print(f"   Username: {username}")
+                        print(f"   Email: {user.email}")
+                        print(f"   Phone: {phone}")
+                        print(f"   Bank Details: {json.dumps(bank_details, indent=2)}\n")
+                        
+                        messages.success(request, '🎉 Registration successful! Your account is pending admin approval.')
                     
                     # Clear session
                     request.session.pop('dist_reg_name', None)
@@ -188,19 +261,17 @@ def distributor_register(request):
                     request.session.pop('dist_reg_account_holder', None)
                     request.session.pop('dist_reg_account_number', None)
                     request.session.pop('dist_reg_ifsc', None)
+                    request.session.pop('dist_reg_existing_user_id', None)
                     
-                    print(f"✅ DISTRIBUTOR ACCOUNT CREATED")
-                    print(f"   Username: {username}")
-                    print(f"   Email: {user.email}")
-                    print(f"   Phone: {phone}")
-                    print(f"   Bank Details: {json.dumps(bank_details, indent=2)}\n")
-                    
-                    messages.success(request, '🎉 Registration successful! Your account is pending admin approval.')
                     return redirect('accounts:distributor_pending_public')
                     
+                except User.DoesNotExist:
+                    print(f"❌ Error: Existing user not found\n")
+                    messages.error(request, 'User account not found. Please try again.')
+                    return redirect('accounts:distributor_register')
                 except Exception as e:
-                    print(f"❌ Error creating account: {str(e)}\n")
-                    messages.error(request, f'Error creating account: {str(e)}')
+                    print(f"❌ Error: {str(e)}\n")
+                    messages.error(request, f'Error processing registration: {str(e)}')
                     return redirect('accounts:distributor_register')
             else:
                 messages.error(request, message)

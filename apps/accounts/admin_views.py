@@ -13,7 +13,7 @@ from datetime import timedelta
 from .models import User
 from .wallet_models import Wallet, WalletTransaction
 from .recharge_models import (
-    RechargeCategory, RechargePlan, QRWallet, QRWalletTransaction
+    RechargeCategory, RechargePlan, QRWallet, QRWalletTransaction, DistributorPayment
 )
 from apps.gateways.qr_models import PreGeneratedQR, QRBatch
 from apps.gateways.models import Gateway
@@ -826,9 +826,10 @@ def manage_distributors(request):
     """
     Manage distributor registrations - view, verify, assign passwords
     Commission tracked on SUCCESSFUL PAYMENT, not activation.
+    Shows revoked distributors separately with option to restore.
     """
     # Get filter parameters
-    status_filter = request.GET.get('status', 'all')
+    status_filter = request.GET.get('status', 'active')  # active, pending, verified, revoked, all
     search_query = request.GET.get('search', '')
     
     # Base queryset - all distributors
@@ -836,9 +837,14 @@ def manage_distributors(request):
     
     # Apply filters
     if status_filter == 'pending':
-        distributors = distributors.filter(distributor_verified=False)
+        distributors = distributors.filter(distributor_verified=False, distributor_revoked=False)
     elif status_filter == 'verified':
-        distributors = distributors.filter(distributor_verified=True)
+        distributors = distributors.filter(distributor_verified=True, distributor_revoked=False)
+    elif status_filter == 'active':
+        distributors = distributors.filter(distributor_revoked=False)
+    elif status_filter == 'revoked':
+        distributors = distributors.filter(distributor_revoked=True)
+    # 'all' shows everything
     
     if search_query:
         distributors = distributors.filter(
@@ -880,8 +886,10 @@ def manage_distributors(request):
     from apps.gateways.qr_models import PreGeneratedQR
     stats = {
         'total': User.objects.filter(is_distributor=True).count(),
-        'pending': User.objects.filter(is_distributor=True, distributor_verified=False).count(),
-        'verified': User.objects.filter(is_distributor=True, distributor_verified=True).count(),
+        'pending': User.objects.filter(is_distributor=True, distributor_verified=False, distributor_revoked=False).count(),
+        'verified': User.objects.filter(is_distributor=True, distributor_verified=True, distributor_revoked=False).count(),
+        'active': User.objects.filter(is_distributor=True, distributor_revoked=False).count(),
+        'revoked': User.objects.filter(is_distributor=True, distributor_revoked=True).count(),
         'total_qrs': PreGeneratedQR.objects.filter(owner__is_distributor=True).count(),
         'activated_qrs': PreGeneratedQR.objects.filter(owner__is_distributor=True, status='activated').count(),
     }
@@ -1071,13 +1079,224 @@ def reset_distributor_password(request, user_id):
 @require_http_methods(["POST"])
 def revoke_distributor(request, user_id):
     """
-    Revoke distributor status
+    Revoke distributor status (soft delete - can be undone)
     """
-    user = get_object_or_404(User, id=user_id, is_distributor=True)
+    from django.utils import timezone as django_timezone
     
-    user.is_distributor = False
-    user.distributor_verified = False
+    user = get_object_or_404(User, id=user_id, is_distributor=True)
+    reason = request.POST.get('reason', '').strip()
+    
+    # Mark as revoked instead of removing distributor status
+    user.distributor_revoked = True
+    user.distributor_revoked_at = django_timezone.now()
+    user.distributor_revoked_by = request.user
+    user.distributor_revoke_reason = reason
     user.save()
     
-    messages.success(request, f'Distributor status revoked for {user.email}')
+    messages.success(request, f'Distributor status revoked for {user.email}. Can be undone if needed.')
     return redirect('accounts:admin_manage_distributors')
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def unrevoke_distributor(request, user_id):
+    """
+    Undo distributor revocation (restore distributor status)
+    """
+    user = get_object_or_404(User, id=user_id, is_distributor=True, distributor_revoked=True)
+    
+    # Restore distributor status
+    user.distributor_revoked = False
+    user.distributor_revoked_at = None
+    user.distributor_revoked_by = None
+    user.distributor_revoke_reason = ''
+    user.save()
+    
+    messages.success(request, f'Distributor status restored for {user.email}')
+    return redirect('accounts:admin_manage_distributors')
+
+
+
+@staff_member_required
+def manage_commission_payments(request):
+    """
+    Manage distributor commission payments
+    Shows all commissions (paid and unpaid) with ability to mark as paid
+    """
+    from django.db.models import Sum, Count, Q
+    from datetime import datetime, timedelta
+    
+    # Get filter parameters
+    distributor_filter = request.GET.get('distributor', '')
+    status_filter = request.GET.get('status', 'unpaid')  # unpaid, paid, all
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # Base query - only completed payments
+    payments = DistributorPayment.objects.filter(
+        status='completed',
+        distributor__isnull=False
+    ).select_related('distributor', 'qr_code', 'commission_paid_by')
+    
+    # Apply filters
+    if distributor_filter:
+        payments = payments.filter(distributor__id=distributor_filter)
+    
+    if status_filter == 'unpaid':
+        payments = payments.filter(commission_paid=False)
+    elif status_filter == 'paid':
+        payments = payments.filter(commission_paid=True)
+    # 'all' shows everything
+    
+    if date_from:
+        try:
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+            payments = payments.filter(paid_at__gte=date_from_obj)
+        except:
+            pass
+    
+    if date_to:
+        try:
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+            payments = payments.filter(paid_at__lte=date_to_obj)
+        except:
+            pass
+    
+    # Order by payment date (newest first)
+    payments = payments.order_by('-paid_at')
+    
+    # Calculate summary statistics
+    total_commissions = payments.aggregate(
+        total=Sum('commission_amount')
+    )['total'] or 0
+    
+    paid_commissions = payments.filter(commission_paid=True).aggregate(
+        total=Sum('commission_amount')
+    )['total'] or 0
+    
+    unpaid_commissions = payments.filter(commission_paid=False).aggregate(
+        total=Sum('commission_amount')
+    )['total'] or 0
+    
+    # Get distributor summary
+    distributor_summary = DistributorPayment.objects.filter(
+        status='completed',
+        distributor__isnull=False
+    ).values(
+        'distributor__id',
+        'distributor__first_name',
+        'distributor__email'
+    ).annotate(
+        total_sales=Count('id'),
+        total_earned=Sum('commission_amount'),
+        total_paid=Sum('commission_amount', filter=Q(commission_paid=True)),
+        total_unpaid=Sum('commission_amount', filter=Q(commission_paid=False))
+    ).order_by('-total_earned')
+    
+    # Get today's earnings for each distributor
+    today = timezone.now().date()
+    for dist in distributor_summary:
+        today_earnings = DistributorPayment.objects.filter(
+            distributor__id=dist['distributor__id'],
+            status='completed',
+            paid_at__date=today
+        ).aggregate(total=Sum('commission_amount'))['total'] or 0
+        dist['today_earnings'] = today_earnings
+    
+    # Get all distributors for filter dropdown
+    all_distributors = User.objects.filter(
+        is_distributor=True,
+        distributor_verified=True
+    ).order_by('first_name')
+    
+    context = {
+        'payments': payments,
+        'total_commissions': total_commissions,
+        'paid_commissions': paid_commissions,
+        'unpaid_commissions': unpaid_commissions,
+        'distributor_summary': distributor_summary,
+        'all_distributors': all_distributors,
+        'status_filter': status_filter,
+        'distributor_filter': distributor_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+    
+    return render(request, 'admin/manage_commission_payments.html', context)
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def mark_commissions_paid(request):
+    """
+    Mark selected commissions as paid
+    """
+    import json
+    from django.utils import timezone as django_timezone
+    
+    try:
+        # Get selected payment IDs
+        payment_ids = request.POST.getlist('payment_ids[]')
+        payment_notes = request.POST.get('payment_notes', '').strip()
+        
+        if not payment_ids:
+            return JsonResponse({
+                'success': False,
+                'message': 'No commissions selected'
+            })
+        
+        # Update payments
+        payments = DistributorPayment.objects.filter(
+            id__in=payment_ids,
+            status='completed',
+            commission_paid=False
+        )
+        
+        updated_count = 0
+        total_amount = 0
+        
+        for payment in payments:
+            payment.commission_paid = True
+            payment.commission_paid_at = django_timezone.now()
+            payment.commission_paid_by = request.user
+            if payment_notes:
+                payment.payment_notes = payment_notes
+            payment.save()
+            
+            updated_count += 1
+            total_amount += payment.commission_amount
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Marked {updated_count} commission(s) as paid (₹{total_amount})',
+            'count': updated_count,
+            'amount': float(total_amount)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def mark_commission_unpaid(request, payment_id):
+    """
+    Mark a single commission as unpaid (undo payment)
+    """
+    try:
+        payment = get_object_or_404(DistributorPayment, id=payment_id)
+        
+        payment.commission_paid = False
+        payment.commission_paid_at = None
+        payment.commission_paid_by = None
+        payment.save()
+        
+        messages.success(request, f'Commission marked as unpaid: ₹{payment.commission_amount}')
+        
+    except Exception as e:
+        messages.error(request, f'Error: {str(e)}')
+    
+    return redirect('accounts:manage_commission_payments')

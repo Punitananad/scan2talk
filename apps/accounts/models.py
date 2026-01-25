@@ -51,6 +51,17 @@ class User(AbstractUser):
     distributor_registered_at = models.DateTimeField(null=True, blank=True)
     distributor_total_qr = models.PositiveIntegerField(default=0, help_text="Total QR codes assigned by admin")
     distributor_commission_per_activation = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Commission earned per QR activation")
+    distributor_revoked = models.BooleanField(default=False, help_text="Has distributor status been revoked?")
+    distributor_revoked_at = models.DateTimeField(null=True, blank=True, help_text="When was distributor status revoked?")
+    distributor_revoked_by = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='distributors_revoked',
+        help_text='Admin who revoked distributor status'
+    )
+    distributor_revoke_reason = models.TextField(blank=True, help_text="Reason for revoking distributor status")
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

@@ -87,6 +87,12 @@ urlpatterns = [
     path('admin/distributors/<uuid:user_id>/update/', admin_views.update_distributor_details, name='update_distributor_details'),
     path('admin/distributors/<uuid:user_id>/reset-password/', admin_views.reset_distributor_password, name='reset_distributor_password'),
     path('admin/distributors/<uuid:user_id>/revoke/', admin_views.revoke_distributor, name='revoke_distributor'),
+    path('admin/distributors/<uuid:user_id>/unrevoke/', admin_views.unrevoke_distributor, name='unrevoke_distributor'),
+    
+    # Commission payment management
+    path('admin/commissions/', admin_views.manage_commission_payments, name='manage_commission_payments'),
+    path('admin/commissions/mark-paid/', admin_views.mark_commissions_paid, name='mark_commissions_paid'),
+    path('admin/commissions/<uuid:payment_id>/mark-unpaid/', admin_views.mark_commission_unpaid, name='mark_commission_unpaid'),
     
     # ===== API ENDPOINTS =====
     # Authentication API
