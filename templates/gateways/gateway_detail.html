@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gateway Details - {{ gateway.identifier }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Gateway Details</h1>
+                    <p class="mt-2 text-gray-600">{{ gateway.identifier }}</p>
+                </div>
+                <a href="{% url 'accounts:dashboard' %}" 
+                   class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Gateway Information -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Gateway Information</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Identifier</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ gateway.identifier }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Owner Name</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ gateway.owner_name|default:"Not set" }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Description</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ gateway.description|default:"No description" }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Total Interactions</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ gateway.total_interactions }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Created</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ gateway.created_at|date:"M d, Y" }}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Status</p>
+                    <p class="text-lg font-semibold text-green-600">Active</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Information -->
+        {% if gateway.qr_code.first %}
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">QR Code</h2>
+            <p class="text-gray-600 mb-4">This gateway has an associated QR code.</p>
+            <a href="{% url 'gateways:qr_detail' gateway.qr_code.first.id %}" 
+               class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                View QR Code Details
+            </a>
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-yellow-800 mb-2">No QR Code</h2>
+            <p class="text-yellow-700">This gateway doesn't have an associated QR code yet.</p>
+        </div>
+        {% endif %}
+
+        <!-- Recent Interactions -->
+        {% if recent_interactions %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Interactions</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for interaction in recent_interactions %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ interaction.created_at|date:"M d, Y H:i" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ interaction.get_interaction_type_display }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

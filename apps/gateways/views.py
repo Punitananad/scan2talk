@@ -41,7 +41,7 @@ class GatewayListView(TemplateView):
 
 class GatewayDetailView(TemplateView):
     """Gateway detail view."""
-    template_name = 'gateways/qr_detail.html'
+    template_name = 'gateways/gateway_detail.html'
     
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
