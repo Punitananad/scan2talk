@@ -118,11 +118,16 @@ else:
 # Redis Configuration
 REDIS_URL = env('REDIS_URL', default='')
 
-# Cache Configuration - Use in-memory cache for development without Redis
+# Cache Configuration - Use file-based cache for multi-worker support
+# LocMemCache doesn't work with multiple Gunicorn workers (each has separate memory)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',  # Use /var/tmp for production
+        'TIMEOUT': 300,  # 5 minutes default
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
     }
 }
 
