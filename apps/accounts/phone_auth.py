@@ -48,7 +48,7 @@ def send_otp(phone_number):
 
 def verify_otp(phone_number, otp):
     """
-    Verify OTP for phone number.
+    Verify OTP for phone number with retry mechanism.
     
     Returns:
         tuple: (success: bool, message: str)
@@ -56,12 +56,28 @@ def verify_otp(phone_number, otp):
     from apps.communications.otp_service import get_otp_service
     from django.core.cache import cache
     from django.conf import settings
+    import time
     
     otp_service = get_otp_service()
+    
+    # Strip whitespace from OTP
+    otp = otp.strip()
     
     # Check if OTP exists in cache first
     cache_key = f"otp_{phone_number}"
     cached_data = cache.get(cache_key)
+    
+    # RETRY MECHANISM: If OTP not in cache, wait briefly and retry once
+    # This handles race conditions where verification happens immediately after send
+    if not cached_data:
+        print(f"⚠️  OTP not in cache on first check, retrying after 100ms...")
+        time.sleep(0.1)  # Wait 100ms
+        cached_data = cache.get(cache_key)
+        
+        if not cached_data:
+            print(f"⚠️  OTP still not in cache after retry, waiting 200ms more...")
+            time.sleep(0.2)  # Wait another 200ms
+            cached_data = cache.get(cache_key)
     
     print(f"\n{'='*60}")
     print(f"🔐 VERIFY OTP")

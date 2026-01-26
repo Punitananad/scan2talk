@@ -297,7 +297,20 @@ class SMSCountryOTPService:
         
         # Store for 5 minutes
         cache.set(cache_key, cache_data, self.OTP_EXPIRY_MINUTES * 60)
-        logger.info(f"OTP stored for {phone_number}, expires in {self.OTP_EXPIRY_MINUTES} minutes")
+        
+        # CRITICAL: Immediately verify it was stored by reading it back
+        stored_data = cache.get(cache_key)
+        if stored_data:
+            logger.info(f"✅ OTP stored and verified for {phone_number}, expires in {self.OTP_EXPIRY_MINUTES} minutes")
+        else:
+            logger.error(f"❌ CRITICAL: OTP storage failed for {phone_number}!")
+            # Try one more time with explicit cache backend
+            cache.set(cache_key, cache_data, self.OTP_EXPIRY_MINUTES * 60)
+            stored_data = cache.get(cache_key)
+            if stored_data:
+                logger.info(f"✅ OTP stored on retry for {phone_number}")
+            else:
+                logger.error(f"❌ CRITICAL: OTP storage failed even after retry for {phone_number}!")
     
     def verify_otp(self, phone_number, otp):
         """
