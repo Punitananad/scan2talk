@@ -107,6 +107,8 @@ class SMSCountryOTPService:
                 print(f"\n{'='*50}")
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"{'='*50}\n")
+                # IMPORTANT: Store OTP immediately in dev mode
+                self.store_otp(phone_number, otp)
                 # Set cooldown even in dev mode
                 cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - not sent)"
@@ -155,6 +157,8 @@ class SMSCountryOTPService:
                     print(f"📱 OTP for {phone_number}: {otp}")
                     print(f"⚠️  API returned invalid JSON")
                     print(f"{'='*50}\n")
+                    # IMPORTANT: Store OTP immediately
+                    self.store_otp(phone_number, otp)
                     cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                     return True, otp, "OTP generated (dev mode - invalid JSON)"
                 return False, None, "Invalid response from SMS service"
@@ -165,6 +169,8 @@ class SMSCountryOTPService:
                 # For 202, message might be queued - this is still success
                 if response.status_code == 202:
                     logger.info(f"✅ OTP queued for delivery to {phone_number}")
+                    # IMPORTANT: Store OTP immediately before returning
+                    self.store_otp(phone_number, otp)
                     # Set resend cooldown
                     cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                     return True, otp, "OTP sent successfully (queued for delivery)"
@@ -177,6 +183,9 @@ class SMSCountryOTPService:
                     # Store message ID for delivery tracking
                     cache_key = f"otp_message_id_{phone_number}"
                     cache.set(cache_key, message_id, self.OTP_EXPIRY_MINUTES * 60)
+                    
+                    # IMPORTANT: Store OTP immediately before returning
+                    self.store_otp(phone_number, otp)
                     
                     # Set resend cooldown
                     cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
@@ -195,6 +204,8 @@ class SMSCountryOTPService:
                         print(f"📱 OTP for {phone_number}: {otp}")
                         print(f"⚠️  API Error: {error_msg}")
                         print(f"{'='*50}\n")
+                        # IMPORTANT: Store OTP immediately
+                        self.store_otp(phone_number, otp)
                         cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                         return True, otp, "OTP generated (dev mode - API error ignored)"
                     
@@ -202,6 +213,8 @@ class SMSCountryOTPService:
                 else:
                     # Success field not present, assume success for 200/201
                     logger.info(f"✅ OTP sent to {phone_number} (Success field not in response)")
+                    # IMPORTANT: Store OTP immediately
+                    self.store_otp(phone_number, otp)
                     cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                     return True, otp, "OTP sent successfully"
             else:
@@ -217,6 +230,8 @@ class SMSCountryOTPService:
                     print(f"📱 OTP for {phone_number}: {otp}")
                     print(f"⚠️  API Error: {error_msg}")
                     print(f"{'='*50}\n")
+                    # IMPORTANT: Store OTP immediately
+                    self.store_otp(phone_number, otp)
                     cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                     return True, otp, "OTP generated (dev mode - API error ignored)"
                 
@@ -229,6 +244,8 @@ class SMSCountryOTPService:
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"⚠️  API Timeout")
                 print(f"{'='*50}\n")
+                # IMPORTANT: Store OTP immediately
+                self.store_otp(phone_number, otp)
                 cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - timeout ignored)"
             return False, None, "SMS service timeout. Please try again."
@@ -239,6 +256,8 @@ class SMSCountryOTPService:
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"⚠️  Request Error: {str(e)}")
                 print(f"{'='*50}\n")
+                # IMPORTANT: Store OTP immediately
+                self.store_otp(phone_number, otp)
                 cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - request error ignored)"
             return False, None, "Failed to send OTP. Please try again."
@@ -249,6 +268,8 @@ class SMSCountryOTPService:
                 print(f"📱 OTP for {phone_number}: {otp}")
                 print(f"⚠️  Error: {str(e)}")
                 print(f"{'='*50}\n")
+                # IMPORTANT: Store OTP immediately
+                self.store_otp(phone_number, otp)
                 cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
                 return True, otp, "OTP generated (dev mode - error ignored)"
             return False, None, "An error occurred. Please try again."

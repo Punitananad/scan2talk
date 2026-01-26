@@ -19,22 +19,18 @@ def send_otp(phone_number):
     
     otp_service = get_otp_service()
     
-    # Send OTP
+    # Send OTP (OTP is now stored automatically inside send_otp)
     success, otp, message = otp_service.send_otp(phone_number)
     
     print(f"\n{'='*60}")
     print(f"📤 SEND OTP RESULT")
     print(f"   Phone: {phone_number}")
     print(f"   Success: {success}")
-    print(f"   OTP: {otp}")
+    print(f"   OTP: {otp if success else 'N/A'}")
     print(f"   Message: {message}")
     print(f"{'='*60}\n")
     
     if success and otp:
-        # Store OTP securely
-        otp_service.store_otp(phone_number, otp)
-        print(f"✅ OTP stored in cache for {phone_number}")
-        
         # Verify it was stored
         from django.core.cache import cache
         cache_key = f"otp_{phone_number}"
@@ -42,7 +38,7 @@ def send_otp(phone_number):
         if cached_data:
             print(f"✅ Verified: OTP is in cache with {cached_data.get('attempts')} attempts")
         else:
-            print(f"❌ WARNING: OTP not found in cache after storing!")
+            print(f"❌ WARNING: OTP not found in cache after sending!")
         
         return True, "OTP sent successfully"
     else:
