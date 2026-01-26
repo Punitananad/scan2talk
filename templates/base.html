@@ -9,11 +9,14 @@
   <title>{% block title %}Scan2Talk{% endblock %}</title>
 
   <!-- Favicon - Multiple formats for maximum compatibility -->
-  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}?v=3">
-  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon.svg' %}?v=3">
-  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.svg' %}?v=3">
-  <link rel="shortcut icon" href="{% static 'favicon.svg' %}?v=3">
-  <link rel="apple-touch-icon" href="{% static 'favicon.svg' %}?v=3">
+  <!-- SVG favicon for modern browsers -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}?v=4">
+  <!-- PNG fallback for older browsers -->
+  <link rel="icon" type="image/png" href="{% static 'tag/logo-sky.png' %}?v=4">
+  <!-- Traditional favicon.ico -->
+  <link rel="shortcut icon" href="/favicon.ico?v=4">
+  <!-- Apple touch icon -->
+  <link rel="apple-touch-icon" href="{% static 'tag/logo-sky.png' %}?v=4">
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -200,7 +203,9 @@
 
               <a href="{% url 'accounts:logout' %}" class="block py-3 text-red-600 font-medium">Logout</a>
             {% else %}
-              <a href="{% url 'core:home' %}" class="block py-3 text-[#094067] font-medium">🏠 Home</a>
+              <a href="{% url 'core:home' %}" class="block w-full py-3 px-4 text-center bg-white border-2 border-gray-400 text-gray-700 font-bold rounded-lg mb-3">
+                🏠 Home
+              </a>
               
               <a href="{% url 'accounts:phone_login' %}" class="block w-full py-3 px-4 text-center bg-white border-2 border-[#3DA9FC] text-[#3DA9FC] font-bold rounded-lg mb-3">
                 Login
