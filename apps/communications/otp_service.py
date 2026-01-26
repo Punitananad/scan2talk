@@ -160,27 +160,59 @@ class SMSCountryOTPService:
                 return False, None, "Invalid response from SMS service"
             
             # Check both HTTP status AND Success field in response
-            if response.status_code in [200, 201, 202] and response_data.get("Success") is True:
-                message_id = response_data.get("MessageUUID") or response_data.get("MessageId")
-                logger.info(f"✅ OTP sent successfully to {phone_number}, MessageID: {message_id}")
+            # IMPORTANT: 202 Accepted means message is queued (this is SUCCESS)
+            if response.status_code in [200, 201, 202]:
+                # For 202, message might be queued - this is still success
+                if response.status_code == 202:
+                    logger.info(f"✅ OTP queued for delivery to {phone_number}")
+                    # Set resend cooldown
+                    cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
+                    return True, otp, "OTP sent successfully (queued for delivery)"
                 
-                # Store message ID for delivery tracking
-                cache_key = f"otp_message_id_{phone_number}"
-                cache.set(cache_key, message_id, self.OTP_EXPIRY_MINUTES * 60)
-                
-                # Set resend cooldown
-                cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
-                
-                return True, otp, "OTP sent successfully"
+                # For 200/201, check Success field
+                if response_data.get("Success") is True:
+                    message_id = response_data.get("MessageUUID") or response_data.get("MessageId")
+                    logger.info(f"✅ OTP sent successfully to {phone_number}, MessageID: {message_id}")
+                    
+                    # Store message ID for delivery tracking
+                    cache_key = f"otp_message_id_{phone_number}"
+                    cache.set(cache_key, message_id, self.OTP_EXPIRY_MINUTES * 60)
+                    
+                    # Set resend cooldown
+                    cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
+                    
+                    return True, otp, "OTP sent successfully"
+                elif response_data.get("Success") is False:
+                    # API returned 200 but Success=False (DLT rejection, invalid sender, etc.)
+                    error_msg = response_data.get("Message") or response_data.get("Error") or response.text
+                    logger.error(f"❌ SMSCountry API rejected: {error_msg}")
+                    logger.error(f"Full response: {response_data}")
+                    
+                    # In dev mode, still return success for testing
+                    if settings.DEBUG:
+                        logger.warning(f"DEV MODE: Ignoring API rejection, OTP {otp} for {phone_number}")
+                        print(f"\n{'='*50}")
+                        print(f"📱 OTP for {phone_number}: {otp}")
+                        print(f"⚠️  API Error: {error_msg}")
+                        print(f"{'='*50}\n")
+                        cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
+                        return True, otp, "OTP generated (dev mode - API error ignored)"
+                    
+                    return False, None, f"SMS delivery failed: {error_msg}"
+                else:
+                    # Success field not present, assume success for 200/201
+                    logger.info(f"✅ OTP sent to {phone_number} (Success field not in response)")
+                    cache.set(cooldown_key, timezone.now(), self.RESEND_COOLDOWN_SECONDS)
+                    return True, otp, "OTP sent successfully"
             else:
-                # API returned 200 but Success=False (DLT rejection, invalid sender, etc.)
+                # Non-2xx status code
                 error_msg = response_data.get("Message") or response_data.get("Error") or response.text
-                logger.error(f"❌ SMSCountry API rejected: {error_msg}")
+                logger.error(f"❌ SMSCountry API error: {error_msg}")
                 logger.error(f"Full response: {response_data}")
                 
                 # In dev mode, still return success for testing
                 if settings.DEBUG:
-                    logger.warning(f"DEV MODE: Ignoring API rejection, OTP {otp} for {phone_number}")
+                    logger.warning(f"DEV MODE: Ignoring API error, OTP {otp} for {phone_number}")
                     print(f"\n{'='*50}")
                     print(f"📱 OTP for {phone_number}: {otp}")
                     print(f"⚠️  API Error: {error_msg}")
