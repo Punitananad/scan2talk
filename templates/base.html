@@ -8,15 +8,12 @@
 
   <title>{% block title %}Scan2Talk{% endblock %}</title>
 
-  <!-- Favicon - Multiple formats for maximum compatibility -->
-  <!-- SVG favicon for modern browsers -->
-  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}?v=4">
-  <!-- PNG fallback for older browsers -->
-  <link rel="icon" type="image/png" href="{% static 'tag/logo-sky.png' %}?v=4">
-  <!-- Traditional favicon.ico -->
-  <link rel="shortcut icon" href="/favicon.ico?v=4">
-  <!-- Apple touch icon -->
-  <link rel="apple-touch-icon" href="{% static 'tag/logo-sky.png' %}?v=4">
+  <!-- Favicon - Professional multi-format setup -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+  <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
