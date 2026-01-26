@@ -33,11 +33,16 @@ db.sqlite3-journal
 /media
 /staticfiles
 
-# Static files (but keep tag templates)
+# Static files (but keep tag templates and favicons)
 /static/*
 !/static/.gitkeep
 !/static/tag/
 !/static/favicon/
+!/static/*.png
+!/static/*.ico
+!/static/favicon.svg
+!/static/site.webmanifest
+!/static/about.txt
 
 # Environment variables
 .env
