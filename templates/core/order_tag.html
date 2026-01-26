@@ -12,6 +12,38 @@
 body {
     font-family: 'Inter', sans-serif;
 }
+
+/* Mobile tag preview optimization - MUCH LARGER */
+@media (max-width: 768px) {
+    .tag-preview-container {
+        transform: scale(1.2) !important;
+        transform-origin: center;
+        margin: 20px 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .tag-preview-container {
+        transform: scale(1.1) !important;
+        transform-origin: center;
+        margin: 15px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .tag-preview-container {
+        transform: scale(1.0) !important;
+        transform-origin: center;
+        margin: 10px 0;
+    }
+}
+
+/* Ensure the preview container doesn't overflow */
+.tag-preview-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+}
 </style>
 {% endblock %}
 
@@ -39,9 +71,11 @@ body {
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">What You'll Get</h2>
                 
                 <!-- Large Tag Preview -->
-                <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl mb-6">
+                <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-3 sm:p-6 rounded-xl mb-6 tag-preview-wrapper">
                     <div class="flex justify-center">
-                        {% include 'gateways/tag_single_preview.html' with qr_code_data=None %}
+                        <div class="tag-preview-container w-full max-w-full">
+                            {% include 'gateways/tag_single_preview.html' with qr_code_data=None %}
+                        </div>
                     </div>
                 </div>
 
