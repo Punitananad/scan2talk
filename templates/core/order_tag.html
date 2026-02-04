@@ -8,6 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+<!-- Meta Pixel Event Tracking for Order Page -->
+<script>
+// Track when user views the order page (InitiateCheckout event)
+if (typeof fbq !== 'undefined') {
+    fbq('track', 'InitiateCheckout');
+}
+</script>
+
 <style>
 body {
     font-family: 'Inter', sans-serif;
@@ -298,6 +306,7 @@ body {
                         <!-- Submit Button -->
                         <button 
                             type="submit"
+                            onclick="if(typeof fbq !== 'undefined') { fbq('track', 'AddToCart', {content_name: 'QR Tag', value: 99, currency: 'INR'}); }"
                             class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2"
                         >
                             <span>Proceed to Payment</span>
