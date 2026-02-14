@@ -23,18 +23,23 @@ cd /var/www/scan2talk
 git pull origin main
 ```
 
-### Step 4: Collect Static Files
+### Step 4: Activate Virtual Environment
 ```bash
-python3 manage.py collectstatic --noinput
+source venv/bin/activate
 ```
 
-### Step 5: Restart Services
+### Step 5: Collect Static Files
+```bash
+python manage.py collectstatic --noinput
+```
+
+### Step 6: Restart Services
 ```bash
 systemctl restart gunicorn
 systemctl restart nginx
 ```
 
-### Step 6: Verify
+### Step 7: Verify
 Open your website in a browser and check:
 - Home page loads faster
 - Tag design preview is visible (no slider)

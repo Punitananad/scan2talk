@@ -14,9 +14,13 @@ cd /var/www/scan2talk || exit 1
 echo "Pulling latest code from GitHub..."
 git pull origin main
 
+# Activate virtual environment
+echo "Activating virtual environment..."
+source venv/bin/activate
+
 # Collect static files
 echo "Collecting static files..."
-python3 manage.py collectstatic --noinput
+python manage.py collectstatic --noinput
 
 # Restart Gunicorn
 echo "Restarting Gunicorn..."
