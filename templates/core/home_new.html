@@ -4,12 +4,7 @@
 {% block title %}Scan2Talk - Connect Without Sharing Numbers{% endblock %}
 
 {% block extra_head %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
-<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-<link rel="stylesheet" href="{% static 'trippi/css/style.css' %}">
+<!-- Fonts are already loaded in base.html, no need to reload -->
 
 <style>
 body {
@@ -77,12 +72,12 @@ body {
     font-size: 0.95rem !important;
   }
   
-  /* Optimize hero slider for mobile */
-  .hero-slider .swiper-slide {
+  /* Optimize hero image for mobile */
+  .hero-image-container {
     padding: 0.5rem !important;
   }
   
-  .hero-slider img {
+  .hero-image-container img {
     max-height: 250px !important;
     object-fit: contain !important;
   }
@@ -111,7 +106,7 @@ body {
   }
   
   /* Reduce padding on cards */
-  .swiper-slide > div {
+  .hero-card > div {
     padding: 0.75rem !important;
   }
   
@@ -175,7 +170,7 @@ body {
 
     <div class="px-2 sm:px-4 lg:px-0">
  
-    <section data-aos="fade-up" data-aos-duration="1000" class="relative grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-8 lg:mb-20 mt-2 lg:mt-8 py-8 lg:py-0">
+    <section class="relative grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-8 lg:mb-20 mt-2 lg:mt-8 py-8 lg:py-0">
       <!-- Mobile Background Gradient -->
       <div class="lg:hidden absolute inset-0 bg-gradient-to-b from-[#3DA9FC]/5 via-transparent to-transparent rounded-3xl -z-10"></div>
       
@@ -259,100 +254,46 @@ body {
         </div>
       </div>
       
-      <!-- Slider - Shows Second on Mobile -->
+      <!-- Hero Image - Shows Second on Mobile -->
       <div class="lg:col-span-6 mt-8 lg:mt-0 order-2 lg:order-2">
-        <!-- Auto-Sliding Hero Carousel -->
-        <div class="swiper hero-slider rounded-2xl shadow-2xl overflow-hidden">
-          <div class="swiper-wrapper">
-            <!-- Slide 1: Live Tag Design -->
-            <div class="swiper-slide">
-              <div class="relative bg-white p-4 sm:p-6 rounded-2xl border-4 border-[#3DA9FC]/20">
-                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-white px-4 sm:px-6 py-2 rounded-full font-bold text-xs sm:text-sm shadow-lg z-10">
-                  ⭐ Actual Tag Design
-                </div>
-                
-                <!-- Embedded Tag Design -->
-                <div class="mt-2 bg-gray-50 p-2 sm:p-4 rounded-xl">
-                  <div class="flex justify-center">
-                    <div class="tag-zoom-container" style="transform: scale(0.7) sm:scale(0.85) md:scale(0.95); transform-origin: center; transition: transform 0.3s ease;">
-                      {% include 'gateways/tag_single_preview.html' with qr_code_data=None %}
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- CTA for QR Code -->
-                <div class="mt-4 text-center bg-gradient-to-r from-[#3DA9FC] to-[#3498E4] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg">
-                  <div class="flex items-center justify-center gap-2">
-                    <img src="{% static 'tag/scan.png' %}" alt="Scan" class="w-6 h-6 sm:w-8 sm:h-8 animate-bounce">
-                    <p class="text-xs sm:text-sm font-bold">Scan this QR code to know more and talk to our executive!</p>
-                  </div>
-                </div>
-                
-                <div class="mt-4 sm:mt-6 text-center">
-                  <h3 class="text-base sm:text-lg font-bold text-[#094067] mb-2">Professional Print-Ready Design</h3>
-                  <div class="flex flex-wrap justify-center gap-2 text-xs">
-                    <span class="bg-[#3DA9FC]/10 text-[#3DA9FC] px-3 py-1.5 rounded-full font-semibold">✓ Print-Optimized</span>
-                    <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full font-semibold">✓ Waterproof</span>
-                  </div>
+        <!-- Static Hero Image - Fast Loading -->
+        <div class="hero-image-container rounded-2xl shadow-2xl overflow-hidden">
+          <div class="relative bg-white p-4 sm:p-6 rounded-2xl border-4 border-[#3DA9FC]/20">
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-white px-4 sm:px-6 py-2 rounded-full font-bold text-xs sm:text-sm shadow-lg z-10">
+              ⭐ Actual Tag Design
+            </div>
+            
+            <!-- Embedded Tag Design -->
+            <div class="mt-2 bg-gray-50 p-2 sm:p-4 rounded-xl">
+              <div class="flex justify-center">
+                <div class="tag-zoom-container" style="transform: scale(0.7) sm:scale(0.85) md:scale(0.95); transform-origin: center; transition: transform 0.3s ease;">
+                  {% include 'gateways/tag_single_preview.html' with qr_code_data=None %}
                 </div>
               </div>
             </div>
-
-            <!-- Slide 2: Scan to Connect -->
-            <div class="swiper-slide">
-              <div class="relative bg-white p-4 sm:p-6 rounded-2xl border-4 border-[#fbbf24]/20 h-full flex flex-col">
-                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-white px-4 sm:px-6 py-2 rounded-full font-bold text-xs sm:text-sm shadow-lg z-10">
-                  📱 Scan to Connect
-                </div>
-                
-                <div class="mt-2 rounded-xl overflow-hidden flex-1 flex items-center justify-center bg-gradient-to-br from-[#fbbf24]/10 to-[#f59e0b]/10 min-h-[280px] sm:min-h-[320px] md:min-h-[380px]">
-                  <img src="{% static 'tag/scan.png' %}" alt="Scan QR Code" class="w-full h-full object-contain p-4 max-h-[280px] sm:max-h-[320px] md:max-h-[380px]">
-                </div>
-                
-                <div class="mt-4 sm:mt-6 text-center">
-                  <h3 class="text-base sm:text-lg font-bold text-[#094067] mb-2">Anyone Can Scan</h3>
-                  <div class="flex flex-wrap justify-center gap-2 text-xs">
-                    <span class="bg-[#fbbf24]/10 text-[#f59e0b] px-3 py-1.5 rounded-full font-semibold">✓ No App Needed</span>
-                    <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full font-semibold">✓ Instant Contact</span>
-                  </div>
-                </div>
+            
+            <!-- CTA for QR Code -->
+            <div class="mt-4 text-center bg-gradient-to-r from-[#3DA9FC] to-[#3498E4] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg">
+              <div class="flex items-center justify-center gap-2">
+                <img src="{% static 'tag/scan.png' %}" alt="Scan" class="w-6 h-6 sm:w-8 sm:h-8 animate-bounce">
+                <p class="text-xs sm:text-sm font-bold">Scan this QR code to know more and talk to our executive!</p>
               </div>
             </div>
-
-            <!-- Slide 3: Real-World Usage -->
-            <div class="swiper-slide">
-              <div class="relative bg-white p-4 sm:p-6 rounded-2xl border-4 border-[#10b981]/20 h-full flex flex-col">
-                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#10b981] to-[#059669] text-white px-4 sm:px-6 py-2 rounded-full font-bold text-xs sm:text-sm shadow-lg z-10">
-                  🚗 Real-World Usage
-                </div>
-                
-                <div class="mt-2 rounded-xl overflow-hidden flex-1 flex items-center justify-center min-h-[280px] sm:min-h-[320px] md:min-h-[380px]">
-                  <img src="{% static 'tag/NEW_BNDA.png' %}" alt="Scan2Talk in Action" class="w-full h-full object-contain max-h-[280px] sm:max-h-[320px] md:max-h-[380px]">
-                </div>
-                
-                <div class="mt-4 sm:mt-6 text-center">
-                  <h3 class="text-base sm:text-lg font-bold text-[#094067] mb-2">See It In Action</h3>
-                  <div class="flex flex-wrap justify-center gap-2 text-xs">
-                    <span class="bg-[#3DA9FC]/10 text-[#3DA9FC] px-3 py-1.5 rounded-full font-semibold">✓ Easy Install</span>
-                    <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full font-semibold">✓ Works Instantly</span>
-                  </div>
-                </div>
+            
+            <div class="mt-4 sm:mt-6 text-center">
+              <h3 class="text-base sm:text-lg font-bold text-[#094067] mb-2">Professional Print-Ready Design</h3>
+              <div class="flex flex-wrap justify-center gap-2 text-xs">
+                <span class="bg-[#3DA9FC]/10 text-[#3DA9FC] px-3 py-1.5 rounded-full font-semibold">✓ Print-Optimized</span>
+                <span class="bg-[#10b981]/10 text-[#10b981] px-3 py-1.5 rounded-full font-semibold">✓ Waterproof</span>
               </div>
             </div>
           </div>
-          
-          <!-- Pagination -->
-          <div class="swiper-pagination hero-pagination"></div>
-          
-          <!-- Navigation Arrows -->
-          <div class="swiper-button-prev hero-prev"></div>
-          <div class="swiper-button-next hero-next"></div>
         </div>
       </div>
     </section>
 
     <!-- Trust Indicators Section - Hidden on Mobile -->
-    <section data-aos="fade-right" data-aos-delay="500" data-aos-duration="700" class="hidden lg:flex w-full flex-col lg:flex-row items-center justify-center space-y-11 lg:space-y-0 lg:space-x-11 py-12 mb-24">
+    <section class="hidden lg:flex w-full flex-col lg:flex-row items-center justify-center space-y-11 lg:space-y-0 lg:space-x-11 py-12 mb-24">
       <div class="flex items-center gap-3 text-[#094067]">
         <svg class="w-8 h-8 text-[#3DA9FC]" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -380,7 +321,7 @@ body {
     </section>
 
     <!-- How to Activate Your Tag Section -->
-    <section data-aos="fade-up" data-aos-duration="1000" class="relative w-full py-16 mb-24 rounded-3xl overflow-hidden bg-gradient-to-br from-[#667eea] via-[#764ba2] to-[#f093fb]">
+    <section class="relative w-full py-16 mb-24 rounded-3xl overflow-hidden bg-gradient-to-br from-[#667eea] via-[#764ba2] to-[#f093fb]">
       <!-- Decorative Background Elements -->
       <div class="absolute top-0 left-0 w-full h-full opacity-10">
         <div class="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
@@ -453,7 +394,7 @@ body {
     </section>
 
     <!-- How It Works Section -->
-    <section id="how-it-works" data-aos="zoom-in" data-aos-duration="1000" class="py-2 mb-16 text-center lg:text-left">
+    <section id="how-it-works" class="py-2 mb-16 text-center lg:text-left">
       <span class="text-[#3DA9FC] inline-block font-semibold leading-tight mb-4">How It Works</span>
       <div class="flex items-center justify-between mb-8 lg:mb-5">
         <h3 class="text-4xl text-[#094067] font-extrabold leading-tight w-full lg:w-fit">Three Simple Steps to Privacy</h3>
@@ -485,7 +426,7 @@ body {
 
     <!-- Product Showcase Section -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-16 pb-8 lg:pb-56">
-      <div data-aos="fade-right" data-aos-duration="700" class="pt-12 text-center lg:text-left">
+      <div class="pt-12 text-center lg:text-left">
         <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Premium Quality Tags</span>
         <h2 class="mb-4 text-3xl md:text-4xl lg:text-5xl text-[#094067] font-extrabold leading-tight">Durable, Weather-Resistant QR Tags 🏷️</h2>
         <p class="mb-8 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B]">Our premium QR code tags are designed to withstand all weather conditions. Waterproof, UV-resistant, and built to last 3+ years on your vehicle.</p>
@@ -500,7 +441,7 @@ body {
           <span>Order Now</span>
         </a>
       </div>
-      <div data-aos="fade-left" data-aos-duration="700" class="relative flex items-center justify-center mt-8 lg:mt-0">
+      <div class="relative flex items-center justify-center mt-8 lg:mt-0">
         <!-- Beautiful Highlighted Card -->
         <div class="relative group w-full">
           <!-- Animated Glow Background -->
@@ -554,7 +495,7 @@ body {
     </section>
 
     <!-- Features Section -->
-    <section data-aos="fade-up" data-aos-duration="1000" class="w-full flex flex-col items-center justify-center py-4 mb-40 text-center lg:text-left">
+    <section class="w-full flex flex-col items-center justify-center py-4 mb-40 text-center lg:text-left">
       <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Built For Your Peace of Mind</span>
       <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight">Why Choose Scan2Talk?</h2>
       <p class="mb-8 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] text-center px-0 lg:px-64">Enterprise-grade security meets simple, everyday convenience. Your privacy is our priority.</p>
@@ -594,7 +535,7 @@ body {
     </section>
 
     <!-- FAQ Section -->
-    <section data-aos="fade-up" data-aos-delay="50" data-aos-duration="500" class="w-full py-12 flex flex-col items-center mb-24 overflow-x-hidden">
+    <section class="w-full py-12 flex flex-col items-center mb-24 overflow-x-hidden">
       <span class="mb-4 text-[#3DA9FC] inline-block font-semibold leading-tight">Frequently Asked Questions</span>
       <h2 class="mb-4 text-4xl md:text-5xl text-[#094067] font-extrabold leading-tight text-center lg:text-left">Got Questions? We've Got Answers</h2>
       <p class="mb-12 text-base md:text-lg tracking-wide leading-8 font-medium text-[#5F6C7B] text-center px-0 lg:px-52">Everything you need to know about Scan2Talk and how it protects your privacy.</p>
@@ -686,7 +627,7 @@ body {
     </section>
 
     <!-- CTA Section -->
-    <section data-aos="zoom-in" data-aos-delay="50" data-aos-duration="500" class="relative w-full bg-[#D8EEFE] py-12 rounded-xl shadow-[0_6px_30px_rgba(9,64,103,0.13)] mb-24 overflow-hidden">
+    <section class="relative w-full bg-[#D8EEFE] py-12 rounded-xl shadow-[0_6px_30px_rgba(9,64,103,0.13)] mb-24 overflow-hidden">
       <div class="relative z-10 flex flex-col items-center px-4 sm:px-8">
         <h3 class="text-2xl sm:text-3xl lg:text-4xl text-[#094067] text-center font-bold leading-tight px-0 lg:px-24 xl:px-48 mb-9">Ready to Protect Your Privacy? Get Your QR Code Today!</h3>
         <div class="w-full flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
@@ -706,34 +647,7 @@ body {
     </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
-<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
-  AOS.init();
-  
-  // Hero Slider (Auto-sliding at top)
-  const heroSwiper = new Swiper('.hero-slider', {
-    loop: true,
-    slidesPerView: 1,
-    spaceBetween: 30,
-    autoplay: {
-      delay: 3500,
-      disableOnInteraction: false,
-    },
-    effect: 'fade',
-    fadeEffect: {
-      crossFade: true
-    },
-    pagination: {
-      el: '.hero-pagination',
-      clickable: true,
-    },
-    navigation: {
-      nextEl: '.hero-next',
-      prevEl: '.hero-prev',
-    },
-  });
-  
   // FAQ Accordion Functionality
   document.addEventListener('DOMContentLoaded', function() {
     const faqItems = document.querySelectorAll('.faq-item');
