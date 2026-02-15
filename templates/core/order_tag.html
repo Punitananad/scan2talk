@@ -303,13 +303,93 @@ body {
                             </p>
                         </div>
 
+                        <!-- Payment Method Selection -->
+                        <div class="mb-8">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                                Payment Method
+                            </h2>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Online Payment Option -->
+                                <label class="relative cursor-pointer">
+                                    <input 
+                                        type="radio" 
+                                        name="payment_method" 
+                                        value="online"
+                                        x-model="paymentMethod"
+                                        class="peer sr-only"
+                                        checked
+                                    >
+                                    <div class="p-6 border-2 border-gray-300 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all hover:border-blue-300">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                                </svg>
+                                                <span class="font-bold text-gray-900">Online Payment</span>
+                                            </div>
+                                            <div class="w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-2">Pay securely via UPI, Card, or Net Banking</p>
+                                        <div class="flex items-center gap-2 text-xs text-green-600 font-semibold">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Instant Confirmation
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <!-- COD Option -->
+                                <label class="relative cursor-pointer">
+                                    <input 
+                                        type="radio" 
+                                        name="payment_method" 
+                                        value="cod"
+                                        x-model="paymentMethod"
+                                        class="peer sr-only"
+                                    >
+                                    <div class="p-6 border-2 border-gray-300 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 transition-all hover:border-green-300">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                </svg>
+                                                <span class="font-bold text-gray-900">Cash on Delivery</span>
+                                            </div>
+                                            <div class="w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-green-500 peer-checked:bg-green-500 flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-2">Pay when you receive your order</p>
+                                        <div class="flex items-center gap-2 text-xs text-green-600 font-semibold">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            No Advance Payment
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- Submit Button -->
                         <button 
                             type="submit"
                             onclick="if(typeof fbq !== 'undefined') { fbq('track', 'AddToCart', {content_name: 'QR Tag', value: 99, currency: 'INR'}); }"
                             class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                            :class="paymentMethod === 'cod' ? 'from-green-600 to-green-700 hover:from-green-700 hover:to-green-800' : 'from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'"
                         >
-                            <span>Proceed to Payment</span>
+                            <span x-text="paymentMethod === 'cod' ? 'Place COD Order' : 'Proceed to Payment'"></span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                             </svg>
@@ -355,6 +435,7 @@ function orderForm() {
         pincode: '',
         quantity: 1,
         customQuantity: '',
+        paymentMethod: 'online',
         subtotal: {{ tag_price }},
         total: {{ tag_price }},
         basePrice: {{ tag_price }},

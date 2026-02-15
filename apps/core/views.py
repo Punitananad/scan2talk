@@ -87,6 +87,9 @@ class OrderTagView(View):
     def post(self, request):
         from apps.core.pricing_models import PricingSettings
         
+        # Get payment method
+        payment_method = request.POST.get('payment_method', 'online')
+        
         # Store order data in session
         quantity = int(request.POST.get('quantity', 1))
         distributor_code = request.POST.get('distributor_code', '').strip()
@@ -101,13 +104,46 @@ class OrderTagView(View):
             'pincode': request.POST.get('pincode'),
             'quantity': quantity,
             'distributor_code': distributor_code,  # Save distributor code
+            'payment_method': payment_method,  # Save payment method
         }
         
         # Calculate total using dynamic pricing
         BASE_PRICE = float(PricingSettings.get_tag_price())
         order_data['total'] = BASE_PRICE * quantity
         
-        # Store in session
+        # If COD, create order directly and redirect to success
+        if payment_method == 'cod':
+            from apps.core.models import TagOrder
+            import uuid
+            
+            # Generate order ID
+            order_id = f"TAG{uuid.uuid4().hex[:8].upper()}"
+            order_data['order_id'] = order_id
+            
+            # Create COD order
+            TagOrder.objects.create(
+                order_id=order_id,
+                name=order_data['name'],
+                phone=order_data['phone'],
+                email=order_data['email'],
+                address=order_data['address'],
+                city=order_data['city'],
+                state=order_data['state'],
+                pincode=order_data['pincode'],
+                quantity=order_data['quantity'],
+                total_amount=order_data['total'],
+                distributor_code=order_data.get('distributor_code', ''),
+                status='cod_pending',  # COD pending delivery
+                payment_method='cod',
+                notes='Cash on Delivery order'
+            )
+            
+            # Store in session for success page
+            request.session['completed_order'] = order_data
+            
+            return redirect('core:order_success')
+        
+        # For online payment, store in session and redirect to payment page
         request.session['order_data'] = order_data
         
         return redirect('core:order_payment')

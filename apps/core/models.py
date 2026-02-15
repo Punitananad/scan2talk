@@ -29,9 +29,15 @@ class TagOrder(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('processing', 'Processing'),
+        ('cod_pending', 'COD Pending Delivery'),
         ('shipped', 'Shipped'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
+    ]
+    
+    PAYMENT_METHOD_CHOICES = [
+        ('online', 'Online Payment'),
+        ('cod', 'Cash on Delivery'),
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -52,6 +58,7 @@ class TagOrder(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='online', help_text="Payment method chosen by customer")
     
     # Distributor tracking (commission earned on successful payment)
     distributor_code = models.CharField(max_length=15, blank=True, db_index=True, help_text="Distributor's mobile number")
