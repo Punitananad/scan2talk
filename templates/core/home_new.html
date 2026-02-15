@@ -278,6 +278,109 @@ body {
       </div>
     </section>
 
+    <!-- LIMITED TIME OFFER - Pricing Section -->
+    <section class="mb-16 lg:mb-24">
+      <div class="bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 border-4 border-red-200 rounded-3xl p-6 sm:p-8 lg:p-12 relative overflow-hidden shadow-2xl">
+        <!-- Animated Background Elements -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-red-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-orange-200 rounded-full blur-3xl opacity-20 animate-pulse" style="animation-delay: 1s;"></div>
+        
+        <div class="relative z-10">
+          <!-- Limited Time Badge -->
+          <div class="flex justify-center mb-6">
+            <div class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-full font-bold text-sm sm:text-base shadow-lg animate-bounce">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+              </svg>
+              <span>⚡ LIMITED TIME OFFER!</span>
+            </div>
+          </div>
+
+          <div class="text-center mb-8">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">
+              Special Launch Price
+            </h2>
+            <p class="text-lg sm:text-xl text-gray-700 font-medium">
+              Get your QR tag at an unbeatable price - One-time purchase, lifetime validity!
+            </p>
+          </div>
+
+          <!-- Pricing Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
+            <!-- Old Price Card -->
+            <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-6 border-2 border-gray-300 relative opacity-75">
+              <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-600 text-white px-4 py-1 rounded-full text-sm font-bold">
+                Regular Price
+              </div>
+              <div class="text-center mt-4">
+                <div class="text-6xl font-extrabold text-gray-400 line-through mb-2">
+                  ₹499
+                </div>
+                <p class="text-gray-600 font-medium">Per Tag</p>
+              </div>
+            </div>
+
+            <!-- New Price Card - Highlighted -->
+            <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 border-4 border-green-400 relative shadow-2xl transform hover:scale-105 transition-all">
+              <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-gray-900 px-6 py-2 rounded-full text-sm font-black shadow-lg animate-pulse">
+                🔥 40% OFF
+              </div>
+              <div class="text-center mt-4">
+                <div class="text-7xl font-extrabold text-white mb-2">
+                  ₹299
+                </div>
+                <p class="text-white font-bold text-lg">Per Tag - One Time!</p>
+                <div class="mt-4 space-y-2">
+                  <div class="flex items-center justify-center gap-2 text-white text-sm">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-semibold">Lifetime Validity</span>
+                  </div>
+                  <div class="flex items-center justify-center gap-2 text-white text-sm">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-semibold">No Hidden Charges</span>
+                  </div>
+                  <div class="flex items-center justify-center gap-2 text-white text-sm">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-semibold">Free Shipping</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Savings Highlight -->
+          <div class="mt-8 text-center">
+            <div class="inline-block bg-yellow-400 text-gray-900 px-8 py-4 rounded-2xl shadow-xl">
+              <p class="text-2xl sm:text-3xl font-black">
+                💰 You Save ₹200!
+              </p>
+              <p class="text-sm font-semibold mt-1">Limited time offer - Grab it now!</p>
+            </div>
+          </div>
+
+          <!-- CTA Button -->
+          <div class="mt-8 text-center">
+            <a href="{% url 'core:order_tag' %}" 
+               class="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-xl rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+              <span>Order Now at ₹299</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Trust Indicators Section - Hidden on Mobile -->
     <section class="hidden lg:flex w-full flex-col lg:flex-row items-center justify-center space-y-11 lg:space-y-0 lg:space-x-11 py-12 mb-24">
       <div class="flex items-center gap-3 text-[#094067]">
