@@ -8,20 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- Meta Pixel Purchase Event - CRITICAL FOR CONVERSION TRACKING -->
-<script>
-// Fire Purchase event ONLY on success page after order confirmation
-if (typeof fbq !== 'undefined') {
-    fbq('track', 'Purchase', {
-        value: {{ order.total }},
-        currency: 'INR',
-        content_name: 'QR Tag',
-        content_type: 'product',
-        num_items: {{ order.quantity }}
-    });
-}
-</script>
-
 <style>
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -115,4 +101,18 @@ body {
         </div>
     </div>
 </div>
+
+<!-- Meta Pixel Purchase Event - CRITICAL FOR CONVERSION TRACKING -->
+<script>
+// Wait for full page load to ensure fbq is ready
+window.addEventListener('load', function() {
+    fbq('track', 'Purchase', {
+        value: {{ order.total|floatformat:2 }},
+        currency: 'INR',
+        content_name: 'QR Tag',
+        content_type: 'product',
+        num_items: {{ order.quantity }}
+    });
+});
+</script>
 {% endblock %}
