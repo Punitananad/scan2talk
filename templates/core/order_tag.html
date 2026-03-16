@@ -183,8 +183,7 @@ input, select, textarea { font-size: 16px !important; }
           <div class="pb-6">
             <h5 class="font-bold text-slate-900 mb-0.5">Peel & Stick on Your Car</h5>
             <p class="text-xs text-slate-500">Stick QR tag on dashboard or windshield. Takes 30 seconds.</p>
-            <!-- [STEP 1 PHOTO PLACEHOLDER] -->
-            <div class="w-full h-28 bg-slate-100 border border-dashed border-slate-300 rounded-lg mt-2 flex items-center justify-center text-xs text-slate-400">STEP 1 PHOTO — sticker on windshield</div>
+            <img src="{% static 'souc.jpg' %}" alt="Stick on your car" class="w-full h-28 object-cover rounded-lg mt-2">
           </div>
         </div>
         <div class="flex gap-4">
@@ -205,8 +204,7 @@ input, select, textarea { font-size: 16px !important; }
           <div class="pb-2">
             <h5 class="font-bold text-slate-900 mb-0.5">You Get Called — Number Hidden</h5>
             <p class="text-xs text-slate-500">You receive the call. Your private number stays hidden.</p>
-            <!-- [STEP 3 PHOTO PLACEHOLDER] -->
-            <div class="w-full h-28 bg-slate-100 border border-dashed border-slate-300 rounded-lg mt-2 flex items-center justify-center text-xs text-slate-400">STEP 3 PHOTO — incoming call on phone</div>
+            <img src="{% static 'men.png' %}" alt="You get connected" class="w-full h-28 object-cover rounded-lg mt-2">
           </div>
         </div>
       </div>
@@ -215,7 +213,7 @@ input, select, textarea { font-size: 16px !important; }
     <!-- Desktop grid -->
     <div class="hidden sm:grid grid-cols-3 gap-6">
       <div class="relative">
-        <div class="w-full h-40 bg-slate-100 border border-dashed border-slate-300 rounded-xl mb-4 flex items-center justify-center text-xs text-slate-400 text-center p-3">STEP 1 PHOTO<br>Sticker on windshield</div>
+        <img src="{% static 'souc.jpg' %}" alt="Stick on your car" class="w-full h-40 object-cover rounded-xl mb-4">
         <div class="w-9 h-9 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-2">1</div>
         <h5 class="font-bold text-slate-900 mb-1">Peel & Stick</h5>
         <p class="text-xs text-slate-500">Stick QR tag on dashboard or windshield. Takes 30 seconds.</p>
@@ -229,7 +227,7 @@ input, select, textarea { font-size: 16px !important; }
         <div class="absolute top-16 -right-4 text-slate-300 text-2xl">→</div>
       </div>
       <div>
-        <div class="w-full h-40 bg-slate-100 border border-dashed border-slate-300 rounded-xl mb-4 flex items-center justify-center text-xs text-slate-400 text-center p-3">STEP 3 PHOTO<br>Call received on phone</div>
+        <img src="{% static 'men.png' %}" alt="You get connected" class="w-full h-40 object-cover rounded-xl mb-4">
         <div class="w-9 h-9 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-2">3</div>
         <h5 class="font-bold text-slate-900 mb-1">You Get Called</h5>
         <p class="text-xs text-slate-500">You receive the call. Your real number stays hidden. Problem solved.</p>
