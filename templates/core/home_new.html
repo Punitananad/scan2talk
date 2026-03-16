@@ -254,15 +254,30 @@
   <div class="max-w-screen-xl mx-auto px-4 sm:px-6 text-center">
     <span class="text-xs font-semibold text-blue-700 uppercase tracking-wider">See It In Action</span>
     <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-3">Watch How It Works</h2>
-    <p class="text-slate-500 mb-8">15-second demo — from scan to connected call</p>
+    <p class="text-slate-500 mb-8">1 min 50 sec demo — see exactly how it works</p>
 
-    <video class="max-w-2xl mx-auto w-full rounded-xl"
-           controls
-           preload="none"
-           poster="{% static 'tagimg1.jpg' %}"
-           loading="lazy">
-      <source src="{% static 'veo.mp4' %}" type="video/mp4">
-    </video>
+    <div class="relative max-w-2xl mx-auto w-full" id="videoWrapper">
+      <video id="demoVideo"
+             class="w-full rounded-xl"
+             controls
+             preload="none"
+             playsinline
+             poster="{% static 'tagimg1.jpg' %}">
+        <source src="{% static 'veo.mp4' %}" type="video/mp4">
+      </video>
+      <!-- Custom play button overlay -->
+      <div id="playOverlay"
+           onclick="document.getElementById('demoVideo').play(); document.getElementById('playOverlay').style.display='none';"
+           class="absolute inset-0 flex items-center justify-center rounded-xl cursor-pointer"
+           style="background: rgba(0,0,0,0.25);">
+        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl"
+             style="min-width:80px; min-height:80px;">
+          <svg class="w-8 h-8 text-blue-700 ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
 
     <p class="text-sm text-slate-500 mt-4">
       Or <a href="{% url 'core:order_tag' %}" class="text-blue-700 font-semibold underline">order now</a> and experience it yourself with COD.
@@ -347,19 +362,6 @@
 
     </div>
 
-    <!-- User photo wall -->
-    <div class="mt-10 text-center">
-      <p class="text-sm font-semibold text-slate-700 mb-4">Photos from our customers 📸</p>
-      <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-2xl mx-auto">
-        <!-- [USER PHOTO WALL PLACEHOLDER — 6-12 real customer photos of tag on their cars] -->
-        {% for i in "123456" %}
-        <div class="aspect-square bg-slate-100 border border-dashed border-slate-300 rounded-lg flex items-center justify-center text-xs text-slate-400 text-center p-1">
-          USER<br>PHOTO
-        </div>
-        {% endfor %}
-      </div>
-      <p class="text-xs text-slate-400 mt-3">Replace with real customer photos from WhatsApp/Instagram</p>
-    </div>
   </div>
 </section>
 
@@ -579,9 +581,8 @@
       Order Now — Pay on Delivery
     </a>
     <p class="text-xs text-slate-500">Questions? WhatsApp us:
-      <a href="https://wa.me/919999999999" class="text-blue-400 font-semibold underline" target="_blank" rel="noopener">
-        <!-- [WHATSAPP NUMBER PLACEHOLDER — replace with your actual WhatsApp number] -->
-        +91 XXXXX XXXXX
+      <a href="https://wa.me/917988269874" class="text-blue-400 font-semibold underline" target="_blank" rel="noopener">
+        +91 79882 69874
       </a>
     </p>
   </div>

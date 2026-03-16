@@ -62,13 +62,12 @@ input, select, textarea { font-size: 16px !important; }
 
       <!-- Product Images — shown AFTER text on mobile, BEFORE on desktop -->
       <div class="space-y-3 order-2 lg:order-1">
-        <img src="{% static 'tagimg1.jpg' %}" alt="Scan2Talk QR Tag" class="w-full rounded-xl object-cover aspect-[4/3]">
+        <img src="{% static 'tagimg1.jpg' %}" alt="Scan2Talk QR Tag" class="w-full rounded-xl object-cover" style="max-height: 480px; height: 55vw; min-height: 260px;">
         <!-- Thumbnail row -->
         <div class="grid grid-cols-3 gap-2">
           <img src="{% static 'tagimg1.jpg' %}" alt="Product" class="w-full rounded-lg object-cover aspect-square">
-          <img src="{% static 'piu.jpg' %}" alt="Scanning QR on car" class="w-full rounded-lg object-cover aspect-square">
-          <!-- [PHOTO: Delivery packaging] -->
-          <div class="bg-slate-100 border border-dashed border-slate-300 rounded-lg aspect-square flex items-center justify-center text-xs text-slate-400 text-center p-2">PACKAGING<br>PHOTO</div>
+          <img src="{% static 'amzn.png' %}" alt="Product listing" class="w-full rounded-lg object-cover aspect-square">
+          <img src="{% static 'souc.jpg' %}" alt="Stick on car" class="w-full rounded-lg object-cover aspect-square">
         </div>
       </div>
 
@@ -242,15 +241,28 @@ input, select, textarea { font-size: 16px !important; }
 <section class="py-10 bg-slate-900">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
     <h2 class="text-2xl font-extrabold text-white mb-2">See It in Action</h2>
-    <p class="text-slate-400 text-sm mb-6">Blocked car → scan QR → call connects in 15 seconds</p>
+    <p class="text-slate-400 text-sm mb-6">1 min 50 sec demo — see exactly how it works</p>
 
-    <!-- [DEMO VIDEO PLACEHOLDER — Replace div below with <iframe> YouTube/Vimeo embed] -->
-    <div class="max-w-2xl mx-auto bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl aspect-video flex flex-col items-center justify-center text-slate-500 mx-auto">
-      <div class="w-16 h-16 bg-slate-700 rounded-full flex items-center justify-center mb-3">
-        <svg class="w-7 h-7 text-slate-400 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <div class="relative max-w-2xl mx-auto w-full" id="videoWrapperOrder">
+      <video id="demoVideoOrder"
+             class="w-full rounded-xl"
+             controls
+             preload="none"
+             playsinline
+             poster="{% static 'tagimg1.jpg' %}">
+        <source src="{% static 'veo.mp4' %}" type="video/mp4">
+      </video>
+      <div id="playOverlayOrder"
+           onclick="document.getElementById('demoVideoOrder').play(); document.getElementById('playOverlayOrder').style.display='none';"
+           class="absolute inset-0 flex items-center justify-center rounded-xl cursor-pointer"
+           style="background: rgba(0,0,0,0.25);">
+        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl"
+             style="min-width:80px; min-height:80px;">
+          <svg class="w-8 h-8 text-blue-700 ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
       </div>
-      <p class="font-bold text-slate-400">DEMO VIDEO PLACEHOLDER</p>
-      <p class="text-xs text-slate-600 mt-1 max-w-xs">Record a 15-sec video: blocked car → scan QR → call connects<br>Then replace with: &lt;iframe src="youtube-embed"&gt;</p>
     </div>
   </div>
 </section>
@@ -599,9 +611,9 @@ input, select, textarea { font-size: 16px !important; }
 
             <div class="mt-4 border-t border-slate-100 pt-3 text-center">
               <p class="text-xs text-slate-500">Questions?
-                <a href="https://wa.me/919999999999" target="_blank" rel="noopener"
+                <a href="https://wa.me/917988269874" target="_blank" rel="noopener"
                    class="text-green-600 font-bold hover:underline">
-                  WhatsApp us → <!-- [REPLACE: your WhatsApp number] -->
+                  WhatsApp us → +91 79882 69874
                 </a>
               </p>
             </div>
@@ -673,9 +685,12 @@ input, select, textarea { font-size: 16px !important; }
         <!-- Amazon note — hidden on mobile -->
         <div class="hidden lg:block bg-white border border-slate-200 rounded-xl p-4 text-center">
           <p class="text-xs text-slate-400 mb-3">Also available on</p>
-          <a href="https://amzn.in/d/0iqWjKvZ" target="_blank" rel="noopener" class="inline-block">
+          <a href="https://amzn.in/d/0iqWjKvZ" target="_blank" rel="noopener"
+             class="inline-block hover:opacity-80 cursor-pointer">
             <img src="{% static 'amzn.png' %}" alt="Buy on Amazon" class="h-8 w-auto object-contain mx-auto">
           </a>
+          <a href="https://amzn.in/d/0iqWjKvZ" target="_blank" rel="noopener"
+             class="text-xs text-blue-600 mt-2 font-medium block hover:underline">👆 Click to order on Amazon</a>
         </div>
 
       </div>
