@@ -87,12 +87,7 @@
       <!-- Right: Product Image -->
       <div class="flex justify-center lg:justify-end">
         <div class="w-full max-w-sm">
-          <!-- [PRODUCT HERO PHOTO PLACEHOLDER — clear photo of QR tag on car windshield/dashboard] -->
-          <div class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl aspect-square flex flex-col items-center justify-center text-slate-400 text-center p-8">
-            <svg class="w-16 h-16 mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <p class="font-semibold text-sm">PRODUCT HERO PHOTO</p>
-            <p class="text-xs mt-1">Clear photo of Scan2Talk QR tag<br>placed on a car windshield or dashboard</p>
-          </div>
+          <img src="{% static 'tagimg1.jpg' %}" alt="Scan2Talk QR Tag on car" class="w-full rounded-xl object-cover aspect-square">
           <div class="mt-3 bg-slate-900 text-white text-center py-2.5 px-3 rounded text-sm font-medium">
             Actual Tag Design — Waterproof & UV-Resistant
           </div>
@@ -212,11 +207,7 @@
 
       <div>
         <!-- [PRODUCT SOLUTION IMAGE PLACEHOLDER — split image: left=problem (blocked car), right=solution (scan QR, call connects)] -->
-        <div class="bg-blue-600 border-2 border-dashed border-blue-400 rounded-xl aspect-video flex flex-col items-center justify-center text-blue-200 text-center p-8">
-          <svg class="w-12 h-12 mb-3 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <p class="font-semibold text-sm">PRODUCT IN-USE PHOTO</p>
-          <p class="text-xs mt-1">Photo of someone scanning QR tag on a car<br>and connecting via call</p>
-        </div>
+        <img src="{% static 'piu.jpg' %}" alt="Scanning Scan2Talk QR on car" class="w-full rounded-xl object-cover aspect-video">
       </div>
     </div>
   </div>
@@ -243,10 +234,7 @@
       </div>
 
       <div class="bg-white border border-slate-200 rounded-xl p-6 text-center">
-        <!-- [STEP 2 IMAGE PLACEHOLDER — person scanning QR tag on car with phone] -->
-        <div class="w-full h-36 bg-slate-100 border border-dashed border-slate-300 rounded-lg mb-4 flex items-center justify-center text-slate-400 text-xs">
-          STEP 2 PHOTO PLACEHOLDER<br>Scanning QR on car
-        </div>
+        <img src="{% static 'piu.jpg' %}" alt="Scanning QR on car" class="w-full h-36 object-cover rounded-lg mb-4">
         <div class="w-10 h-10 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3 text-lg">2</div>
         <h5 class="text-base font-bold text-slate-900 mb-2">Anyone Scans It</h5>
         <p class="text-sm text-slate-500">The person who needs you just opens their camera, scans the code — a call request is sent instantly. No app needed.</p>
