@@ -1,365 +1,766 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Order QR Tag | Scan2Talk{% endblock %}
+{% block title %}Scan2Talk QR Car Tag — ₹299 COD | Free Shipping{% endblock %}
 
 {% block extra_head %}
 <script>
 if (typeof fbq !== 'undefined') { fbq('track', 'InitiateCheckout'); }
 </script>
 <style>
-@media (max-width: 768px) {
-  .tag-preview-container { transform: scale(1.1); transform-origin: center; margin: 10px 0; }
-}
-@media (max-width: 480px) {
-  .tag-preview-container { transform: scale(0.9); transform-origin: center; }
-}
-.tag-preview-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* FAQ */
+.faq-answer { max-height: 0; overflow: hidden; }
+.faq-open .faq-answer { max-height: 400px; }
+.faq-chevron { transition: transform 0.2s; }
+.faq-open .faq-chevron { transform: rotate(180deg); }
+/* Sticky CTA bar */
+#sticky-cta { transition: transform 0.3s; }
+/* Progress step */
+.step-done { background: #1d4ed8; color: white; }
+.step-active { background: #1d4ed8; color: white; }
+.step-pending { background: #e2e8f0; color: #94a3b8; }
+/* iOS zoom fix — all inputs must be 16px+ */
+input, select, textarea { font-size: 16px !important; }
+/* iOS safe area for sticky bar */
+#sticky-cta { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="py-8 sm:py-12">
 
-  <!-- Page Header -->
-  <div class="text-center mb-8">
-    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Order Your QR Tag</h1>
-    <p class="text-slate-500 mt-1 text-sm">One-time purchase &bull; Free shipping &bull; 7-day delivery</p>
-  </div>
-
-  <div class="max-w-4xl mx-auto">
-
-    <!-- Order Form -->
-    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5 sm:p-7 mb-6">
-
-      <!-- Price Banner -->
-      <div class="bg-slate-900 rounded-lg px-4 py-3 mb-6 text-center">
-        <div class="flex flex-wrap items-center justify-center gap-3 text-white">
-          <span class="text-2xl sm:text-3xl font-extrabold">&#8377;299</span>
-          <span class="text-base line-through text-slate-400">&#8377;499</span>
-          <span class="bg-blue-700 text-white px-3 py-0.5 rounded text-xs font-bold">SAVE &#8377;200</span>
-        </div>
-      </div>
-
-      <h2 class="text-xl font-bold text-slate-900 mb-6 text-center">Complete Your Order</h2>
-
-      <form method="post" x-data="orderForm()">
-        {% csrf_token %}
-
-        <!-- Contact Information -->
-        <div class="mb-6">
-          <h3 class="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-            <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            Contact Information
-          </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
-              <input type="text" name="name" x-model="name" required
-                class="w-full px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                placeholder="John Doe">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Phone Number *</label>
-              <input type="tel" name="phone" x-model="phone" required pattern="[0-9]{10}"
-                class="w-full px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                placeholder="9876543210">
-            </div>
-          </div>
-          <div class="mt-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Email Address *</label>
-            <input type="email" name="email" x-model="email" required
-              class="w-full px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="john@example.com">
-          </div>
-        </div>
-
-        <!-- Delivery Address -->
-        <div class="mb-6">
-          <h3 class="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-            <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            Delivery Address
-          </h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Street Address *</label>
-              <textarea name="address" x-model="address" required rows="2"
-                class="w-full px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
-                placeholder="House/Flat No., Street, Locality"></textarea>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">PIN Code *</label>
-                <div class="relative">
-                  <input type="text" name="pincode" x-model="pincode" required pattern="[0-9]{6}" maxlength="6"
-                    @input="onPincodeInput()"
-                    class="w-full px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="400001">
-                  <span x-show="pincodeLoading" class="absolute right-2 top-2.5 text-xs text-slate-400">...</span>
-                  <span x-show="pincodeError" class="absolute right-2 top-2.5 text-xs text-red-500">✗</span>
-                </div>
-                <p x-show="pincodeError" x-text="pincodeError" class="text-xs text-red-500 mt-1"></p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">City *</label>
-                <input type="text" name="city" x-model="city" required
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="Mumbai">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">State *</label>
-                <select name="state" x-model="state" required
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
-                  <option value="">Select State</option>
-                  <option>Andhra Pradesh</option>
-                  <option>Arunachal Pradesh</option>
-                  <option>Assam</option>
-                  <option>Bihar</option>
-                  <option>Chhattisgarh</option>
-                  <option>Goa</option>
-                  <option>Gujarat</option>
-                  <option>Haryana</option>
-                  <option>Himachal Pradesh</option>
-                  <option>Jharkhand</option>
-                  <option>Karnataka</option>
-                  <option>Kerala</option>
-                  <option>Madhya Pradesh</option>
-                  <option>Maharashtra</option>
-                  <option>Manipur</option>
-                  <option>Meghalaya</option>
-                  <option>Mizoram</option>
-                  <option>Nagaland</option>
-                  <option>Odisha</option>
-                  <option>Punjab</option>
-                  <option>Rajasthan</option>
-                  <option>Sikkim</option>
-                  <option>Tamil Nadu</option>
-                  <option>Telangana</option>
-                  <option>Tripura</option>
-                  <option>Uttar Pradesh</option>
-                  <option>Uttarakhand</option>
-                  <option>West Bengal</option>
-                  <option>Andaman and Nicobar Islands</option>
-                  <option>Chandigarh</option>
-                  <option>Dadra and Nagar Haveli and Daman and Diu</option>
-                  <option>Delhi</option>
-                  <option>Jammu and Kashmir</option>
-                  <option>Ladakh</option>
-                  <option>Lakshadweep</option>
-                  <option>Puducherry</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quantity -->
-        <div class="mb-6">
-          <h3 class="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-            <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
-            Select Quantity
-          </h3>
-          <div class="flex items-center gap-3">
-            <select name="quantity" x-model="quantity" @change="updateTotal()"
-              class="flex-1 px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium">
-              <option value="1">1 Tag</option>
-              <option value="2">2 Tags</option>
-              <option value="3">3 Tags</option>
-              <option value="5">5 Tags</option>
-              <option value="10">10 Tags</option>
-              <option value="custom">Custom Quantity</option>
-            </select>
-            <input type="number" x-model="customQuantity" @input="handleCustomQuantity()"
-              x-show="quantity === 'custom'" min="1" max="1000" placeholder="Enter qty"
-              class="w-32 px-3 py-2.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-blue-500">
-          </div>
-          <p x-show="quantity === 'custom'" class="text-xs text-slate-500 mt-2">
-            For bulk orders (50+), contact us for special pricing.
-          </p>
-        </div>
-
-        <!-- Payment Method -->
-        <div class="mb-6">
-          <h3 class="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-            <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-            Payment Method
-          </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Online -->
-            <label class="cursor-pointer">
-              <input type="radio" name="payment_method" value="online" x-model="paymentMethod" class="peer sr-only" checked>
-              <div class="p-4 border-2 border-slate-200 rounded-lg peer-checked:border-blue-700 peer-checked:bg-blue-50">
-                <div class="flex items-center gap-3 mb-2">
-                  <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                  <span class="font-semibold text-slate-900 text-sm">Online Payment</span>
-                </div>
-                <p class="text-xs text-slate-500">Pay via UPI, Card, or Net Banking</p>
-                <p class="text-xs font-semibold text-green-700 mt-1">Instant Confirmation</p>
-              </div>
-            </label>
-            <!-- COD -->
-            <label class="cursor-pointer">
-              <input type="radio" name="payment_method" value="cod" x-model="paymentMethod" class="peer sr-only">
-              <div class="p-4 border-2 border-slate-200 rounded-lg peer-checked:border-green-600 peer-checked:bg-green-50">
-                <div class="flex items-center gap-3 mb-2">
-                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                  <span class="font-semibold text-slate-900 text-sm">Cash on Delivery</span>
-                </div>
-                <p class="text-xs text-slate-500">Pay when you receive your order</p>
-                <p class="text-xs font-semibold text-green-700 mt-1">No Advance Payment</p>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit"
-          onclick="if(typeof fbq !== 'undefined') { fbq('track', 'AddToCart', {content_name: 'QR Tag', value: 99, currency: 'INR'}); }"
-          class="w-full py-3.5 px-6 rounded font-bold text-base text-white"
-          :class="paymentMethod === 'cod' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-700 hover:bg-blue-800'">
-          <span x-text="paymentMethod === 'cod' ? 'Place COD Order' : 'Proceed to Payment'"></span>
-        </button>
-
-        <!-- Trust Indicators -->
-        <div class="mt-4 flex items-center justify-center gap-6 text-xs text-slate-500">
-          <div class="flex items-center gap-1">
-            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-            Secure Payment
-          </div>
-          <div class="flex items-center gap-1">
-            <svg class="w-4 h-4 text-blue-700" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"></path></svg>
-            Free Shipping
-          </div>
-          <div class="flex items-center gap-1">
-            <svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
-            7-Day Delivery
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <!-- Tag Preview -->
-    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 sm:p-8">
-      <h2 class="text-xl font-bold text-slate-900 mb-6 text-center">What You'll Get</h2>
-
-      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 sm:p-6 mb-6 tag-preview-wrapper">
-        <div class="flex justify-center">
-          <div class="tag-preview-container w-full max-w-full">
-            {% include 'gateways/tag_single_preview.html' with qr_code_data=None %}
-          </div>
-        </div>
-      </div>
-
-      <!-- Pack Info -->
-      <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 mb-6 text-center">
-        <div class="w-12 h-12 bg-blue-700 rounded-lg flex items-center justify-center mx-auto mb-3">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-        </div>
-        <h3 class="text-base font-bold text-slate-900 mb-1">Pack of 2 Tags Included</h3>
-        <p class="text-sm text-slate-500">Each order includes 2 premium QR tags — perfect for front and back of your vehicle.</p>
-      </div>
-
-      <!-- Features Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-          <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-          <div>
-            <h4 class="font-semibold text-slate-900 text-sm">Waterproof & UV-resistant</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Lasts 3+ years in all weather</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-          <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-          <div>
-            <h4 class="font-semibold text-slate-900 text-sm">Pre-activated</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Ready to use immediately</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-          <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-          <div>
-            <h4 class="font-semibold text-slate-900 text-sm">Easy Installation</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Self-adhesive backing</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-          <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-          <div>
-            <h4 class="font-semibold text-slate-900 text-sm">Free Shipping</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Delivered in 7 days</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+<!-- ============================================================ -->
+<!-- STICKY BOTTOM CTA — mobile only -->
+<!-- ============================================================ -->
+<div id="sticky-cta" class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white border-t border-slate-200 px-4 py-3 shadow-lg">
+  <a href="#order-form"
+     class="block w-full py-3.5 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl text-center">
+    🛵 Order Now — ₹299 Cash on Delivery
+  </a>
 </div>
 
+<div class="pb-24 lg:pb-0">
+
+<!-- ============================================================ -->
+<!-- 1. PRODUCT HERO -->
+<!-- ============================================================ -->
+<section class="py-8 border-b border-slate-100">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+
+    <!-- Brand bar -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-2">
+        <img src="{% static 'tag/logo-sky.png' %}" alt="Scan2Talk" class="h-10 w-auto">
+      </div>
+      <div class="flex items-center gap-2 text-sm text-slate-500">
+        <span class="text-yellow-500">★★★★★</span>
+        <span class="font-semibold text-slate-700">4.8/5</span>
+        <span class="hidden sm:inline">— 5,000+ orders</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+      <!-- Product Images — shown AFTER text on mobile, BEFORE on desktop -->
+      <div class="space-y-3 order-2 lg:order-1">
+        <!-- [REAL PRODUCT PHOTO PLACEHOLDER — Main hero: QR tag stuck on car windshield, clear and bright] -->
+        <div class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl aspect-[4/3] flex flex-col items-center justify-center text-slate-400 text-center p-6">
+          <svg class="w-14 h-14 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <p class="font-bold text-sm">REAL PRODUCT PHOTO</p>
+          <p class="text-xs mt-1">QR Tag on car windshield<br>(actual product, not mockup)</p>
+        </div>
+        <!-- Thumbnail row -->
+        <div class="grid grid-cols-3 gap-2">
+          <!-- [PHOTO: Close-up of QR tag face] -->
+          <div class="bg-slate-100 border border-dashed border-slate-300 rounded-lg aspect-square flex items-center justify-center text-xs text-slate-400 text-center p-2">TAG<br>CLOSE-UP</div>
+          <!-- [PHOTO: Person scanning QR with phone] -->
+          <div class="bg-slate-100 border border-dashed border-slate-300 rounded-lg aspect-square flex items-center justify-center text-xs text-slate-400 text-center p-2">SCANNING<br>PHOTO</div>
+          <!-- [PHOTO: Delivery packaging] -->
+          <div class="bg-slate-100 border border-dashed border-slate-300 rounded-lg aspect-square flex items-center justify-center text-xs text-slate-400 text-center p-2">PACKAGING<br>PHOTO</div>
+        </div>
+      </div>
+
+      <!-- Product Info — first on mobile -->
+      <div class="order-1 lg:order-2">
+        <div class="inline-block bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full mb-3">
+          🔥 Launch Offer — Limited Stock
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight mb-2">
+          Scan2Talk QR Emergency<br>Contact Tag for Cars
+        </h1>
+        <p class="text-slate-500 text-sm mb-4 leading-relaxed">
+          A smart QR sticker for your car. Anyone who needs to reach you — parking, emergency, accident — just scans it and calls you instantly. <strong class="text-slate-700">Your private number stays hidden.</strong>
+        </p>
+
+        <!-- Price Block — CLEAR pricing -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-4xl font-extrabold text-slate-900">₹299</span>
+            <div>
+              <p class="text-sm text-slate-400 line-through">MRP ₹499</p>
+              <p class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded">SAVE ₹200 (40% OFF)</p>
+            </div>
+          </div>
+          <div class="border-t border-slate-200 pt-2 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-700">Total Payable</span>
+            <span class="text-lg font-extrabold text-slate-900">₹299</span>
+          </div>
+          <p class="text-xs text-green-700 font-semibold mt-1">✅ No hidden charges · Free shipping included</p>
+        </div>
+
+        <!-- Quick trust pills -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="flex items-center gap-1 text-xs bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg font-medium text-slate-600">💵 Cash on Delivery</span>
+          <span class="flex items-center gap-1 text-xs bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg font-medium text-slate-600">🚚 Free Shipping</span>
+          <span class="flex items-center gap-1 text-xs bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg font-medium text-slate-600">🛡️ Replacement Guarantee</span>
+          <span class="flex items-center gap-1 text-xs bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg font-medium text-slate-600">⚡ Ships in 24 hrs</span>
+        </div>
+
+        <!-- Scarcity (believable) -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 mb-4">
+          <p class="text-sm font-semibold text-amber-800">📦 Limited Launch Batch</p>
+          <p class="text-xs text-amber-700 mt-0.5">This is our current production batch. Next batch ships next week — order now to avoid the wait.</p>
+        </div>
+
+        <a href="#order-form"
+           class="block w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-base rounded-xl text-center">
+          🛵 Order Now — Cash on Delivery
+        </a>
+        <p class="text-center text-xs text-slate-500 mt-2">Pay ₹299 only when the tag is delivered to you</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2. PROBLEM SECTION -->
+<!-- ============================================================ -->
+<section class="py-8 sm:py-12 bg-slate-50 border-y border-slate-200">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-8">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Sound Familiar?</h2>
+      <p class="text-slate-500 text-sm mt-2">Every car owner in India faces this</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white border border-red-200 rounded-xl p-4 flex items-start gap-4 sm:flex-col sm:gap-0">
+        <div class="text-3xl sm:mb-3 flex-shrink-0">🚗</div>
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1 text-sm">You're blocking someone</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">They can't move. Your number isn't written anywhere. They knock, honk, wait — nothing.</p>
+        </div>
+      </div>
+      <div class="bg-white border border-red-200 rounded-xl p-4 flex items-start gap-4 sm:flex-col sm:gap-0">
+        <div class="text-3xl sm:mb-3 flex-shrink-0">📝</div>
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1 text-sm">Paper notes don't work</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Strangers get your personal number. Notes get wet, torn, stolen. Unsafe and unreliable.</p>
+        </div>
+      </div>
+      <div class="bg-white border border-red-200 rounded-xl p-4 flex items-start gap-4 sm:flex-col sm:gap-0">
+        <div class="text-3xl sm:mb-3 flex-shrink-0">🆘</div>
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1 text-sm">Emergency, no way to help</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Accident nearby, car needs to be moved urgently. No owner contact. Precious minutes lost.</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-8">
+      <div class="inline-block bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-sm">
+        Scan2Talk solves all three for ₹299 👇
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 3. HOW IT WORKS -->
+<!-- ============================================================ -->
+<section class="py-8 sm:py-12">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">How It Works</h2>
+    <p class="text-slate-500 text-sm mb-8">Setup in 2 minutes. Works forever.</p>
+
+    <!-- Mobile: vertical steps with line; Desktop: 3-col grid -->
+    <div class="block sm:hidden">
+      <div class="space-y-0 text-left max-w-sm mx-auto">
+        <div class="flex gap-4">
+          <div class="flex flex-col items-center">
+            <div class="w-9 h-9 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+            <div class="w-0.5 bg-slate-200 flex-1 my-1"></div>
+          </div>
+          <div class="pb-6">
+            <h5 class="font-bold text-slate-900 mb-0.5">Peel & Stick on Your Car</h5>
+            <p class="text-xs text-slate-500">Stick QR tag on dashboard or windshield. Takes 30 seconds.</p>
+            <!-- [STEP 1 PHOTO PLACEHOLDER] -->
+            <div class="w-full h-28 bg-slate-100 border border-dashed border-slate-300 rounded-lg mt-2 flex items-center justify-center text-xs text-slate-400">STEP 1 PHOTO — sticker on windshield</div>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="flex flex-col items-center">
+            <div class="w-9 h-9 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+            <div class="w-0.5 bg-slate-200 flex-1 my-1"></div>
+          </div>
+          <div class="pb-6">
+            <h5 class="font-bold text-slate-900 mb-0.5">Anyone Scans — No App Needed</h5>
+            <p class="text-xs text-slate-500">They open phone camera, scan QR — connects instantly.</p>
+            <!-- [STEP 2 PHOTO PLACEHOLDER] -->
+            <div class="w-full h-28 bg-slate-100 border border-dashed border-slate-300 rounded-lg mt-2 flex items-center justify-center text-xs text-slate-400">STEP 2 PHOTO — scanning QR on car</div>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="flex flex-col items-center">
+            <div class="w-9 h-9 bg-green-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+          </div>
+          <div class="pb-2">
+            <h5 class="font-bold text-slate-900 mb-0.5">You Get Called — Number Hidden</h5>
+            <p class="text-xs text-slate-500">You receive the call. Your private number stays hidden.</p>
+            <!-- [STEP 3 PHOTO PLACEHOLDER] -->
+            <div class="w-full h-28 bg-slate-100 border border-dashed border-slate-300 rounded-lg mt-2 flex items-center justify-center text-xs text-slate-400">STEP 3 PHOTO — incoming call on phone</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop grid -->
+    <div class="hidden sm:grid grid-cols-3 gap-6">
+      <div class="relative">
+        <div class="w-full h-40 bg-slate-100 border border-dashed border-slate-300 rounded-xl mb-4 flex items-center justify-center text-xs text-slate-400 text-center p-3">STEP 1 PHOTO<br>Sticker on windshield</div>
+        <div class="w-9 h-9 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-2">1</div>
+        <h5 class="font-bold text-slate-900 mb-1">Peel & Stick</h5>
+        <p class="text-xs text-slate-500">Stick QR tag on dashboard or windshield. Takes 30 seconds.</p>
+        <div class="absolute top-16 -right-4 text-slate-300 text-2xl">→</div>
+      </div>
+      <div class="relative">
+        <div class="w-full h-40 bg-slate-100 border border-dashed border-slate-300 rounded-xl mb-4 flex items-center justify-center text-xs text-slate-400 text-center p-3">STEP 2 PHOTO<br>Scanning QR on car</div>
+        <div class="w-9 h-9 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-2">2</div>
+        <h5 class="font-bold text-slate-900 mb-1">Anyone Scans</h5>
+        <p class="text-xs text-slate-500">They open phone camera, scan QR — no app needed. Connects instantly.</p>
+        <div class="absolute top-16 -right-4 text-slate-300 text-2xl">→</div>
+      </div>
+      <div>
+        <div class="w-full h-40 bg-slate-100 border border-dashed border-slate-300 rounded-xl mb-4 flex items-center justify-center text-xs text-slate-400 text-center p-3">STEP 3 PHOTO<br>Call received on phone</div>
+        <div class="w-9 h-9 bg-blue-700 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-2">3</div>
+        <h5 class="font-bold text-slate-900 mb-1">You Get Called</h5>
+        <p class="text-xs text-slate-500">You receive the call. Your real number stays hidden. Problem solved.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 4. DEMO VIDEO -->
+<!-- ============================================================ -->
+<section class="py-10 bg-slate-900">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+    <h2 class="text-2xl font-extrabold text-white mb-2">See It in Action</h2>
+    <p class="text-slate-400 text-sm mb-6">Blocked car → scan QR → call connects in 15 seconds</p>
+
+    <!-- [DEMO VIDEO PLACEHOLDER — Replace div below with <iframe> YouTube/Vimeo embed] -->
+    <div class="max-w-2xl mx-auto bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl aspect-video flex flex-col items-center justify-center text-slate-500 mx-auto">
+      <div class="w-16 h-16 bg-slate-700 rounded-full flex items-center justify-center mb-3">
+        <svg class="w-7 h-7 text-slate-400 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <p class="font-bold text-slate-400">DEMO VIDEO PLACEHOLDER</p>
+      <p class="text-xs text-slate-600 mt-1 max-w-xs">Record a 15-sec video: blocked car → scan QR → call connects<br>Then replace with: &lt;iframe src="youtube-embed"&gt;</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 5. REVIEWS / SOCIAL PROOF -->
+<!-- ============================================================ -->
+<section class="py-8 sm:py-12">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-6">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">What Car Owners Say</h2>
+      <div class="flex items-center justify-center gap-2 mt-2">
+        <span class="text-yellow-500 text-lg">★★★★★</span>
+        <span class="font-bold text-slate-900">4.8 out of 5</span>
+        <span class="text-slate-400 text-sm">· 200+ verified reviews</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <!-- [USER PHOTO PLACEHOLDER — Real customer selfie, 48x48px] -->
+          <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700 text-lg flex-shrink-0">R</div>
+          <div>
+            <p class="font-bold text-slate-900 text-sm">Rahul Sharma</p>
+            <p class="text-xs text-slate-400">Mumbai, Maharashtra</p>
+          </div>
+          <span class="ml-auto text-yellow-500 text-xs">★★★★★</span>
+        </div>
+        <!-- [TESTIMONIAL PLACEHOLDER — Paste real WhatsApp review here] -->
+        <p class="text-xs text-slate-600 leading-relaxed italic">"Was stuck in parking for 30 mins before getting this. Now people scan and call in seconds. Best ₹299 I've spent on my car!"</p>
+        <p class="text-xs text-green-600 font-semibold mt-2">✅ Verified COD Purchase</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <!-- [USER PHOTO PLACEHOLDER] -->
+          <div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center font-bold text-pink-700 text-lg flex-shrink-0">A</div>
+          <div>
+            <p class="font-bold text-slate-900 text-sm">Anjali Mehta</p>
+            <p class="text-xs text-slate-400">Bengaluru, Karnataka</p>
+          </div>
+          <span class="ml-auto text-yellow-500 text-xs">★★★★★</span>
+        </div>
+        <!-- [TESTIMONIAL PLACEHOLDER] -->
+        <p class="text-xs text-slate-600 leading-relaxed italic">"As a woman driving alone, I didn't want strangers to have my number. Scan2Talk solved this perfectly. My number stays private!"</p>
+        <p class="text-xs text-green-600 font-semibold mt-2">✅ Verified COD Purchase</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <!-- [USER PHOTO PLACEHOLDER] -->
+          <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-700 text-lg flex-shrink-0">V</div>
+          <div>
+            <p class="font-bold text-slate-900 text-sm">Vikram Nair</p>
+            <p class="text-xs text-slate-400">Hyderabad, Telangana</p>
+          </div>
+          <span class="ml-auto text-yellow-500 text-xs">★★★★☆</span>
+        </div>
+        <!-- [TESTIMONIAL PLACEHOLDER] -->
+        <p class="text-xs text-slate-600 leading-relaxed italic">"Delivery in 5 days. Tag quality is great — stuck on rear windshield 3 months ago, hasn't peeled. Setup was literally 2 minutes."</p>
+        <p class="text-xs text-green-600 font-semibold mt-2">✅ Verified COD Purchase</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 6. TRUST SIGNALS -->
+<!-- ============================================================ -->
+<section class="py-6 sm:py-8 bg-slate-50 border-y border-slate-200">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <h3 class="text-center font-bold text-slate-900 mb-4 sm:mb-6">Why Thousands Trust Scan2Talk</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div class="text-2xl mb-1">💵</div>
+        <p class="text-xs font-bold text-slate-900">Cash on Delivery</p>
+        <p class="text-xs text-slate-500 mt-0.5">Pay when you receive</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div class="text-2xl mb-1">🚚</div>
+        <p class="text-xs font-bold text-slate-900">Free Shipping</p>
+        <p class="text-xs text-slate-500 mt-0.5">Pan-India delivery</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div class="text-2xl mb-1">🛡️</div>
+        <p class="text-xs font-bold text-slate-900">Replacement Guarantee</p>
+        <p class="text-xs text-slate-500 mt-0.5">Damaged? We replace it</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div class="text-2xl mb-1">⚡</div>
+        <p class="text-xs font-bold text-slate-900">Ships in 24 hrs</p>
+        <p class="text-xs text-slate-500 mt-0.5">Delivered in 5–7 days</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div class="text-2xl mb-1">🔒</div>
+        <p class="text-xs font-bold text-slate-900">Secure Checkout</p>
+        <p class="text-xs text-slate-500 mt-0.5">Razorpay · SSL encrypted</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 7. OFFER SECTION -->
+<!-- ============================================================ -->
+<section class="py-8 sm:py-12">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-6">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">What You Get for ₹299</h2>
+    </div>
+    <div class="max-w-lg mx-auto bg-slate-900 border-2 border-blue-700 rounded-2xl p-5 sm:p-6 text-white">
+      <!-- Clear price breakdown -->
+      <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-700">
+        <div>
+          <p class="text-xs text-slate-400 uppercase tracking-wider">MRP</p>
+          <p class="text-xl text-slate-400 line-through">₹499</p>
+        </div>
+        <div class="text-center">
+          <p class="bg-blue-700 text-white text-xs font-bold px-3 py-1 rounded-full">40% OFF</p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-slate-400 uppercase tracking-wider">You Pay</p>
+          <p class="text-3xl font-extrabold text-white">₹299</p>
+        </div>
+      </div>
+      <div class="space-y-2.5 mb-5 text-sm">
+        <div class="flex items-center gap-2"><span class="text-green-400">✓</span><span class="text-slate-300"><strong>2 QR Stickers included</strong> — front & rear window</span></div>
+        <div class="flex items-center gap-2"><span class="text-green-400">✓</span><span class="text-slate-300">Lifetime platform access — no subscription</span></div>
+        <div class="flex items-center gap-2"><span class="text-green-400">✓</span><span class="text-slate-300">Instant masked call system</span></div>
+        <div class="flex items-center gap-2"><span class="text-green-400">✓</span><span class="text-slate-300">Waterproof + UV-resistant (3+ year life)</span></div>
+        <div class="flex items-center gap-2"><span class="text-green-400">✓</span><span class="text-slate-300">Free shipping across India</span></div>
+        <div class="flex items-center gap-2"><span class="text-green-400">✓</span><span class="text-slate-300">Replacement guarantee if damaged</span></div>
+      </div>
+      <a href="#order-form"
+         class="block w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-center">
+        🛵 Order Now — Pay on Delivery
+      </a>
+      <p class="text-center text-xs text-slate-400 mt-2">Total payable: ₹299 only when delivered</p>
+    </div>
+
+    <!-- Risk reversal -->
+    <div class="max-w-lg mx-auto mt-4 bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+      <p class="font-bold text-green-800 text-sm">🛡️ 100% Risk-Free — Replacement Guarantee</p>
+      <p class="text-green-700 text-xs mt-1">If the tag arrives damaged, WhatsApp us a photo and we'll send a free replacement. No questions asked.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 8. CHECKOUT FORM (Anchor: order-form) -->
+<!-- ============================================================ -->
+<section id="order-form" class="py-10 bg-slate-50 border-t-4 border-blue-700">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center gap-2 bg-green-700 text-white text-sm font-bold px-5 py-2 rounded-full mb-3">
+        <span>🛵</span> Cash on Delivery Available
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Complete Your Order</h2>
+      <p class="text-slate-500 text-sm mt-1">Fill your delivery details below. Pay ₹299 only when your tag arrives.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6" x-data="orderForm()">
+
+      <!-- Form — order-2 on mobile so summary shows first -->
+      <div class="lg:col-span-3 order-2 lg:order-1">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5 sm:p-6">
+
+          <!-- Form progress steps -->
+          <div class="flex items-center gap-2 mb-6">
+            <div class="flex items-center gap-1.5">
+              <div class="w-6 h-6 step-active rounded-full flex items-center justify-center text-xs font-bold">1</div>
+              <span class="text-xs font-semibold text-slate-700 hidden sm:inline">Your Details</span>
+            </div>
+            <div class="flex-1 h-px bg-slate-200"></div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-6 h-6 step-active rounded-full flex items-center justify-center text-xs font-bold">2</div>
+              <span class="text-xs font-semibold text-slate-700 hidden sm:inline">Address</span>
+            </div>
+            <div class="flex-1 h-px bg-slate-200"></div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-6 h-6 step-active rounded-full flex items-center justify-center text-xs font-bold">3</div>
+              <span class="text-xs font-semibold text-slate-700 hidden sm:inline">Payment</span>
+            </div>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+
+            <!-- Contact -->
+            <div class="mb-5">
+              <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <span class="w-5 h-5 bg-blue-700 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                Your Details
+              </h3>
+              <div class="space-y-3">
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
+                    <input type="text" name="name" x-model="name" required
+                      class="w-full px-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="Rahul Sharma">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">WhatsApp Number *</label>
+                    <input type="tel" name="phone" x-model="phone" required pattern="[0-9]{10}"
+                      class="w-full px-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="9876543210">
+                    <p class="text-xs text-slate-400 mt-0.5">📦 Order tracking sent here</p>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Email Address *</label>
+                  <input type="email" name="email" x-model="email" required
+                    class="w-full px-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="rahul@email.com">
+                </div>
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="mb-5">
+              <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <span class="w-5 h-5 bg-blue-700 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                Delivery Address
+              </h3>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">PIN Code *</label>
+                  <div class="relative">
+                    <input type="text" name="pincode" x-model="pincode" required pattern="[0-9]{6}" maxlength="6"
+                      @input="onPincodeInput()"
+                      class="w-full px-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="Enter 6-digit PIN — city & state fill automatically">
+                    <span x-show="pincodeLoading" class="absolute right-3 top-2.5 text-xs text-slate-400">Fetching...</span>
+                    <span x-show="pincodeSuccess" class="absolute right-3 top-2.5 text-xs text-green-600 font-bold">✓</span>
+                  </div>
+                  <p x-show="pincodeError" x-text="pincodeError" class="text-xs text-red-500 mt-1"></p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Street Address *</label>
+                  <textarea name="address" x-model="address" required rows="2"
+                    class="w-full px-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+                    placeholder="House/Flat No., Street, Locality"></textarea>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">City *</label>
+                    <input type="text" name="city" x-model="city" required
+                      class="w-full px-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="Mumbai">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">State *</label>
+                    <select name="state" x-model="state" required
+                      class="w-full px-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
+                      <option value="">Select State</option>
+                      <option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                      <option>Assam</option><option>Bihar</option><option>Chhattisgarh</option>
+                      <option>Goa</option><option>Gujarat</option><option>Haryana</option>
+                      <option>Himachal Pradesh</option><option>Jharkhand</option>
+                      <option>Karnataka</option><option>Kerala</option>
+                      <option>Madhya Pradesh</option><option>Maharashtra</option>
+                      <option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
+                      <option>Nagaland</option><option>Odisha</option><option>Punjab</option>
+                      <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
+                      <option>Telangana</option><option>Tripura</option>
+                      <option>Uttar Pradesh</option><option>Uttarakhand</option>
+                      <option>West Bengal</option>
+                      <option>Andaman and Nicobar Islands</option><option>Chandigarh</option>
+                      <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                      <option>Delhi</option><option>Jammu and Kashmir</option>
+                      <option>Ladakh</option><option>Lakshadweep</option><option>Puducherry</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quantity -->
+            <div class="mb-5">
+              <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Quantity</h3>
+              <select name="quantity" x-model="quantity" @change="updateTotal()"
+                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 bg-white font-medium">
+                <option value="1">1 Pack (2 stickers) — ₹299</option>
+                <option value="2">2 Packs (4 stickers) — ₹598</option>
+                <option value="3">3 Packs (6 stickers) — ₹897</option>
+                <option value="5">5 Packs (10 stickers) — ₹1,495</option>
+                <option value="10">10 Packs (20 stickers) — ₹2,990</option>
+                <option value="custom">Custom (Bulk Order)</option>
+              </select>
+              <input type="number" x-model="customQuantity" @input="handleCustomQuantity()"
+                x-show="quantity === 'custom'" min="1" max="1000" placeholder="Enter quantity"
+                class="mt-2 w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+            </div>
+
+            <!-- Payment — COD DEFAULT & FIRST -->
+            <div class="mb-5">
+              <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <span class="w-5 h-5 bg-blue-700 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                Payment Method
+              </h3>
+              <div class="grid grid-cols-2 gap-3">
+                <!-- Online Payment -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="payment_method" value="online" x-model="paymentMethod" class="peer sr-only" checked>
+                  <div class="p-4 border-2 border-slate-200 rounded-xl peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                    <p class="text-lg">💳</p>
+                    <p class="font-bold text-slate-900 text-sm mt-0.5">Online Payment</p>
+                    <p class="text-xs text-slate-500">UPI / Card / Net Banking</p>
+                    <p class="text-xs font-semibold text-blue-700 mt-1">⚡ Instant confirmation</p>
+                  </div>
+                </label>
+                <!-- COD -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="payment_method" value="cod" x-model="paymentMethod" class="peer sr-only">
+                  <div class="p-4 border-2 border-slate-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50">
+                    <p class="text-lg">💵</p>
+                    <p class="font-bold text-slate-900 text-sm mt-0.5">Cash on Delivery</p>
+                    <p class="text-xs text-slate-500">Pay when tag arrives</p>
+                    <p class="text-xs text-slate-500 mt-1">No advance needed</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <button type="submit"
+              onclick="if(typeof fbq !== 'undefined') { fbq('track', 'AddToCart', {content_name: 'QR Tag', value: {{ tag_price }}, currency: 'INR'}); }"
+              class="w-full py-4 rounded-xl font-bold text-base text-white"
+              :class="paymentMethod === 'cod' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-700 hover:bg-blue-800'">
+              <span x-show="paymentMethod === 'cod'">🛵 Place COD Order — Pay on Delivery</span>
+              <span x-show="paymentMethod !== 'cod'">🔒 Pay ₹<span x-text="total"></span> — Proceed Securely</span>
+            </button>
+
+            <div class="mt-3 text-center text-xs text-slate-400 space-y-1">
+              <p x-show="paymentMethod === 'cod'">You pay <strong class="text-slate-700">₹<span x-text="total"></span> only when delivered.</strong> Zero risk.</p>
+              <p x-show="paymentMethod !== 'cod'">100% secure payment. UPI · Card · Net Banking.</p>
+              <div class="flex justify-center gap-4 mt-2">
+                <span>🔒 Secure</span><span>📦 Free Shipping</span><span>🛡️ Guaranteed</span>
+              </div>
+            </div>
+
+            <div class="mt-4 border-t border-slate-100 pt-3 text-center">
+              <p class="text-xs text-slate-500">Questions?
+                <a href="https://wa.me/919999999999" target="_blank" rel="noopener"
+                   class="text-green-600 font-bold hover:underline">
+                  WhatsApp us → <!-- [REPLACE: your WhatsApp number] -->
+                </a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Order Summary Sidebar — order-1 on mobile so it shows ABOVE form -->
+      <div class="lg:col-span-2 space-y-4 order-1 lg:order-2">
+
+        <!-- Price summary — CLEAR ₹299 -->
+        <div class="bg-slate-900 rounded-xl p-5 text-white">
+          <p class="text-xs text-blue-400 font-bold uppercase tracking-wider mb-3">Order Summary</p>
+          <div class="space-y-2 text-sm mb-4">
+            <div class="flex justify-between text-slate-300">
+              <span>Scan2Talk QR Tag × <span x-text="quantity === 'custom' ? (customQuantity||1) : quantity"></span></span>
+              <span>₹<span x-text="subtotal"></span></span>
+            </div>
+            <div class="flex justify-between text-slate-400 text-xs">
+              <span class="italic">Each pack includes 2 stickers</span>
+              <span class="line-through">MRP ₹{{ tag_price }}</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Shipping</span>
+              <span class="text-green-400 font-semibold">FREE</span>
+            </div>
+            <div class="flex justify-between border-t border-slate-700 pt-2 font-extrabold text-white text-base">
+              <span>Total Payable</span>
+              <span>₹<span x-text="total"></span></span>
+            </div>
+          </div>
+          <div class="bg-green-800 border border-green-600 rounded-lg px-3 py-2 text-center">
+            <p class="text-green-300 text-xs font-bold">💵 Pay ₹<span x-text="total"></span> only when delivered</p>
+          </div>
+        </div>
+
+        <!-- What's included — hidden on mobile to reduce scroll before form -->
+        <div class="hidden lg:block bg-white border border-slate-200 rounded-xl p-4">
+          <p class="font-bold text-slate-900 text-sm mb-3">What's Included</p>
+          <div class="space-y-2 text-xs text-slate-600">
+            <div class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> QR Tag Sticker (pack of 2)</div>
+            <div class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> Lifetime platform access</div>
+            <div class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> Waterproof + UV-resistant</div>
+            <div class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> 2-min setup guide</div>
+            <div class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> Free shipping</div>
+          </div>
+        </div>
+
+        <!-- Delivery timeline — hidden on mobile -->
+        <div class="hidden lg:block bg-white border border-slate-200 rounded-xl p-4">
+          <p class="font-bold text-slate-900 text-sm mb-3">Delivery Timeline</p>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 text-xs"><span class="w-5 h-5 bg-blue-700 text-white rounded-full flex items-center justify-center text-xs">1</span><span class="text-slate-600">Order placed today</span></div>
+            <div class="flex items-center gap-2 text-xs"><span class="w-5 h-5 bg-blue-700 text-white rounded-full flex items-center justify-center text-xs">2</span><span class="text-slate-600">Shipped within 24 hours</span></div>
+            <div class="flex items-center gap-2 text-xs"><span class="w-5 h-5 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">3</span><span class="text-slate-700 font-bold">Delivered in 5–7 days</span></div>
+          </div>
+          <p class="text-xs text-slate-400 mt-2">📱 Tracking link sent to your WhatsApp</p>
+        </div>
+
+        <!-- Social proof mini — hidden on mobile -->
+        <div class="hidden lg:block bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-700 text-xs">R</div>
+            <div><p class="text-xs font-bold text-slate-900">Rahul, Mumbai</p><span class="text-yellow-500 text-xs">★★★★★</span></div>
+          </div>
+          <p class="text-xs text-slate-600 italic">"Delivery in 5 days. Setup 2 mins. Tag is still stuck after 3 months. 100% recommend!"</p>
+        </div>
+
+        <!-- Amazon note — hidden on mobile -->
+        <div class="hidden lg:block bg-white border border-slate-200 rounded-xl p-4 text-center">
+          <p class="text-xs text-slate-400 mb-3">Also available on</p>
+          <a href="https://amzn.in/d/0iqWjKvZ" target="_blank" rel="noopener"
+             class="inline-flex items-center justify-center bg-[#FF9900] hover:bg-[#e68a00] px-4 py-2 rounded-lg">
+            <img src="{% static 'amzn.png' %}" alt="Buy on Amazon" class="h-6 w-auto object-contain">
+          </a>
+          <p class="text-xs text-slate-500 mt-2">₹349 on Amazon · <span class="text-green-700 font-semibold">Save ₹50 ordering here</span></p>
+        </div>
+
+      </div>
+    </div><!-- end grid -->
+  </div>
+</section>
+
+</div><!-- end pb-24 -->
+
 <script>
+// FAQ
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-question')?.addEventListener('click', function() {
+      const isOpen = item.classList.contains('faq-open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('faq-open'));
+      if (!isOpen) item.classList.add('faq-open');
+    });
+  });
+  // Show sticky CTA only after scrolling past hero
+  const stickyCta = document.getElementById('sticky-cta');
+  if (stickyCta) {
+    window.addEventListener('scroll', () => {
+      stickyCta.style.transform = window.scrollY > 300 ? 'translateY(0)' : 'translateY(100%)';
+    });
+    stickyCta.style.transform = 'translateY(100%)';
+  }
+});
+
 function orderForm() {
   return {
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    pincodeLoading: false,
-    pincodeError: '',
-    quantity: 1,
-    customQuantity: '',
+    name: '', phone: '', email: '',
+    address: '', city: '', state: '', pincode: '',
+    pincodeLoading: false, pincodeError: '', pincodeSuccess: false,
+    quantity: '1', customQuantity: '',
     paymentMethod: 'online',
-    subtotal: {{ tag_price }},
-    total: {{ tag_price }},
-    basePrice: {{ tag_price }},
+    subtotal: {{ sale_price }},
+    total: {{ sale_price }},
+    basePrice: {{ sale_price }},
     onPincodeInput() {
-      this.pincodeError = '';
-      if (this.pincode.length === 6) {
-        this.fetchPincodeData(this.pincode);
-      }
+      this.pincodeError = ''; this.pincodeSuccess = false;
+      if (this.pincode.length === 6) this.fetchPincodeData(this.pincode);
     },
     async fetchPincodeData(pin) {
       this.pincodeLoading = true;
-      this.pincodeError = '';
       try {
         const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
         const data = await res.json();
         if (data[0].Status === 'Success') {
           const po = data[0].PostOffice[0];
           this.city = po.District;
-          // Map API state name to select option
-          const stateMap = {
+          const map = {
             'Andaman & Nicobar Islands': 'Andaman and Nicobar Islands',
             'Dadra & Nagar Haveli': 'Dadra and Nagar Haveli and Daman and Diu',
             'Daman & Diu': 'Dadra and Nagar Haveli and Daman and Diu',
             'Jammu & Kashmir': 'Jammu and Kashmir',
           };
-          this.state = stateMap[po.State] || po.State;
-        } else {
-          this.pincodeError = 'Invalid PIN code';
-        }
-      } catch(e) {
-        this.pincodeError = 'Could not fetch PIN data';
-      } finally {
-        this.pincodeLoading = false;
-      }
+          this.state = map[po.State] || po.State;
+          this.pincodeSuccess = true;
+        } else { this.pincodeError = 'Invalid PIN code'; }
+      } catch(e) { this.pincodeError = 'Could not verify PIN'; }
+      finally { this.pincodeLoading = false; }
     },
     updateTotal() {
       if (this.quantity === 'custom') return;
-      const qty = parseInt(this.quantity);
+      const qty = parseInt(this.quantity) || 1;
       this.subtotal = this.basePrice * qty;
       this.total = this.subtotal;
     },
     handleCustomQuantity() {
       const qty = parseInt(this.customQuantity);
-      if (qty && qty > 0) {
-        this.subtotal = this.basePrice * qty;
-        this.total = this.subtotal;
-      } else {
-        this.subtotal = 0;
-        this.total = 0;
-      }
+      this.subtotal = qty > 0 ? this.basePrice * qty : 0;
+      this.total = this.subtotal;
     }
   }
 }

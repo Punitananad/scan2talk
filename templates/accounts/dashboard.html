@@ -47,7 +47,7 @@
         <p class="text-xs text-slate-500 mt-0.5">Manage contact codes for your vehicles</p>
       </div>
       <a href="{% url 'gateways:generate_qr' %}"
-         class="flex items-center gap-1.5 px-4 py-2 bg-blue-700 text-white text-sm font-semibold rounded hover:bg-blue-800">
+         class="flex items-center gap-1.5 px-4 py-3 bg-blue-700 text-white text-sm font-semibold rounded hover:bg-blue-800">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
@@ -75,16 +75,16 @@
         <div class="flex gap-2">
           {% if gateway.qr_code.first %}
           <a href="{% url 'gateways:qr_detail' gateway.qr_code.first.id %}"
-             class="flex-1 text-center bg-blue-700 text-white px-3 py-2 rounded text-xs font-semibold hover:bg-blue-800">
+             class="flex-1 text-center bg-blue-700 text-white px-3 py-3 rounded text-xs font-semibold hover:bg-blue-800">
             View Details
           </a>
           <a href="{% url 'gateways:download_qr_image' gateway.qr_code.first.id %}"
-             class="bg-slate-100 text-slate-700 px-3 py-2 rounded text-xs font-semibold hover:bg-slate-200 border border-slate-200">
+             class="bg-slate-100 text-slate-700 px-3 py-3 rounded text-xs font-semibold hover:bg-slate-200 border border-slate-200">
             Download
           </a>
           {% else %}
           <a href="{% url 'gateways:detail' gateway.id %}"
-             class="flex-1 text-center bg-blue-700 text-white px-3 py-2 rounded text-xs font-semibold hover:bg-blue-800">
+             class="flex-1 text-center bg-blue-700 text-white px-3 py-3 rounded text-xs font-semibold hover:bg-blue-800">
             View Details
           </a>
           {% endif %}

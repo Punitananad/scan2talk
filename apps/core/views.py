@@ -80,7 +80,8 @@ class OrderTagView(View):
         from apps.core.pricing_models import PricingSettings
         
         context = {
-            'tag_price': PricingSettings.get_tag_price()
+            'tag_price': PricingSettings.get_tag_price(),  # MRP (499)
+            'sale_price': 299,  # Actual selling price shown to customer
         }
         return render(request, self.template_name, context)
     
